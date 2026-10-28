@@ -66,7 +66,13 @@ module addi_decode (
     output reg         is_lh_o,
     output reg         is_lhu_o,
     output reg         is_sb_o,
-    output reg         is_sh_o
+    output reg         is_sh_o,
+
+    output reg         is_mul_o,
+    output reg         is_mulh_o,
+    output reg         is_mulhsu_o,
+    output reg         is_mulhu_o
+    
 );
 
   wire [6:0] opcode;
@@ -125,6 +131,10 @@ module addi_decode (
     is_lhu_o = 1'b0;
     is_sb_o = 1'b0;
     is_sh_o = 1'b0;
+    is_mul_o = 1'b0;
+    is_mulh_o = 1'b0;
+    is_mulhsu_o = 1'b0;
+    is_mulhu_o = 1'b0;
     case (opcode)
       7'b0110011: begin//R型指令
         if (funct3 == 3'b000 && funct7 == 7'b0000000) begin
@@ -156,6 +166,18 @@ module addi_decode (
         end
         else if (funct3 == 3'b011 && funct7 == 7'b0000000) begin
           is_sltu_o = 1'b1;
+        end
+        else if (funct3 == 3'b000 && funct7 == 7'b0000001) begin
+          is_mul_o = 1'b1;
+        end
+        else if (funct3 == 3'b001 && funct7 == 7'b0000001) begin
+          is_mulh_o = 1'b1;
+        end
+        else if (funct3 == 3'b010 && funct7 == 7'b0000001) begin
+          is_mulhsu_o = 1'b1;
+        end
+        else if (funct3 == 3'b011 && funct7 == 7'b0000001) begin
+          is_mulhu_o = 1'b1;
         end
       end
       7'b0010011: begin//I型指令
@@ -288,6 +310,10 @@ module addi_decode (
         is_lhu_o = 1'b0;
         is_sb_o = 1'b0;
         is_sh_o = 1'b0;
+        is_mul_o = 1'b0;
+        is_mulh_o = 1'b0;
+        is_mulhsu_o = 1'b0;
+        is_mulhu_o = 1'b0;
       end
     endcase
   end

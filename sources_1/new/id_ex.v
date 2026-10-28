@@ -80,6 +80,11 @@ module id_ex(
     input wire is_lh_idex_i,
     input wire is_lhu_idex_i,
 
+    input wire is_mul_idex_i,
+    input wire is_mulh_idex_i,
+    input wire is_mulhsu_idex_i,
+    input wire is_mulhu_idex_i,
+
     output reg valid_idex_o,
     output reg [31:0] pc_idex_o,
     output reg [31:0] rs1_data_idex_o,
@@ -133,7 +138,12 @@ module id_ex(
     output reg is_lb_idex_o,
     output reg is_lbu_idex_o,
     output reg is_lh_idex_o,
-    output reg is_lhu_idex_o
+    output reg is_lhu_idex_o,
+
+    output reg is_mul_idex_o,
+    output reg is_mulh_idex_o,
+    output reg is_mulhsu_idex_o,
+    output reg is_mulhu_idex_o
     );
 
     always @(posedge clk) begin
@@ -193,7 +203,11 @@ module id_ex(
             is_lbu_idex_o <= 1'b0;
             is_lh_idex_o <= 1'b0;
             is_lhu_idex_o <= 1'b0;
-            
+
+            is_mul_idex_o <= 1'b0;
+            is_mulh_idex_o <= 1'b0;
+            is_mulhsu_idex_o <= 1'b0;
+            is_mulhu_idex_o <= 1'b0;
 
         end 
         else if (flush_idex_i) begin
@@ -253,6 +267,11 @@ module id_ex(
             is_lh_idex_o <= 1'b0;
             is_lhu_idex_o <= 1'b0;
 
+            is_mul_idex_o <= 1'b0;
+            is_mulh_idex_o <= 1'b0;
+            is_mulhsu_idex_o <= 1'b0;
+            is_mulhu_idex_o <= 1'b0;
+
         end else begin
             valid_idex_o <= valid_idex_i;
             pc_idex_o <= pc_idex_i;
@@ -308,6 +327,11 @@ module id_ex(
             is_lbu_idex_o <= is_lbu_idex_i;
             is_lh_idex_o <= is_lh_idex_i;
             is_lhu_idex_o <= is_lhu_idex_i;
+
+            is_mul_idex_o <= is_mul_idex_i;
+            is_mulh_idex_o <= is_mulh_idex_i;
+            is_mulhsu_idex_o <= is_mulhsu_idex_i;
+            is_mulhu_idex_o <= is_mulhu_idex_i;
         end
     end
 endmodule
