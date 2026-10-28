@@ -71,7 +71,14 @@ module id_ex(
     input wire is_auipc_idex_i,
 
     input wire is_sw_idex_i,
+    input wire is_sb_idex_i,
+    input wire is_sh_idex_i,
+    
     input wire is_lw_idex_i,
+    input wire is_lb_idex_i,
+    input wire is_lbu_idex_i,
+    input wire is_lh_idex_i,
+    input wire is_lhu_idex_i,
 
     output reg valid_idex_o,
     output reg [31:0] pc_idex_o,
@@ -119,7 +126,14 @@ module id_ex(
     output reg is_auipc_idex_o,
 
     output reg is_sw_idex_o,
-    output reg is_lw_idex_o
+    output reg is_sb_idex_o,
+    output reg is_sh_idex_o,
+
+    output reg is_lw_idex_o,
+    output reg is_lb_idex_o,
+    output reg is_lbu_idex_o,
+    output reg is_lh_idex_o,
+    output reg is_lhu_idex_o
     );
 
     always @(posedge clk) begin
@@ -171,7 +185,14 @@ module id_ex(
             is_auipc_idex_o <= 1'b0;
 
             is_sw_idex_o <= 1'b0;
+            is_sb_idex_o <= 1'b0;
+            is_sh_idex_o <= 1'b0;
+
             is_lw_idex_o <= 1'b0;
+            is_lb_idex_o <= 1'b0;
+            is_lbu_idex_o <= 1'b0;
+            is_lh_idex_o <= 1'b0;
+            is_lhu_idex_o <= 1'b0;
             
 
         end 
@@ -223,7 +244,14 @@ module id_ex(
             is_auipc_idex_o <= 1'b0;
 
             is_sw_idex_o <= 1'b0;
+            is_sb_idex_o <= 1'b0;
+            is_sh_idex_o <= 1'b0;
+
             is_lw_idex_o <= 1'b0;
+            is_lb_idex_o <= 1'b0;
+            is_lbu_idex_o <= 1'b0;
+            is_lh_idex_o <= 1'b0;
+            is_lhu_idex_o <= 1'b0;
 
         end else begin
             valid_idex_o <= valid_idex_i;
@@ -272,7 +300,14 @@ module id_ex(
             is_auipc_idex_o <= is_auipc_idex_i;
 
             is_sw_idex_o <= is_sw_idex_i;
+            is_sb_idex_o <= is_sb_idex_i;
+            is_sh_idex_o <= is_sh_idex_i;
+            
             is_lw_idex_o <= is_lw_idex_i;
+            is_lb_idex_o <= is_lb_idex_i;
+            is_lbu_idex_o <= is_lbu_idex_i;
+            is_lh_idex_o <= is_lh_idex_i;
+            is_lhu_idex_o <= is_lhu_idex_i;
         end
     end
 endmodule

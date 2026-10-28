@@ -58,7 +58,14 @@ module ex(
     input wire is_auipc_ex_i,
 
     input wire is_sw_ex_i,
+    input wire is_sb_ex_i,
+    input wire is_sh_ex_i,
+
     input wire is_lw_ex_i,
+    input wire is_lb_ex_i,
+    input wire is_lbu_ex_i,
+    input wire is_lh_ex_i,
+    input wire is_lhu_ex_i,
 
     input wire [31:0] pc_ex_i,
     input wire [31:0] rs1_data_ex_i,
@@ -308,16 +315,128 @@ module ex(
                 ram_wr_data_ex_o = rs2_data_ex_i;
                 ram_wr_sel_ex_o = 4'b1111;
             end
+            else if(is_sb_ex_i) begin
+                ram_wr_en_ex_o = 1'b1;
+                ram_wr_addr_ex_o = rs1_data_ex_i + imms_data_ex_i;
+                case(ram_wr_addr_ex_o[1:0])
+                    2'b00: begin
+                        ram_wr_sel_ex_o = 4'b0001;
+                        ram_wr_data_ex_o[7:0] = rs2_data_ex_i[7:0];
+                    end
+                    2'b01: begin
+                        ram_wr_sel_ex_o = 4'b0010;
+                        ram_wr_data_ex_o[15:8] = rs2_data_ex_i[7:0];
+                    end
+                    2'b10: begin
+                        ram_wr_sel_ex_o = 4'b0100;
+                        ram_wr_data_ex_o[23:16] = rs2_data_ex_i[7:0];
+                    end
+                    2'b11: begin
+                        ram_wr_sel_ex_o = 4'b1000;
+                        ram_wr_data_ex_o[31:24] = rs2_data_ex_i[7:0];
+                    end
+                endcase
+            end
+            else if(is_sh_ex_i) begin
+                ram_wr_en_ex_o = 1'b1;
+                ram_wr_addr_ex_o = rs1_data_ex_i + imms_data_ex_i;
+                case(ram_wr_addr_ex_o[1:0])
+                    2'b00: begin
+                        ram_wr_sel_ex_o = 4'b0011;
+                        ram_wr_data_ex_o[15:0] = rs2_data_ex_i[15:0];
+                    end
+                    2'b10: begin
+                        ram_wr_sel_ex_o = 4'b1100;
+                        ram_wr_data_ex_o[31:16] = rs2_data_ex_i[15:0];
+                    end
+                    default: begin
+                        ram_wr_sel_ex_o = 4'b0000;
+                        ram_wr_data_ex_o = 32'h0;
+                    end
+                endcase
+            end
             else if(is_lw_ex_i) begin
                 ram_rd_en_ex_o = 1'b1;
                 ram_rd_addr_ex_o = rs1_data_ex_i + immi_data_ex_i;
                 wr_en_ex_o = 1'b1;
                 wr_addr_ex_o = rd_addr_ex_i;
                 wr_data_ex_o = ram_rd_data_ex_i;
+            end
+            else if(is_lb_ex_i) begin
+                ram_rd_en_ex_o = 1'b1;
+                ram_rd_addr_ex_o = rs1_data_ex_i + immi_data_ex_i;
+                wr_en_ex_o = 1'b1;
+                wr_addr_ex_o = rd_addr_ex_i;
+                case(ram_rd_addr_ex_o[1:0])
+                    2'b00: begin
+                        wr_data_ex_o = {{24{ram_rd_data_ex_i[7]}}, ram_rd_data_ex_i[7:0]};
+                    end
+                    2'b01: begin
+                        wr_data_ex_o = {{24{ram_rd_data_ex_i[15]}}, ram_rd_data_ex_i[15:8]};
+                    end
+                    2'b10: begin
+                        wr_data_ex_o = {{24{ram_rd_data_ex_i[23]}}, ram_rd_data_ex_i[23:16]};
+                    end
+                    2'b11: begin
+                        wr_data_ex_o = {{24{ram_rd_data_ex_i[31]}}, ram_rd_data_ex_i[31:24]};
+                    end
+                endcase
+            end
+            else if(is_lbu_ex_i) begin
+                ram_rd_en_ex_o = 1'b1;
+                ram_rd_addr_ex_o = rs1_data_ex_i + immi_data_ex_i;
+                wr_en_ex_o = 1'b1;
+                wr_addr_ex_o = rd_addr_ex_i;
+                case(ram_rd_addr_ex_o[1:0])
+                    2'b00: begin
+                        wr_data_ex_o = {24'h0, ram_rd_data_ex_i[7:0]};
+                    end
+                    2'b01: begin
+                        wr_data_ex_o = {24'h0, ram_rd_data_ex_i[15:8]};
+                    end
+                    2'b10: begin
+                        wr_data_ex_o = {24'h0, ram_rd_data_ex_i[23:16]};
+                    end
+                    2'b11: begin
+                        wr_data_ex_o = {24'h0, ram_rd_data_ex_i[31:24]};
+                    end
+                endcase
         end
+            else if(is_lh_ex_i) begin
+                ram_rd_en_ex_o = 1'b1;
+                ram_rd_addr_ex_o = rs1_data_ex_i + immi_data_ex_i;
+                wr_en_ex_o = 1'b1;
+                wr_addr_ex_o = rd_addr_ex_i;
+                case(ram_rd_addr_ex_o[1:0])
+                    2'b00: begin
+                        wr_data_ex_o = {{16{ram_rd_data_ex_i[15]}}, ram_rd_data_ex_i[15:0]};
+                    end
+                    2'b10: begin
+                        wr_data_ex_o = {{16{ram_rd_data_ex_i[31]}}, ram_rd_data_ex_i[31:16]};
+                    end
+                    default: begin
+                        wr_data_ex_o = 32'h0;
+                    end
+                endcase
+            end
+            else if(is_lhu_ex_i) begin
+                ram_rd_en_ex_o = 1'b1;
+                ram_rd_addr_ex_o = rs1_data_ex_i + immi_data_ex_i;
+                wr_en_ex_o = 1'b1;
+                wr_addr_ex_o = rd_addr_ex_i;
+                case(ram_rd_addr_ex_o[1:0])
+                    2'b00: begin
+                        wr_data_ex_o = {16'h0, ram_rd_data_ex_i[15:0]};
+                        end
+                    2'b10: begin
+                        wr_data_ex_o = {16'h0, ram_rd_data_ex_i[31:16]};
+                    end
+                    default: begin
+                        wr_data_ex_o = 32'h0;
+                    end
+                endcase
+            end
         end
-
-
         else begin
             wr_en_ex_o = 1'b0;
             wr_addr_ex_o = 5'h0;
