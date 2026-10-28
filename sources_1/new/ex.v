@@ -57,6 +57,9 @@ module ex(
     input wire is_lui_ex_i,
     input wire is_auipc_ex_i,
 
+    input wire is_sw_ex_i,
+    input wire is_lw_ex_i,
+
     input wire [31:0] pc_ex_i,
     input wire [31:0] rs1_data_ex_i,
     input wire [31:0] rs2_data_ex_i,
@@ -64,6 +67,7 @@ module ex(
     input wire [31:0] immb_data_ex_i,
     input wire [31:0] immj_data_ex_i,
     input wire [31:0] immu_data_ex_i,
+    input wire [31:0] imms_data_ex_i,
     input wire [4:0] rd_addr_ex_i,
     
     output reg wr_en_ex_o,
@@ -72,16 +76,35 @@ module ex(
 
     output reg pc_brench_flag_ex_o,
     output reg [31:0] pc_brench_addr_ex_o,
-    output reg clear_valid_ex_o
+    output reg clear_valid_ex_o,
+
+    output reg ram_wr_en_ex_o,
+    output reg [31:0] ram_wr_addr_ex_o,
+    output reg [31:0] ram_wr_data_ex_o,
+    output reg [3:0] ram_wr_sel_ex_o,
+
+    output reg ram_rd_en_ex_o,
+    output reg [31:0] ram_rd_addr_ex_o,
+    input wire [31:0] ram_rd_data_ex_i
     );
 
     always @(*) begin
         wr_en_ex_o = 1'b0;
         wr_addr_ex_o = 5'h0;
         wr_data_ex_o = 32'h0;
+
         pc_brench_flag_ex_o = 1'b0;
         pc_brench_addr_ex_o = 32'h0;
         clear_valid_ex_o = 1'b0;
+
+        ram_wr_en_ex_o = 1'b0;
+        ram_wr_addr_ex_o = 32'h0;
+        ram_wr_data_ex_o = 32'h0;
+        ram_wr_sel_ex_o = 4'b0000;
+
+        ram_rd_en_ex_o = 1'b0;
+        ram_rd_addr_ex_o = 32'h0;
+
         if(valid_ex_i) begin
             if(is_addi_ex_i) begin
                 wr_en_ex_o = 1'b1;
@@ -277,6 +300,21 @@ module ex(
                 wr_addr_ex_o = rd_addr_ex_i;
                 wr_data_ex_o = pc_ex_i + immu_data_ex_i;
             end
+
+
+            else if(is_sw_ex_i) begin
+                ram_wr_en_ex_o = 1'b1;
+                ram_wr_addr_ex_o = rs1_data_ex_i + imms_data_ex_i;
+                ram_wr_data_ex_o = rs2_data_ex_i;
+                ram_wr_sel_ex_o = 4'b1111;
+            end
+            else if(is_lw_ex_i) begin
+                ram_rd_en_ex_o = 1'b1;
+                ram_rd_addr_ex_o = rs1_data_ex_i + immi_data_ex_i;
+                wr_en_ex_o = 1'b1;
+                wr_addr_ex_o = rd_addr_ex_i;
+                wr_data_ex_o = ram_rd_data_ex_i;
+        end
         end
 
 
@@ -284,9 +322,18 @@ module ex(
             wr_en_ex_o = 1'b0;
             wr_addr_ex_o = 5'h0;
             wr_data_ex_o = 32'h0;
+
             pc_brench_flag_ex_o = 1'b0;
             pc_brench_addr_ex_o = 32'h0;
             clear_valid_ex_o = 1'b0;
+
+            ram_wr_en_ex_o = 1'b0;
+            ram_wr_addr_ex_o = 32'h0;
+            ram_wr_data_ex_o = 32'h0;
+            ram_wr_sel_ex_o = 4'b0000;
+
+            ram_rd_en_ex_o = 1'b0;
+            ram_rd_addr_ex_o = 32'h0;
         end
     end
 endmodule

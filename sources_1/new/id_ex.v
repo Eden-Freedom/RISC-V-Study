@@ -32,6 +32,7 @@ module id_ex(
     input wire [31:0] immb_data_idex_i,
     input wire [31:0] immj_data_idex_i,
     input wire [31:0] immu_data_idex_i,
+    input wire [31:0] imms_data_idex_i,
     input wire [4:0] rd_addr_idex_i,
 
     input wire is_addi_idex_i,
@@ -69,6 +70,9 @@ module id_ex(
     input wire is_lui_idex_i,
     input wire is_auipc_idex_i,
 
+    input wire is_sw_idex_i,
+    input wire is_lw_idex_i,
+
     output reg valid_idex_o,
     output reg [31:0] pc_idex_o,
     output reg [31:0] rs1_data_idex_o,
@@ -77,6 +81,7 @@ module id_ex(
     output reg [31:0] immb_data_idex_o,
     output reg [31:0] immj_data_idex_o,
     output reg [31:0] immu_data_idex_o,
+    output reg [31:0] imms_data_idex_o,
     output reg [4:0] rd_addr_idex_o,
 
     output reg is_addi_idex_o,
@@ -111,7 +116,10 @@ module id_ex(
     output reg is_jalr_idex_o,
 
     output reg is_lui_idex_o,
-    output reg is_auipc_idex_o
+    output reg is_auipc_idex_o,
+
+    output reg is_sw_idex_o,
+    output reg is_lw_idex_o
     );
 
     always @(posedge clk) begin
@@ -124,6 +132,7 @@ module id_ex(
             immb_data_idex_o <= 32'h0;
             immj_data_idex_o <= 32'h0;
             immu_data_idex_o <= 32'h0;
+            imms_data_idex_o <= 32'h0;
             rd_addr_idex_o <= 5'h0;
 
             is_addi_idex_o <= 1'b0;
@@ -160,8 +169,10 @@ module id_ex(
 
             is_lui_idex_o <= 1'b0;
             is_auipc_idex_o <= 1'b0;
-            
 
+            is_sw_idex_o <= 1'b0;
+            is_lw_idex_o <= 1'b0;
+            
 
         end 
         else if (flush_idex_i) begin
@@ -173,6 +184,7 @@ module id_ex(
             immb_data_idex_o <= 32'h0;
             immj_data_idex_o <= 32'h0;
             immu_data_idex_o <= 32'h0;
+            imms_data_idex_o <= 32'h0;
             rd_addr_idex_o <= 5'h0;
 
             is_addi_idex_o <= 1'b0;
@@ -209,6 +221,10 @@ module id_ex(
 
             is_lui_idex_o <= 1'b0;
             is_auipc_idex_o <= 1'b0;
+
+            is_sw_idex_o <= 1'b0;
+            is_lw_idex_o <= 1'b0;
+
         end else begin
             valid_idex_o <= valid_idex_i;
             pc_idex_o <= pc_idex_i;
@@ -218,6 +234,7 @@ module id_ex(
             immb_data_idex_o <= immb_data_idex_i;
             immj_data_idex_o <= immj_data_idex_i;
             immu_data_idex_o <= immu_data_idex_i;
+            imms_data_idex_o <= imms_data_idex_i;
             rd_addr_idex_o <= rd_addr_idex_i;
 
             is_addi_idex_o <= is_addi_idex_i;
@@ -254,7 +271,8 @@ module id_ex(
             is_lui_idex_o <= is_lui_idex_i;
             is_auipc_idex_o <= is_auipc_idex_i;
 
-
+            is_sw_idex_o <= is_sw_idex_i;
+            is_lw_idex_o <= is_lw_idex_i;
         end
     end
 endmodule
