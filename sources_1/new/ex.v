@@ -21,6 +21,9 @@
 
 
 module ex (
+
+    input wire clk,
+    input wire rst_n,
     input wire valid_ex_i,
 
     input wire is_addi_ex_i,
@@ -72,6 +75,11 @@ module ex (
     input wire is_mulhsu_ex_i,
     input wire is_mulhu_ex_i,
 
+    input wire is_div_ex_i,
+    input wire is_divu_ex_i,
+    input wire is_rem_ex_i,
+    input wire is_remu_ex_i,
+
     input wire [31:0] pc_ex_i,
     input wire [31:0] rs1_data_ex_i,
     input wire [31:0] rs2_data_ex_i,
@@ -97,12 +105,26 @@ module ex (
 
     output reg         ram_rd_en_ex_o,
     output reg  [31:0] ram_rd_addr_ex_o,
-    input  wire [31:0] ram_rd_data_ex_i
+    input  wire [31:0] ram_rd_data_ex_i,
+
+    output reg stall_ex_o
+
 );
 
   wire signed [32:0] mul_a;
   wire signed [32:0] mul_b;
   wire signed [65:0] mul_result;
+
+  reg                signed_ex_o;
+  reg         [31:0] dividend_ex_o;
+  reg         [31:0] divisor_ex_o;
+  reg                start_ex_o;
+  wire               busy_div_o;
+  wire               done_div_o;
+  wire        [31:0] quotient_div_o;
+  wire        [31:0] remainder_div_o;
+
+
 
   assign mul_a = (is_mulh_ex_i | is_mulhsu_ex_i)?{rs1_data_ex_i[31], rs1_data_ex_i} : {1'b0, rs1_data_ex_i};
   assign mul_b = (is_mulh_ex_i) ? {rs2_data_ex_i[31], rs2_data_ex_i} : {1'b0, rs2_data_ex_i};
@@ -124,6 +146,12 @@ module ex (
 
     ram_rd_en_ex_o      = 1'b0;
     ram_rd_addr_ex_o    = 32'h0;
+
+    stall_ex_o          = 1'b0;
+    start_ex_o          = 1'b0;
+    signed_ex_o         = 1'b0;
+    dividend_ex_o       = 32'h0;
+    divisor_ex_o        = 32'h0;
 
     if (valid_ex_i) begin
       if (is_addi_ex_i) begin
@@ -480,9 +508,122 @@ module ex (
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = mul_result[63:32];
       end
-    end
 
-    
+
+      else if (is_div_ex_i) begin
+
+        signed_ex_o   = is_div_ex_i;
+        dividend_ex_o = rs1_data_ex_i;
+        divisor_ex_o  = rs2_data_ex_i;
+
+        if (!busy_div_o && !done_div_o) begin
+          start_ex_o = 1'b1;
+        end
+        else begin
+          start_ex_o = 1'b0;
+        end
+
+
+        if (!done_div_o) begin
+          stall_ex_o = 1'b1;
+        end
+        else begin
+          stall_ex_o = 1'b0;
+        end
+
+        if (done_div_o) begin
+          wr_en_ex_o   = 1'b1;
+          wr_addr_ex_o = rd_addr_ex_i;
+          wr_data_ex_o = quotient_div_o;
+        end
+        else begin
+          wr_en_ex_o   = 1'b0;
+          wr_addr_ex_o = 5'h0;
+          wr_data_ex_o = 32'h0;
+        end
+      end
+      else if (is_divu_ex_i) begin
+        signed_ex_o   = 1'b0;
+        dividend_ex_o = rs1_data_ex_i;
+        divisor_ex_o  = rs2_data_ex_i;
+        if (!busy_div_o && !done_div_o) begin
+          start_ex_o = 1'b1;
+        end
+        else begin
+          start_ex_o = 1'b0;
+        end
+        if (!done_div_o) begin
+          stall_ex_o = 1'b1;
+        end
+        else begin
+          stall_ex_o = 1'b0;
+        end
+        if (done_div_o) begin
+          wr_en_ex_o   = 1'b1;
+          wr_addr_ex_o = rd_addr_ex_i;
+          wr_data_ex_o = quotient_div_o;
+        end
+        else begin
+          wr_en_ex_o   = 1'b0;
+          wr_addr_ex_o = 5'h0;
+          wr_data_ex_o = 32'h0;
+        end
+      end
+      else if (is_rem_ex_i) begin
+        signed_ex_o   = 1'b1;
+        dividend_ex_o = rs1_data_ex_i;
+        divisor_ex_o  = rs2_data_ex_i;
+        if (!busy_div_o && !done_div_o) begin
+          start_ex_o = 1'b1;
+        end
+        else begin
+          start_ex_o = 1'b0;
+        end
+        if (!done_div_o) begin
+          stall_ex_o = 1'b1;
+        end
+        else begin
+          stall_ex_o = 1'b0;
+        end
+        if (done_div_o) begin
+          wr_en_ex_o   = 1'b1;
+          wr_addr_ex_o = rd_addr_ex_i;
+          wr_data_ex_o = remainder_div_o;
+        end
+        else begin
+          wr_en_ex_o   = 1'b0;
+          wr_addr_ex_o = 5'h0;
+          wr_data_ex_o = 32'h0;
+        end
+      end
+      else if (is_remu_ex_i) begin
+        signed_ex_o   = 1'b0;
+        dividend_ex_o = rs1_data_ex_i;
+        divisor_ex_o  = rs2_data_ex_i;
+        if (!busy_div_o && !done_div_o) begin
+          start_ex_o = 1'b1;
+        end
+        else begin
+          start_ex_o = 1'b0;
+        end
+        if (!done_div_o) begin
+          stall_ex_o = 1'b1;
+        end
+        else begin
+          stall_ex_o = 1'b0;
+        end
+        if (done_div_o) begin
+          wr_en_ex_o   = 1'b1;
+          wr_addr_ex_o = rd_addr_ex_i;
+          wr_data_ex_o = remainder_div_o;
+        end
+        else begin
+          wr_en_ex_o   = 1'b0;
+          wr_addr_ex_o = 5'h0;
+          wr_data_ex_o = 32'h0;
+        end
+      end
+    end
     else begin
       wr_en_ex_o          = 1'b0;
       wr_addr_ex_o        = 5'h0;
@@ -499,6 +640,25 @@ module ex (
 
       ram_rd_en_ex_o      = 1'b0;
       ram_rd_addr_ex_o    = 32'h0;
+
+      stall_ex_o          = 1'b0;
+      start_ex_o          = 1'b0;
+      signed_ex_o         = 1'b0;
+      dividend_ex_o       = 32'h0;
+      divisor_ex_o        = 32'h0;
     end
   end
+
+  div_rem_unit div_rem_unit_inst (
+      .clk(clk),
+      .rst_n(rst_n),
+      .start_i(start_ex_o),
+      .signed_i(signed_ex_o),
+      .dividend_i(dividend_ex_o),
+      .divisor_i(divisor_ex_o),
+      .quotient_o(quotient_div_o),
+      .remainder_o(remainder_div_o),
+      .busy_o(busy_div_o),
+      .done_o(done_div_o)
+  );
 endmodule

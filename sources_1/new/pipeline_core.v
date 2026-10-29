@@ -94,6 +94,11 @@ module pipeline_core (
   wire        is_mulh_o;//decode输出，id_ex输入
   wire        is_mulhsu_o;//decode输出，id_ex输入
   wire        is_mulhu_o;//decode输出，id_ex输入
+
+  wire        is_div_o;//decode输出，id_ex输入
+  wire        is_divu_o;//decode输出，id_ex输入
+  wire        is_rem_o;//decode输出，id_ex输入
+  wire        is_remu_o;//decode输出，id_ex输入
   
   
 
@@ -159,6 +164,11 @@ module pipeline_core (
   wire        is_mulhsu_idex_o;//id_ex输出 ex输入
   wire        is_mulhu_idex_o;//id_ex输出 ex输入
 
+  wire        is_div_idex_o;//id_ex输出 ex输入
+  wire        is_divu_idex_o;//id_ex输出 ex输入
+  wire        is_rem_idex_o;//id_ex输出 ex输入
+  wire        is_remu_idex_o;//id_ex输出 ex输入
+
   //ex
   wire wr_en_ex_o;//ex输出，regfile输入
   wire [4:0] wr_addr_ex_o;//ex输出，regfile输入
@@ -166,6 +176,7 @@ module pipeline_core (
   wire        pc_brench_flag_ex_o;//ex输出，fetch_unit输入
   wire [31:0] pc_brench_addr_ex_o;//ex输出，fetch_unit输入
   wire        clear_valid_ex_o;//ex输出，if_id输入,id_ex输入
+  wire stall_ex_o; //ex输出，fetch_unit输入，if_id输入,id_ex输入
 
 
   wire ram_wr_en_ex_o;//ex输出，ram输入
@@ -187,6 +198,8 @@ module pipeline_core (
   //旁路，解决数据冒险
   wire [31:0] rs1_data_forward_o;//id_ex输入
   wire [31:0] rs2_data_forward_o;//id_ex输入
+
+ 
   
 
   fetch_unit fetch_unit_inst (
@@ -194,6 +207,7 @@ module pipeline_core (
       .rst_n(rst_n),
       .pc_brench_flag_i(pc_brench_flag_ex_o),
       .pc_brench_addr_i(pc_brench_addr_ex_o),
+      .pc_stall_i(stall_ex_o),
       .pc_o(pc_o),
       .instr_o(instr_o)
   );
@@ -206,6 +220,7 @@ module pipeline_core (
       .rst_n(rst_n),
       .valid_i(1'b1),
       .flush_ifid_i(clear_valid_ex_o),
+      .stall_ifid_i(stall_ex_o),
       .pc_ifid_i(pc_o),
       .instr_ifid_i(instr_o),
       .valid_o(valid_ifid_o),
@@ -271,7 +286,12 @@ module pipeline_core (
       .is_mul_o(is_mul_o),
       .is_mulh_o(is_mulh_o),
       .is_mulhsu_o(is_mulhsu_o),
-      .is_mulhu_o(is_mulhu_o)
+      .is_mulhu_o(is_mulhu_o),
+
+      .is_div_o(is_div_o),
+      .is_divu_o(is_divu_o),
+      .is_rem_o(is_rem_o),
+      .is_remu_o(is_remu_o)
   );
 
   assign rs1_data_forward_o = (rs1_addr_o == wr_addr_ex_o && wr_en_ex_o && wr_addr_ex_o != 5'h0) ? wr_data_ex_o : rs1_data_o;
@@ -284,12 +304,14 @@ module pipeline_core (
                        is_lui_o | is_auipc_o |
                        is_sw_o | is_sb_o | is_sh_o |
                        is_lw_o | is_lb_o | is_lbu_o | is_lh_o | is_lhu_o |
-                       is_mul_o | is_mulh_o | is_mulhsu_o | is_mulhu_o );
+                       is_mul_o | is_mulh_o | is_mulhsu_o | is_mulhu_o |
+                       is_div_o | is_divu_o | is_rem_o | is_remu_o );
   id_ex id_ex_inst (
       .clk(clk),
       .rst_n(rst_n),
       .valid_idex_i(valid_idex_i),
       .flush_idex_i(clear_valid_ex_o),
+      .stall_idex_i(stall_ex_o),
       .pc_idex_i(pc_ifid_o),
       .rs1_data_idex_i(rs1_data_forward_o),
       .rs2_data_idex_i(rs2_data_forward_o),
@@ -349,6 +371,11 @@ module pipeline_core (
       .is_mulhsu_idex_i(is_mulhsu_o),
       .is_mulhu_idex_i(is_mulhu_o),
 
+      .is_div_idex_i(is_div_o),
+      .is_divu_idex_i(is_divu_o),
+      .is_rem_idex_i(is_rem_o),
+      .is_remu_idex_i(is_remu_o),
+
       .valid_idex_o(valid_idex_o),
       .pc_idex_o(pc_idex_o),
       .rs1_data_idex_o(rs1_data_idex_o),
@@ -407,10 +434,17 @@ module pipeline_core (
       .is_mul_idex_o(is_mul_idex_o),
       .is_mulh_idex_o(is_mulh_idex_o),
       .is_mulhsu_idex_o(is_mulhsu_idex_o),
-      .is_mulhu_idex_o(is_mulhu_idex_o)
+      .is_mulhu_idex_o(is_mulhu_idex_o),
+
+      .is_div_idex_o(is_div_idex_o),
+      .is_divu_idex_o(is_divu_idex_o),
+      .is_rem_idex_o(is_rem_idex_o),
+      .is_remu_idex_o(is_remu_idex_o)
   );
 
   ex ex_inst (
+      .clk(clk),
+      .rst_n(rst_n),
       .valid_ex_i(valid_idex_o),
       .pc_ex_i(pc_idex_o),
 
@@ -463,6 +497,11 @@ module pipeline_core (
       .is_mulhsu_ex_i(is_mulhsu_idex_o),
       .is_mulhu_ex_i(is_mulhu_idex_o),
 
+      .is_div_ex_i(is_div_idex_o),
+      .is_divu_ex_i(is_divu_idex_o),
+      .is_rem_ex_i(is_rem_idex_o),
+      .is_remu_ex_i(is_remu_idex_o),
+
       .rs1_data_ex_i(rs1_data_idex_o),
       .rs2_data_ex_i(rs2_data_idex_o),
       .immi_data_ex_i(immi_data_idex_o),
@@ -486,7 +525,9 @@ module pipeline_core (
       .ram_wr_sel_ex_o(ram_wr_sel_ex_o),
       .ram_rd_en_ex_o(ram_rd_en_ex_o),
       .ram_rd_addr_ex_o(ram_rd_addr_ex_o),
-      .ram_rd_data_ex_i(ram_rd_data_o)
+      .ram_rd_data_ex_i(ram_rd_data_o),
+
+      .stall_ex_o(stall_ex_o)
   );
 
   regfile regfile_inst (
@@ -513,4 +554,7 @@ module pipeline_core (
     .ram_wr_sel_i(ram_wr_sel_ex_o),
     .ram_rd_data_o(ram_rd_data_o)
   );
+
+
+
 endmodule

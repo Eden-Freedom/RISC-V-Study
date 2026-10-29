@@ -25,6 +25,7 @@ module pc_reg(
     input wire rst_n,
     input wire pc_brench_flag_i,
     input wire [31:0] pc_brench_addr_i,
+    input wire pc_stall_i,
 
     output reg [31:0] pc_o
     );
@@ -34,6 +35,8 @@ module pc_reg(
             pc_o <= 32'h00000000;
         end else if(pc_brench_flag_i) begin
             pc_o <= pc_brench_addr_i;
+        end else if(pc_stall_i) begin
+            pc_o <= pc_o;
         end else begin
             pc_o <= pc_o + 32'h00000004;
         end

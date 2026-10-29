@@ -25,6 +25,7 @@ module fetch_unit(
     input wire rst_n,
     input wire pc_brench_flag_i,
     input wire [31:0] pc_brench_addr_i,
+    input wire pc_stall_i,
 
     output wire [31:0] pc_o,
     output wire [31:0] instr_o
@@ -35,7 +36,8 @@ module fetch_unit(
     .rst_n(rst_n),
     .pc_o(pc_o),
     .pc_brench_flag_i(pc_brench_flag_i),
-    .pc_brench_addr_i(pc_brench_addr_i)
+    .pc_brench_addr_i(pc_brench_addr_i),
+    .pc_stall_i(pc_stall_i)
   );
   imem imem_inst(
     .addr_i(pc_o),

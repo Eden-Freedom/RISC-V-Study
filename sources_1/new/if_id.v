@@ -25,6 +25,7 @@ module if_id(
     input wire rst_n,
     input wire valid_i,
     input wire flush_ifid_i,
+    input wire stall_ifid_i,
     input wire [31:0] pc_ifid_i,
     input wire [31:0] instr_ifid_i,
     output reg valid_o,
@@ -44,7 +45,12 @@ always @(posedge clk) begin
         pc_ifid_o <= 32'h0;
         instr_ifid_o <= 32'h0;
     end
-    else  begin
+    else if (stall_ifid_i) begin
+        valid_o <= valid_o;
+        pc_ifid_o <= pc_ifid_o;
+        instr_ifid_o <= instr_ifid_o;
+    end
+    else begin
         valid_o <= valid_i;
         pc_ifid_o <= pc_ifid_i;
         instr_ifid_o <= instr_ifid_i;

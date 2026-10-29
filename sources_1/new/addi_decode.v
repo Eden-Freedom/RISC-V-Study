@@ -71,7 +71,12 @@ module addi_decode (
     output reg         is_mul_o,
     output reg         is_mulh_o,
     output reg         is_mulhsu_o,
-    output reg         is_mulhu_o
+    output reg         is_mulhu_o,
+
+    output reg         is_div_o,
+    output reg         is_divu_o,
+    output reg         is_rem_o,
+    output reg         is_remu_o
     
 );
 
@@ -135,6 +140,10 @@ module addi_decode (
     is_mulh_o = 1'b0;
     is_mulhsu_o = 1'b0;
     is_mulhu_o = 1'b0;
+    is_div_o = 1'b0;
+    is_divu_o = 1'b0;
+    is_rem_o = 1'b0;
+    is_remu_o = 1'b0;
     case (opcode)
       7'b0110011: begin//R型指令
         if (funct3 == 3'b000 && funct7 == 7'b0000000) begin
@@ -178,6 +187,18 @@ module addi_decode (
         end
         else if (funct3 == 3'b011 && funct7 == 7'b0000001) begin
           is_mulhu_o = 1'b1;
+        end
+        else if (funct3 == 3'b100 && funct7 == 7'b0000001) begin
+          is_div_o = 1'b1;
+        end
+        else if (funct3 == 3'b101 && funct7 == 7'b0000001) begin
+          is_divu_o = 1'b1;
+        end
+        else if (funct3 == 3'b110 && funct7 == 7'b0000001) begin
+          is_rem_o = 1'b1;
+        end
+        else if (funct3 == 3'b111 && funct7 == 7'b0000001) begin
+          is_remu_o = 1'b1;
         end
       end
       7'b0010011: begin//I型指令

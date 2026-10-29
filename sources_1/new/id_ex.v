@@ -25,6 +25,7 @@ module id_ex(
     input wire rst_n,
     input wire valid_idex_i,
     input wire flush_idex_i,
+    input wire stall_idex_i,
     input wire [31:0] pc_idex_i,
     input wire [31:0] rs1_data_idex_i,
     input wire [31:0] rs2_data_idex_i,
@@ -85,6 +86,11 @@ module id_ex(
     input wire is_mulhsu_idex_i,
     input wire is_mulhu_idex_i,
 
+    input wire is_div_idex_i,
+    input wire is_divu_idex_i,
+    input wire is_rem_idex_i,
+    input wire is_remu_idex_i,
+
     output reg valid_idex_o,
     output reg [31:0] pc_idex_o,
     output reg [31:0] rs1_data_idex_o,
@@ -143,7 +149,12 @@ module id_ex(
     output reg is_mul_idex_o,
     output reg is_mulh_idex_o,
     output reg is_mulhsu_idex_o,
-    output reg is_mulhu_idex_o
+    output reg is_mulhu_idex_o,
+
+    output reg is_div_idex_o,
+    output reg is_divu_idex_o,
+    output reg is_rem_idex_o,
+    output reg is_remu_idex_o
     );
 
     always @(posedge clk) begin
@@ -209,6 +220,11 @@ module id_ex(
             is_mulhsu_idex_o <= 1'b0;
             is_mulhu_idex_o <= 1'b0;
 
+            is_div_idex_o <= 1'b0;
+            is_divu_idex_o <= 1'b0;
+            is_rem_idex_o <= 1'b0;
+            is_remu_idex_o <= 1'b0;
+
         end 
         else if (flush_idex_i) begin
             valid_idex_o <= 1'b0;
@@ -272,7 +288,79 @@ module id_ex(
             is_mulhsu_idex_o <= 1'b0;
             is_mulhu_idex_o <= 1'b0;
 
-        end else begin
+            is_div_idex_o <= 1'b0;
+            is_divu_idex_o <= 1'b0;
+            is_rem_idex_o <= 1'b0;
+            is_remu_idex_o <= 1'b0;
+
+        end 
+        else if (stall_idex_i) begin
+            valid_idex_o <= valid_idex_o;
+            pc_idex_o <= pc_idex_o;
+            rs1_data_idex_o <= rs1_data_idex_o;
+            rs2_data_idex_o <= rs2_data_idex_o;
+            immi_data_idex_o <= immi_data_idex_o;
+            immb_data_idex_o <= immb_data_idex_o;
+            immj_data_idex_o <= immj_data_idex_o;
+            immu_data_idex_o <= immu_data_idex_o;
+            imms_data_idex_o <= imms_data_idex_o;
+            rd_addr_idex_o <= rd_addr_idex_o;
+
+            is_addi_idex_o <= is_addi_idex_o;
+            is_xori_idex_o <= is_xori_idex_o;
+            is_ori_idex_o <= is_ori_idex_o;
+            is_andi_idex_o <= is_andi_idex_o;
+            is_slli_idex_o <= is_slli_idex_o;
+            is_srli_idex_o <= is_srli_idex_o;
+            is_srai_idex_o <= is_srai_idex_o;
+            is_slti_idex_o <= is_slti_idex_o;
+            is_sltiu_idex_o <= is_sltiu_idex_o;
+            
+            is_sub_idex_o <= is_sub_idex_o;
+            is_add_idex_o <= is_add_idex_o;
+            is_xor_idex_o <= is_xor_idex_o;
+            is_or_idex_o <= is_or_idex_o;
+            is_and_idex_o <= is_and_idex_o;
+            is_sll_idex_o <= is_sll_idex_o;
+            is_srl_idex_o <= is_srl_idex_o;
+            is_sra_idex_o <= is_sra_idex_o;
+            is_slt_idex_o <= is_slt_idex_o;
+            is_sltu_idex_o <= is_sltu_idex_o;
+
+            is_beq_idex_o <= is_beq_idex_o;
+            is_bne_idex_o <= is_bne_idex_o;
+            is_blt_idex_o <= is_blt_idex_o;
+            is_bge_idex_o <= is_bge_idex_o;
+            is_bltu_idex_o <= is_bltu_idex_o;
+            is_bgeu_idex_o <= is_bgeu_idex_o;
+
+            is_jal_idex_o <= is_jal_idex_o;
+            is_jalr_idex_o <= is_jalr_idex_o;
+
+            is_lui_idex_o <= is_lui_idex_o;
+            is_auipc_idex_o <= is_auipc_idex_o;
+
+            is_sw_idex_o <= is_sw_idex_o;
+            is_sb_idex_o <= is_sb_idex_o;
+            is_sh_idex_o <= is_sh_idex_o;
+
+            is_lw_idex_o <= is_lw_idex_o;
+            is_lb_idex_o <= is_lb_idex_o;
+            is_lbu_idex_o <= is_lbu_idex_o;
+            is_lh_idex_o <= is_lh_idex_o;
+            is_lhu_idex_o <= is_lhu_idex_o;
+
+            is_mul_idex_o <= is_mul_idex_o;
+            is_mulh_idex_o <= is_mulh_idex_o;
+            is_mulhsu_idex_o <= is_mulhsu_idex_o;
+            is_mulhu_idex_o <= is_mulhu_idex_o;
+
+            is_div_idex_o <= is_div_idex_o;
+            is_divu_idex_o <= is_divu_idex_o;
+            is_rem_idex_o <= is_rem_idex_o;
+            is_remu_idex_o <= is_remu_idex_o;
+        end
+        else begin
             valid_idex_o <= valid_idex_i;
             pc_idex_o <= pc_idex_i;
             rs1_data_idex_o <= rs1_data_idex_i;
@@ -332,6 +420,11 @@ module id_ex(
             is_mulh_idex_o <= is_mulh_idex_i;
             is_mulhsu_idex_o <= is_mulhsu_idex_i;
             is_mulhu_idex_o <= is_mulhu_idex_i;
+
+            is_div_idex_o <= is_div_idex_i;
+            is_divu_idex_o <= is_divu_idex_i;
+            is_rem_idex_o <= is_rem_idex_i;
+            is_remu_idex_o <= is_remu_idex_i;
         end
     end
 endmodule
