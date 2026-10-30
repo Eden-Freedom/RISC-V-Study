@@ -34,6 +34,8 @@ module id_ex(
     input wire [31:0] immj_data_idex_i,
     input wire [31:0] immu_data_idex_i,
     input wire [31:0] imms_data_idex_i,
+    input wire [31:0] imm_csr_idex_i,
+    input wire [11:0] csr_addr_idex_i,
     input wire [4:0] rd_addr_idex_i,
 
     input wire is_addi_idex_i,
@@ -91,6 +93,13 @@ module id_ex(
     input wire is_rem_idex_i,
     input wire is_remu_idex_i,
 
+    input wire is_csrrw_idex_i,
+    input wire is_csrrs_idex_i,
+    input wire is_csrrc_idex_i,
+    input wire is_csrrwi_idex_i,
+    input wire is_csrrsi_idex_i,
+    input wire is_csrrci_idex_i,
+
     output reg valid_idex_o,
     output reg [31:0] pc_idex_o,
     output reg [31:0] rs1_data_idex_o,
@@ -100,6 +109,8 @@ module id_ex(
     output reg [31:0] immj_data_idex_o,
     output reg [31:0] immu_data_idex_o,
     output reg [31:0] imms_data_idex_o,
+    output reg [31:0] imm_csr_idex_o,
+    output reg [11:0] csr_addr_idex_o,
     output reg [4:0] rd_addr_idex_o,
 
     output reg is_addi_idex_o,
@@ -154,7 +165,14 @@ module id_ex(
     output reg is_div_idex_o,
     output reg is_divu_idex_o,
     output reg is_rem_idex_o,
-    output reg is_remu_idex_o
+    output reg is_remu_idex_o,
+
+    output reg is_csrrw_idex_o,
+    output reg is_csrrs_idex_o,
+    output reg is_csrrc_idex_o,
+    output reg is_csrrwi_idex_o,
+    output reg is_csrrsi_idex_o,
+    output reg is_csrrci_idex_o
     );
 
     always @(posedge clk) begin
@@ -168,6 +186,8 @@ module id_ex(
             immj_data_idex_o <= 32'h0;
             immu_data_idex_o <= 32'h0;
             imms_data_idex_o <= 32'h0;
+            imm_csr_idex_o <= 32'h0;
+            csr_addr_idex_o <= 12'h0;
             rd_addr_idex_o <= 5'h0;
 
             is_addi_idex_o <= 1'b0;
@@ -224,6 +244,13 @@ module id_ex(
             is_divu_idex_o <= 1'b0;
             is_rem_idex_o <= 1'b0;
             is_remu_idex_o <= 1'b0;
+
+            is_csrrw_idex_o <= 1'b0;
+            is_csrrs_idex_o <= 1'b0;
+            is_csrrc_idex_o <= 1'b0;
+            is_csrrwi_idex_o <= 1'b0;
+            is_csrrsi_idex_o <= 1'b0;
+            is_csrrci_idex_o <= 1'b0;
 
         end 
         else if (flush_idex_i) begin
@@ -236,6 +263,8 @@ module id_ex(
             immj_data_idex_o <= 32'h0;
             immu_data_idex_o <= 32'h0;
             imms_data_idex_o <= 32'h0;
+            imm_csr_idex_o <= 32'h0;
+            csr_addr_idex_o <= 12'h0;
             rd_addr_idex_o <= 5'h0;
 
             is_addi_idex_o <= 1'b0;
@@ -293,6 +322,13 @@ module id_ex(
             is_rem_idex_o <= 1'b0;
             is_remu_idex_o <= 1'b0;
 
+            is_csrrw_idex_o <= 1'b0;
+            is_csrrs_idex_o <= 1'b0;
+            is_csrrc_idex_o <= 1'b0;
+            is_csrrwi_idex_o <= 1'b0;
+            is_csrrsi_idex_o <= 1'b0;
+            is_csrrci_idex_o <= 1'b0;
+
         end 
         else if (stall_idex_i) begin
             valid_idex_o <= valid_idex_o;
@@ -304,6 +340,8 @@ module id_ex(
             immj_data_idex_o <= immj_data_idex_o;
             immu_data_idex_o <= immu_data_idex_o;
             imms_data_idex_o <= imms_data_idex_o;
+            imm_csr_idex_o <= imm_csr_idex_o;
+            csr_addr_idex_o <= csr_addr_idex_o;
             rd_addr_idex_o <= rd_addr_idex_o;
 
             is_addi_idex_o <= is_addi_idex_o;
@@ -359,6 +397,13 @@ module id_ex(
             is_divu_idex_o <= is_divu_idex_o;
             is_rem_idex_o <= is_rem_idex_o;
             is_remu_idex_o <= is_remu_idex_o;
+
+            is_csrrw_idex_o <= is_csrrw_idex_o;
+            is_csrrs_idex_o <= is_csrrs_idex_o;
+            is_csrrc_idex_o <= is_csrrc_idex_o;
+            is_csrrwi_idex_o <= is_csrrwi_idex_o;
+            is_csrrsi_idex_o <= is_csrrsi_idex_o;
+            is_csrrci_idex_o <= is_csrrci_idex_o;
         end
         else begin
             valid_idex_o <= valid_idex_i;
@@ -370,6 +415,8 @@ module id_ex(
             immj_data_idex_o <= immj_data_idex_i;
             immu_data_idex_o <= immu_data_idex_i;
             imms_data_idex_o <= imms_data_idex_i;
+            imm_csr_idex_o <= imm_csr_idex_i;
+            csr_addr_idex_o <= csr_addr_idex_i;
             rd_addr_idex_o <= rd_addr_idex_i;
 
             is_addi_idex_o <= is_addi_idex_i;
@@ -425,6 +472,13 @@ module id_ex(
             is_divu_idex_o <= is_divu_idex_i;
             is_rem_idex_o <= is_rem_idex_i;
             is_remu_idex_o <= is_remu_idex_i;
+
+            is_csrrw_idex_o <= is_csrrw_idex_i;
+            is_csrrs_idex_o <= is_csrrs_idex_i;
+            is_csrrc_idex_o <= is_csrrc_idex_i;
+            is_csrrwi_idex_o <= is_csrrwi_idex_i;
+            is_csrrsi_idex_o <= is_csrrsi_idex_i;
+            is_csrrci_idex_o <= is_csrrci_idex_i;
         end
     end
 endmodule

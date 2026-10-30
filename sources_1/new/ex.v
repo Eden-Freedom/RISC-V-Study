@@ -80,6 +80,13 @@ module ex (
     input wire is_rem_ex_i,
     input wire is_remu_ex_i,
 
+    input wire is_csrrw_ex_i,
+    input wire is_csrrs_ex_i,
+    input wire is_csrrc_ex_i,
+    input wire is_csrrwi_ex_i,
+    input wire is_csrrsi_ex_i,
+    input wire is_csrrci_ex_i,
+
     input wire [31:0] pc_ex_i,
     input wire [31:0] rs1_data_ex_i,
     input wire [31:0] rs2_data_ex_i,
@@ -88,6 +95,8 @@ module ex (
     input wire [31:0] immj_data_ex_i,
     input wire [31:0] immu_data_ex_i,
     input wire [31:0] imms_data_ex_i,
+    input wire [31:0] imm_csr_ex_i,
+    input wire [11:0] csr_addr_ex_i,
     input wire [ 4:0] rd_addr_ex_i,
 
     output reg        wr_en_ex_o,
@@ -125,7 +134,16 @@ module ex (
   wire        [31:0] remainder_div_o;
 
 
+reg [2:0] csr_type_ex_o;
+  reg csr_wr_en_ex_o;
+  reg [11:0] csr_wr_addr_ex_o;
+  reg [31:0] csr_wr_data_ex_o;
+  reg csr_rd_en_ex_o;
+  reg [11:0] csr_rd_addr_ex_o;
+  wire [31:0] csr_rdata_csr_o;
 
+
+//有符号乘法或者无符号乘法
   assign mul_a = (is_mulh_ex_i | is_mulhsu_ex_i)?{rs1_data_ex_i[31], rs1_data_ex_i} : {1'b0, rs1_data_ex_i};
   assign mul_b = (is_mulh_ex_i) ? {rs2_data_ex_i[31], rs2_data_ex_i} : {1'b0, rs2_data_ex_i};
   assign mul_result = mul_a * mul_b;
@@ -152,6 +170,13 @@ module ex (
     signed_ex_o         = 1'b0;
     dividend_ex_o       = 32'h0;
     divisor_ex_o        = 32'h0;
+
+    csr_type_ex_o = 3'b000;
+    csr_wr_en_ex_o = 1'b0;
+    csr_wr_addr_ex_o = 12'h0;
+    csr_wr_data_ex_o = 32'h0;
+    csr_rd_en_ex_o = 1'b0;
+    csr_rd_addr_ex_o = 12'h0;
 
     if (valid_ex_i) begin
       if (is_addi_ex_i) begin
@@ -623,6 +648,119 @@ module ex (
           wr_data_ex_o = 32'h0;
         end
       end
+
+      else if (is_csrrw_ex_i) begin
+        csr_type_ex_o = 3'b001;
+        csr_wr_en_ex_o = 1'b1;
+        csr_wr_addr_ex_o = csr_addr_ex_i;
+        csr_wr_data_ex_o = rs1_data_ex_i;
+        if(rd_addr_ex_i != 5'h0)begin
+          csr_rd_en_ex_o = 1'b1;
+          csr_rd_addr_ex_o = csr_addr_ex_i;
+          wr_en_ex_o = 1'b1;
+          wr_addr_ex_o = rd_addr_ex_i;
+          wr_data_ex_o = csr_rdata_csr_o;
+        end
+        else begin
+          csr_rd_en_ex_o = 1'b0;
+          csr_rd_addr_ex_o = 12'h0;
+          wr_en_ex_o = 1'b0;
+          wr_addr_ex_o = 5'h0;
+          wr_data_ex_o = 32'h0;
+        end
+      end
+      else if (is_csrrs_ex_i) begin
+        csr_type_ex_o = 3'b010;
+        if(imm_csr_ex_i != 32'h0)begin
+        csr_wr_en_ex_o = 1'b1;
+        csr_wr_addr_ex_o = csr_addr_ex_i;
+        csr_wr_data_ex_o = rs1_data_ex_i;
+        end
+        else begin
+          csr_wr_en_ex_o = 1'b0;
+          csr_wr_addr_ex_o = 12'h0;
+          csr_wr_data_ex_o = 32'h0;
+        end
+        csr_rd_en_ex_o = 1'b1;
+        csr_rd_addr_ex_o = csr_addr_ex_i;
+        wr_en_ex_o = 1'b1;
+        wr_addr_ex_o = rd_addr_ex_i;
+        wr_data_ex_o = csr_rdata_csr_o;
+      end
+      else if (is_csrrc_ex_i) begin
+        csr_type_ex_o = 3'b011;
+        if(imm_csr_ex_i != 32'h0)begin
+        csr_wr_en_ex_o = 1'b1;
+        csr_wr_addr_ex_o = csr_addr_ex_i;
+        csr_wr_data_ex_o = rs1_data_ex_i;
+        end
+        else begin
+          csr_wr_en_ex_o = 1'b0;
+          csr_wr_addr_ex_o = 12'h0;
+          csr_wr_data_ex_o = 32'h0;
+        end
+        csr_rd_en_ex_o = 1'b1;
+        csr_rd_addr_ex_o = csr_addr_ex_i;
+        wr_en_ex_o = 1'b1;
+        wr_addr_ex_o = rd_addr_ex_i;
+        wr_data_ex_o = csr_rdata_csr_o;
+      end
+      else if (is_csrrwi_ex_i) begin
+        csr_type_ex_o = 3'b101;
+        csr_wr_en_ex_o = 1'b1;
+        csr_wr_addr_ex_o = csr_addr_ex_i;
+        csr_wr_data_ex_o = imm_csr_ex_i;
+        if(rd_addr_ex_i != 5'h0)begin
+          csr_rd_en_ex_o = 1'b1;
+          csr_rd_addr_ex_o = csr_addr_ex_i;
+          wr_en_ex_o = 1'b1;
+          wr_addr_ex_o = rd_addr_ex_i;
+          wr_data_ex_o = csr_rdata_csr_o;
+        end
+        else begin
+          csr_rd_en_ex_o = 1'b0;
+          csr_rd_addr_ex_o = 12'h0;
+          wr_en_ex_o = 1'b0;
+          wr_addr_ex_o = 5'h0;
+          wr_data_ex_o = 32'h0;
+        end
+      end
+      else if (is_csrrsi_ex_i) begin
+        csr_type_ex_o = 3'b110;
+        if(imm_csr_ex_i != 32'h0)begin
+          csr_wr_en_ex_o = 1'b1;
+          csr_wr_addr_ex_o = csr_addr_ex_i;
+          csr_wr_data_ex_o = imm_csr_ex_i;
+          end
+          else begin
+            csr_wr_en_ex_o = 1'b0;
+            csr_wr_addr_ex_o = 12'h0;
+            csr_wr_data_ex_o = 32'h0;
+          end
+          csr_rd_en_ex_o = 1'b1;
+          csr_rd_addr_ex_o = csr_addr_ex_i;
+          wr_en_ex_o = 1'b1;
+          wr_addr_ex_o = rd_addr_ex_i;
+          wr_data_ex_o = csr_rdata_csr_o;
+        end
+       else if (is_csrrci_ex_i) begin
+        csr_type_ex_o = 3'b111;
+        if(imm_csr_ex_i != 32'h0)begin
+          csr_wr_en_ex_o = 1'b1;
+          csr_wr_addr_ex_o = csr_addr_ex_i;
+          csr_wr_data_ex_o = imm_csr_ex_i;
+          end
+          else begin
+            csr_wr_en_ex_o = 1'b0;
+            csr_wr_addr_ex_o = 12'h0;
+            csr_wr_data_ex_o = 32'h0;
+          end
+          csr_rd_en_ex_o = 1'b1;
+          csr_rd_addr_ex_o = csr_addr_ex_i;
+          wr_en_ex_o = 1'b1;
+          wr_addr_ex_o = rd_addr_ex_i;
+          wr_data_ex_o = csr_rdata_csr_o;
+        end
     end
     else begin
       wr_en_ex_o          = 1'b0;
@@ -646,6 +784,13 @@ module ex (
       signed_ex_o         = 1'b0;
       dividend_ex_o       = 32'h0;
       divisor_ex_o        = 32'h0;
+
+      csr_type_ex_o = 3'b000;
+      csr_wr_en_ex_o = 1'b0;
+      csr_wr_addr_ex_o = 12'h0;
+      csr_wr_data_ex_o = 32'h0;
+      csr_rd_en_ex_o = 1'b0;
+      csr_rd_addr_ex_o = 12'h0;
     end
   end
 
@@ -660,5 +805,18 @@ module ex (
       .remainder_o(remainder_div_o),
       .busy_o(busy_div_o),
       .done_o(done_div_o)
+  );
+
+
+  csr_unit  csr_unit_inst (
+    .clk(clk),
+    .rst_n(rst_n),
+    .csr_wr_en_i(csr_wr_en_ex_o),
+    .csr_rd_en_i(csr_rd_en_ex_o),
+    .csr_type_i(csr_type_ex_o),
+    .csr_wr_addr_i(csr_wr_addr_ex_o),
+    .csr_src_data_i(csr_wr_data_ex_o),
+    .csr_rd_addr_i(csr_rd_addr_ex_o),
+    .csr_rdata_o(csr_rdata_csr_o)
   );
 endmodule

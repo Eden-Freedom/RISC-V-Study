@@ -27,6 +27,8 @@ module addi_decode (
     output wire [31:0] imm_typeb_o,
     output wire [31:0] imm_typej_o,
     output wire [31:0] imm_types_o,
+    output wire [31:0] imm_csr_o,
+    output wire [11:0] csr_addr_o,
     output wire [ 4:0] rs1_addr_o,
     output wire [ 4:0] rs2_addr_o,
     output wire [ 4:0] rd_addr_o,
@@ -76,8 +78,14 @@ module addi_decode (
     output reg         is_div_o,
     output reg         is_divu_o,
     output reg         is_rem_o,
-    output reg         is_remu_o
-    
+    output reg         is_remu_o,
+
+    output reg         is_csrrw_o,
+    output reg         is_csrrs_o,
+    output reg         is_csrrc_o,
+    output reg         is_csrrwi_o,
+    output reg         is_csrrsi_o,
+    output reg         is_csrrci_o
 );
 
   wire [6:0] opcode;
@@ -93,6 +101,8 @@ module addi_decode (
   assign imm_typeb_o      = {{19{instr_i[31]}},instr_i[31],instr_i[7],instr_i[30:25],instr_i[11:8],1'b0};
   assign imm_typej_o      = {{11{instr_i[31]}},instr_i[31],instr_i[19:12],instr_i[20],instr_i[30:21],1'b0};
   assign imm_types_o      = {{20{instr_i[31]}}, instr_i[31:25], instr_i[11:7]};
+  assign imm_csr_o      =  {27'b0, instr_i[19:15]};
+  assign csr_addr_o      = instr_i[31:20];
   assign rs1_addr_o = instr_i[19:15];
   assign rs2_addr_o = (opcode == 7'b0110011 || opcode == 7'b1100011 || opcode == 7'b0100011) ? instr_i[24:20] : 5'b00000;
   assign rd_addr_o  = instr_i[11:7];
@@ -144,6 +154,12 @@ module addi_decode (
     is_divu_o = 1'b0;
     is_rem_o = 1'b0;
     is_remu_o = 1'b0;
+    is_csrrw_o = 1'b0;
+    is_csrrs_o = 1'b0;
+    is_csrrc_o = 1'b0;
+    is_csrrwi_o = 1'b0;
+    is_csrrsi_o = 1'b0;
+    is_csrrci_o = 1'b0;
     case (opcode)
       7'b0110011: begin//R型指令
         if (funct3 == 3'b000 && funct7 == 7'b0000000) begin
@@ -293,6 +309,26 @@ module addi_decode (
           is_lhu_o = 1'b1;
         end
       end
+      7'b1110011:begin//CSR型指令
+        if(funct3 == 3'b001)begin
+          is_csrrw_o = 1'b1;
+        end
+        else if(funct3 == 3'b010)begin
+          is_csrrs_o = 1'b1;
+        end
+        else if(funct3 == 3'b011)begin
+          is_csrrc_o = 1'b1;
+        end
+        else if(funct3 == 3'b101)begin
+          is_csrrwi_o = 1'b1;
+          end
+        else if(funct3 == 3'b110)begin
+          is_csrrsi_o = 1'b1;
+        end
+        else if(funct3 == 3'b111)begin
+          is_csrrci_o = 1'b1;
+        end
+      end
       default: begin
         is_addi_o = 1'b0;
         is_xori_o = 1'b0;
@@ -335,6 +371,16 @@ module addi_decode (
         is_mulh_o = 1'b0;
         is_mulhsu_o = 1'b0;
         is_mulhu_o = 1'b0;
+        is_div_o = 1'b0;
+        is_divu_o = 1'b0;
+        is_rem_o = 1'b0;
+        is_remu_o = 1'b0;
+        is_csrrw_o = 1'b0;
+        is_csrrs_o = 1'b0;
+        is_csrrc_o = 1'b0;
+        is_csrrwi_o = 1'b0;
+        is_csrrsi_o = 1'b0;
+        is_csrrci_o = 1'b0;
       end
     endcase
   end

@@ -42,9 +42,11 @@ module pipeline_core (
   wire [31:0]       imm_typej_o;//decode输出，id_ex输入
   wire [31:0]       imm_typeu_o;//decode输出，id_ex输入
   wire [31:0]       imm_types_o;//decode输出，id_ex输入
+  wire [31:0]       imm_csr_o;//decode输出，id_ex输入
 
   wire    [4:0]    rs1_addr_o;//decode输出，id_ex，regfile输入
   wire    [4:0]    rs2_addr_o;//decode输出，id_ex，regfile输入
+  wire    [11:0]   csr_addr_o;//decode输出，id_ex输入
   wire    [4:0]    rd_addr_o;//decode输出，id_ex输入
   wire        is_addi_o;//decode输出，id_ex输入
   wire        is_xori_o;//decode输出，id_ex输入
@@ -99,6 +101,13 @@ module pipeline_core (
   wire        is_divu_o;//decode输出，id_ex输入
   wire        is_rem_o;//decode输出，id_ex输入
   wire        is_remu_o;//decode输出，id_ex输入
+
+  wire        is_csrrw_o;//decode输出，id_ex输入
+  wire        is_csrrs_o;//decode输出，id_ex输入
+  wire        is_csrrc_o;//decode输出，id_ex输入
+  wire        is_csrrwi_o;//decode输出，id_ex输入
+  wire        is_csrrsi_o;//decode输出，id_ex输入
+  wire        is_csrrci_o;//decode输出，id_ex输入
   
   
 
@@ -113,8 +122,11 @@ module pipeline_core (
   wire [31:0] immj_data_idex_o;//id_ex输出，ex输入
   wire [31:0] immu_data_idex_o;//id_ex输出，ex输入
   wire [31:0] imms_data_idex_o;//id_ex输出，ex输入
+  wire [31:0] imm_csr_idex_o;//id_ex输出，ex输入
+  wire [11:0] csr_addr_idex_o;//id_ex输出，ex输入
   wire [4:0] rd_addr_idex_o;//id_ex输出，ex输入
 
+  
   wire        is_addi_idex_o;//id_ex输出 ex输入
   wire        is_xori_idex_o;//id_ex输出 ex输入
   wire        is_ori_idex_o;//id_ex输出 ex输入
@@ -168,6 +180,13 @@ module pipeline_core (
   wire        is_divu_idex_o;//id_ex输出 ex输入
   wire        is_rem_idex_o;//id_ex输出 ex输入
   wire        is_remu_idex_o;//id_ex输出 ex输入
+
+  wire        is_csrrw_idex_o;//id_ex输出 ex输入
+  wire        is_csrrs_idex_o;//id_ex输出 ex输入
+  wire        is_csrrc_idex_o;//id_ex输出 ex输入
+  wire        is_csrrwi_idex_o;//id_ex输出 ex输入
+  wire        is_csrrsi_idex_o;//id_ex输出 ex输入
+  wire        is_csrrci_idex_o;//id_ex输出 ex输入
 
   //ex
   wire wr_en_ex_o;//ex输出，regfile输入
@@ -235,9 +254,11 @@ module pipeline_core (
       .imm_typeb_o(imm_typeb_o),
       .imm_typej_o(imm_typej_o),
       .imm_types_o(imm_types_o),
+      .imm_csr_o(imm_csr_o),
 
       .rs1_addr_o(rs1_addr_o),
       .rs2_addr_o(rs2_addr_o),
+      .csr_addr_o(csr_addr_o),
       .rd_addr_o(rd_addr_o),
 
       .is_addi_o(is_addi_o),
@@ -291,7 +312,14 @@ module pipeline_core (
       .is_div_o(is_div_o),
       .is_divu_o(is_divu_o),
       .is_rem_o(is_rem_o),
-      .is_remu_o(is_remu_o)
+      .is_remu_o(is_remu_o),
+
+      .is_csrrw_o(is_csrrw_o),
+      .is_csrrs_o(is_csrrs_o),
+      .is_csrrc_o(is_csrrc_o),
+      .is_csrrwi_o(is_csrrwi_o),
+      .is_csrrsi_o(is_csrrsi_o),
+      .is_csrrci_o(is_csrrci_o)
   );
 
   assign rs1_data_forward_o = (rs1_addr_o == wr_addr_ex_o && wr_en_ex_o && wr_addr_ex_o != 5'h0) ? wr_data_ex_o : rs1_data_o;
@@ -305,7 +333,8 @@ module pipeline_core (
                        is_sw_o | is_sb_o | is_sh_o |
                        is_lw_o | is_lb_o | is_lbu_o | is_lh_o | is_lhu_o |
                        is_mul_o | is_mulh_o | is_mulhsu_o | is_mulhu_o |
-                       is_div_o | is_divu_o | is_rem_o | is_remu_o );
+                       is_div_o | is_divu_o | is_rem_o | is_remu_o |
+                       is_csrrw_o | is_csrrs_o | is_csrrc_o | is_csrrwi_o | is_csrrsi_o | is_csrrci_o );
   id_ex id_ex_inst (
       .clk(clk),
       .rst_n(rst_n),
@@ -320,6 +349,8 @@ module pipeline_core (
       .immj_data_idex_i(imm_typej_o),
       .immu_data_idex_i(imm_typeu_o),
       .imms_data_idex_i(imm_types_o),
+      .imm_csr_idex_i(imm_csr_o),
+      .csr_addr_idex_i(csr_addr_o),
       .rd_addr_idex_i(rd_addr_o),
 
       .is_addi_idex_i(is_addi_o),
@@ -376,6 +407,13 @@ module pipeline_core (
       .is_rem_idex_i(is_rem_o),
       .is_remu_idex_i(is_remu_o),
 
+      .is_csrrw_idex_i(is_csrrw_o),
+      .is_csrrs_idex_i(is_csrrs_o),
+      .is_csrrc_idex_i(is_csrrc_o),
+      .is_csrrwi_idex_i(is_csrrwi_o),
+      .is_csrrsi_idex_i(is_csrrsi_o),
+      .is_csrrci_idex_i(is_csrrci_o),
+
       .valid_idex_o(valid_idex_o),
       .pc_idex_o(pc_idex_o),
       .rs1_data_idex_o(rs1_data_idex_o),
@@ -385,6 +423,8 @@ module pipeline_core (
       .immj_data_idex_o(immj_data_idex_o),
       .immu_data_idex_o(immu_data_idex_o),
       .imms_data_idex_o(imms_data_idex_o),
+      .imm_csr_idex_o(imm_csr_idex_o),
+      .csr_addr_idex_o(csr_addr_idex_o),
       .rd_addr_idex_o(rd_addr_idex_o),
 
       .is_addi_idex_o(is_addi_idex_o),
@@ -439,7 +479,14 @@ module pipeline_core (
       .is_div_idex_o(is_div_idex_o),
       .is_divu_idex_o(is_divu_idex_o),
       .is_rem_idex_o(is_rem_idex_o),
-      .is_remu_idex_o(is_remu_idex_o)
+      .is_remu_idex_o(is_remu_idex_o),
+
+      .is_csrrw_idex_o(is_csrrw_idex_o),
+      .is_csrrs_idex_o(is_csrrs_idex_o),
+      .is_csrrc_idex_o(is_csrrc_idex_o),
+      .is_csrrwi_idex_o(is_csrrwi_idex_o),
+      .is_csrrsi_idex_o(is_csrrsi_idex_o),
+      .is_csrrci_idex_o(is_csrrci_idex_o)
   );
 
   ex ex_inst (
@@ -502,6 +549,13 @@ module pipeline_core (
       .is_rem_ex_i(is_rem_idex_o),
       .is_remu_ex_i(is_remu_idex_o),
 
+      .is_csrrw_ex_i(is_csrrw_idex_o),
+      .is_csrrs_ex_i(is_csrrs_idex_o),
+      .is_csrrc_ex_i(is_csrrc_idex_o),
+      .is_csrrwi_ex_i(is_csrrwi_idex_o),
+      .is_csrrsi_ex_i(is_csrrsi_idex_o),
+      .is_csrrci_ex_i(is_csrrci_idex_o),
+
       .rs1_data_ex_i(rs1_data_idex_o),
       .rs2_data_ex_i(rs2_data_idex_o),
       .immi_data_ex_i(immi_data_idex_o),
@@ -509,6 +563,8 @@ module pipeline_core (
       .immj_data_ex_i(immj_data_idex_o),
       .immu_data_ex_i(immu_data_idex_o),
       .imms_data_ex_i(imms_data_idex_o),
+      .imm_csr_ex_i(imm_csr_idex_o),
+      .csr_addr_ex_i(csr_addr_idex_o),
       .rd_addr_ex_i(rd_addr_idex_o),
       .wr_en_ex_o(wr_en_ex_o),
       .wr_addr_ex_o(wr_addr_ex_o),
