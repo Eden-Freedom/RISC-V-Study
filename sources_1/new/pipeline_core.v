@@ -22,7 +22,9 @@
 
 module pipeline_core (
     input wire clk,
-    input wire rst_n
+    input wire rst_n,
+
+    input wire irq_external_i
     
 );
 
@@ -108,7 +110,11 @@ module pipeline_core (
   wire        is_csrrwi_o;//decode输出，id_ex输入
   wire        is_csrrsi_o;//decode输出，id_ex输入
   wire        is_csrrci_o;//decode输出，id_ex输入
-  
+
+  wire        is_ecall_o;//decode输出，id_ex输入
+  wire        is_mret_o;//decode输出，id_ex输入
+
+  wire        is_illegal_o;//decode输出，id_ex输入
   
 
   //id_ex
@@ -187,6 +193,11 @@ module pipeline_core (
   wire        is_csrrwi_idex_o;//id_ex输出 ex输入
   wire        is_csrrsi_idex_o;//id_ex输出 ex输入
   wire        is_csrrci_idex_o;//id_ex输出 ex输入
+
+  wire        is_ecall_idex_o;//id_ex输出 ex输入
+  wire        is_mret_idex_o;//id_ex输出 ex输入
+
+  wire        is_illegal_idex_o;//id_ex输出 ex输入
 
   //ex
   wire wr_en_ex_o;//ex输出，regfile输入
@@ -319,22 +330,17 @@ module pipeline_core (
       .is_csrrc_o(is_csrrc_o),
       .is_csrrwi_o(is_csrrwi_o),
       .is_csrrsi_o(is_csrrsi_o),
-      .is_csrrci_o(is_csrrci_o)
+      .is_csrrci_o(is_csrrci_o),
+
+      .is_ecall_o(is_ecall_o),
+      .is_mret_o(is_mret_o),
+
+      .is_illegal_o(is_illegal_o)
   );
 
   assign rs1_data_forward_o = (rs1_addr_o == wr_addr_ex_o && wr_en_ex_o && wr_addr_ex_o != 5'h0) ? wr_data_ex_o : rs1_data_o;
   assign rs2_data_forward_o = (rs2_addr_o == wr_addr_ex_o && wr_en_ex_o && wr_addr_ex_o != 5'h0) ? wr_data_ex_o : rs2_data_o;
-  assign valid_idex_i = valid_ifid_o & 
-                       (is_addi_o | is_xori_o | is_ori_o | is_andi_o | is_slli_o | is_srli_o | is_srai_o | is_slti_o | is_sltiu_o |
-                       is_add_o | is_sub_o | is_xor_o | is_or_o | is_and_o | is_sll_o | is_srl_o | is_sra_o | is_slt_o | is_sltu_o |
-                       is_beq_o |  is_bne_o | is_blt_o | is_bge_o | is_bltu_o | is_bgeu_o |
-                       is_jal_o | is_jalr_o | 
-                       is_lui_o | is_auipc_o |
-                       is_sw_o | is_sb_o | is_sh_o |
-                       is_lw_o | is_lb_o | is_lbu_o | is_lh_o | is_lhu_o |
-                       is_mul_o | is_mulh_o | is_mulhsu_o | is_mulhu_o |
-                       is_div_o | is_divu_o | is_rem_o | is_remu_o |
-                       is_csrrw_o | is_csrrs_o | is_csrrc_o | is_csrrwi_o | is_csrrsi_o | is_csrrci_o );
+  assign valid_idex_i = valid_ifid_o;
   id_ex id_ex_inst (
       .clk(clk),
       .rst_n(rst_n),
@@ -414,6 +420,11 @@ module pipeline_core (
       .is_csrrsi_idex_i(is_csrrsi_o),
       .is_csrrci_idex_i(is_csrrci_o),
 
+      .is_ecall_idex_i(is_ecall_o),
+      .is_mret_idex_i(is_mret_o),
+
+      .is_illegal_idex_i(is_illegal_o),
+
       .valid_idex_o(valid_idex_o),
       .pc_idex_o(pc_idex_o),
       .rs1_data_idex_o(rs1_data_idex_o),
@@ -486,7 +497,12 @@ module pipeline_core (
       .is_csrrc_idex_o(is_csrrc_idex_o),
       .is_csrrwi_idex_o(is_csrrwi_idex_o),
       .is_csrrsi_idex_o(is_csrrsi_idex_o),
-      .is_csrrci_idex_o(is_csrrci_idex_o)
+      .is_csrrci_idex_o(is_csrrci_idex_o),
+
+      .is_ecall_idex_o(is_ecall_idex_o),
+      .is_mret_idex_o(is_mret_idex_o),
+
+      .is_illegal_idex_o(is_illegal_idex_o)
   );
 
   ex ex_inst (
@@ -555,6 +571,13 @@ module pipeline_core (
       .is_csrrwi_ex_i(is_csrrwi_idex_o),
       .is_csrrsi_ex_i(is_csrrsi_idex_o),
       .is_csrrci_ex_i(is_csrrci_idex_o),
+
+      .is_ecall_ex_i(is_ecall_idex_o),
+      .is_mret_ex_i(is_mret_idex_o),
+
+      .is_illegal_ex_i(is_illegal_idex_o),
+
+      .irq_external_ex_i(irq_external_i),//CPU外部输入的中断
 
       .rs1_data_ex_i(rs1_data_idex_o),
       .rs2_data_ex_i(rs2_data_idex_o),

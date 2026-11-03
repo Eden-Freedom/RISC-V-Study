@@ -100,6 +100,11 @@ module id_ex(
     input wire is_csrrsi_idex_i,
     input wire is_csrrci_idex_i,
 
+    input wire is_ecall_idex_i,
+    input wire is_mret_idex_i,
+
+    input wire is_illegal_idex_i,
+
     output reg valid_idex_o,
     output reg [31:0] pc_idex_o,
     output reg [31:0] rs1_data_idex_o,
@@ -172,7 +177,12 @@ module id_ex(
     output reg is_csrrc_idex_o,
     output reg is_csrrwi_idex_o,
     output reg is_csrrsi_idex_o,
-    output reg is_csrrci_idex_o
+    output reg is_csrrci_idex_o,
+
+    output reg is_ecall_idex_o,
+    output reg is_mret_idex_o,
+
+    output reg is_illegal_idex_o
     );
 
     always @(posedge clk) begin
@@ -252,6 +262,11 @@ module id_ex(
             is_csrrsi_idex_o <= 1'b0;
             is_csrrci_idex_o <= 1'b0;
 
+            is_ecall_idex_o <= 1'b0;
+            is_mret_idex_o <= 1'b0;
+
+            is_illegal_idex_o <= 1'b0;
+
         end 
         else if (flush_idex_i) begin
             valid_idex_o <= 1'b0;
@@ -329,6 +344,11 @@ module id_ex(
             is_csrrsi_idex_o <= 1'b0;
             is_csrrci_idex_o <= 1'b0;
 
+            is_ecall_idex_o <= 1'b0;
+            is_mret_idex_o <= 1'b0;
+
+            is_illegal_idex_o <= 1'b0;
+
         end 
         else if (stall_idex_i) begin
             valid_idex_o <= valid_idex_o;
@@ -404,6 +424,11 @@ module id_ex(
             is_csrrwi_idex_o <= is_csrrwi_idex_o;
             is_csrrsi_idex_o <= is_csrrsi_idex_o;
             is_csrrci_idex_o <= is_csrrci_idex_o;
+
+            is_ecall_idex_o <= is_ecall_idex_o;
+            is_mret_idex_o <= is_mret_idex_o;
+
+            is_illegal_idex_o <= is_illegal_idex_o;
         end
         else begin
             valid_idex_o <= valid_idex_i;
@@ -479,6 +504,11 @@ module id_ex(
             is_csrrwi_idex_o <= is_csrrwi_idex_i;
             is_csrrsi_idex_o <= is_csrrsi_idex_i;
             is_csrrci_idex_o <= is_csrrci_idex_i;
+
+            is_ecall_idex_o <= is_ecall_idex_i;
+            is_mret_idex_o <= is_mret_idex_i;
+
+            is_illegal_idex_o <= is_illegal_idex_i;
         end
     end
 endmodule

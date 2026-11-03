@@ -85,12 +85,33 @@ module addi_decode (
     output reg         is_csrrc_o,
     output reg         is_csrrwi_o,
     output reg         is_csrrsi_o,
-    output reg         is_csrrci_o
+    output reg         is_csrrci_o,
+
+    output reg         is_ecall_o,
+    output reg         is_mret_o,
+
+    output wire        is_illegal_o
 );
 
   wire [6:0] opcode;
   wire [6:0] funct7;
   wire [2:0] funct3;
+
+  wire instr_recognized;
+
+  assign instr_recognized = (is_addi_o | is_xori_o | is_ori_o | is_andi_o | is_slli_o | is_srli_o | is_srai_o | is_slti_o | is_sltiu_o |
+                             is_add_o | is_sub_o | is_xor_o | is_or_o | is_and_o | is_sll_o | is_srl_o | is_sra_o | is_slt_o | is_sltu_o |
+                             is_beq_o |  is_bne_o | is_blt_o | is_bge_o | is_bltu_o | is_bgeu_o |
+                             is_jal_o | is_jalr_o | 
+                             is_lui_o | is_auipc_o |
+                             is_sw_o | is_sb_o | is_sh_o |
+                             is_lw_o | is_lb_o | is_lbu_o | is_lh_o | is_lhu_o |
+                             is_mul_o | is_mulh_o | is_mulhsu_o | is_mulhu_o |
+                             is_div_o | is_divu_o | is_rem_o | is_remu_o |
+                             is_csrrw_o | is_csrrs_o | is_csrrc_o | is_csrrwi_o | is_csrrsi_o | is_csrrci_o |
+                             is_ecall_o | is_mret_o);
+
+  assign is_illegal_o = ~instr_recognized;
 
   assign opcode     = instr_i[6:0];
   assign funct7     = instr_i[31:25];
@@ -160,6 +181,8 @@ module addi_decode (
     is_csrrwi_o = 1'b0;
     is_csrrsi_o = 1'b0;
     is_csrrci_o = 1'b0;
+    is_ecall_o = 1'b0;
+    is_mret_o = 1'b0;
     case (opcode)
       7'b0110011: begin//R型指令
         if (funct3 == 3'b000 && funct7 == 7'b0000000) begin
@@ -310,7 +333,13 @@ module addi_decode (
         end
       end
       7'b1110011:begin//CSR型指令
-        if(funct3 == 3'b001)begin
+        if(instr_i == 32'h00000073)begin
+          is_ecall_o = 1'b1;
+        end
+        else if(instr_i == 32'h30200073)begin
+          is_mret_o = 1'b1;
+        end
+        else if(funct3 == 3'b001)begin
           is_csrrw_o = 1'b1;
         end
         else if(funct3 == 3'b010)begin
@@ -381,6 +410,8 @@ module addi_decode (
         is_csrrwi_o = 1'b0;
         is_csrrsi_o = 1'b0;
         is_csrrci_o = 1'b0;
+        is_ecall_o = 1'b0;
+        is_mret_o = 1'b0;
       end
     endcase
   end
