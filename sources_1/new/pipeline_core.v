@@ -25,212 +25,219 @@ module pipeline_core (
     input wire rst_n,
 
     input wire irq_external_i
-    
+
 );
 
   //fetch_unit
 
-  wire [31:0] pc_o;//fetch_unit 输出，if_id 输入
-  wire [31:0] instr_o;//fetch_unit 输出，if_id 输入
+  wire [31:0] pc_o;  //fetch_unit 输出，if_id 输入
+  wire [31:0] instr_o;  //fetch_unit 输出，if_id 输入
 
   //if_id
-  wire        valid_ifid_o; //if_id输出，id_ex输入
-  wire [31:0]       pc_ifid_o;//if_id输出，id_ex输入   
-  wire [31:0] instr_ifid_o;//if_id输出，decode输入
+  wire        valid_ifid_o;  //if_id输出，id_ex输入
+  wire [31:0] pc_ifid_o;  //if_id输出，id_ex输入   
+  wire [31:0] instr_ifid_o;  //if_id输出，decode输入
 
   //addi_decode
-  wire [31:0]       imm_typei_o;//decode输出，id_ex输入
-  wire [31:0]       imm_typeb_o;//decode输出，id_ex输入
-  wire [31:0]       imm_typej_o;//decode输出，id_ex输入
-  wire [31:0]       imm_typeu_o;//decode输出，id_ex输入
-  wire [31:0]       imm_types_o;//decode输出，id_ex输入
-  wire [31:0]       imm_csr_o;//decode输出，id_ex输入
+  wire [31:0] imm_typei_o;  //decode输出，id_ex输入
+  wire [31:0] imm_typeb_o;  //decode输出，id_ex输入
+  wire [31:0] imm_typej_o;  //decode输出，id_ex输入
+  wire [31:0] imm_typeu_o;  //decode输出，id_ex输入
+  wire [31:0] imm_types_o;  //decode输出，id_ex输入
+  wire [31:0] imm_csr_o;  //decode输出，id_ex输入
 
-  wire    [4:0]    rs1_addr_o;//decode输出，id_ex，regfile输入
-  wire    [4:0]    rs2_addr_o;//decode输出，id_ex，regfile输入
-  wire    [11:0]   csr_addr_o;//decode输出，id_ex输入
-  wire    [4:0]    rd_addr_o;//decode输出，id_ex输入
-  wire        is_addi_o;//decode输出，id_ex输入
-  wire        is_xori_o;//decode输出，id_ex输入
-  wire        is_ori_o;//decode输出，id_ex输入
-  wire        is_andi_o;//decode输出，id_ex输入
-  wire        is_slli_o;//decode输出，id_ex输入
-  wire        is_srli_o;//decode输出，id_ex输入
-  wire        is_srai_o;//decode输出，id_ex输入
-  wire        is_slti_o;//decode输出，id_ex输入
-  wire        is_sltiu_o;//decode输出，id_ex输入
+  wire [ 4:0] rs1_addr_o;  //decode输出，id_ex，regfile输入
+  wire [ 4:0] rs2_addr_o;  //decode输出，id_ex，regfile输入
+  wire [11:0] csr_addr_o;  //decode输出，id_ex输入
+  wire [ 4:0] rd_addr_o;  //decode输出，id_ex输入
+  wire        is_addi_o;  //decode输出，id_ex输入
+  wire        is_xori_o;  //decode输出，id_ex输入
+  wire        is_ori_o;  //decode输出，id_ex输入
+  wire        is_andi_o;  //decode输出，id_ex输入
+  wire        is_slli_o;  //decode输出，id_ex输入
+  wire        is_srli_o;  //decode输出，id_ex输入
+  wire        is_srai_o;  //decode输出，id_ex输入
+  wire        is_slti_o;  //decode输出，id_ex输入
+  wire        is_sltiu_o;  //decode输出，id_ex输入
 
-  wire        is_add_o;//decode输出，id_ex输入
-  wire        is_sub_o;//decode输出，id_ex输入
-  wire        is_xor_o;//decode输出，id_ex输入
-  wire        is_or_o;//decode输出，id_ex输入
-  wire        is_and_o;//decode输出，id_ex输入
-  wire        is_sll_o;//decode输出，id_ex输入
-  wire        is_srl_o;//decode输出，id_ex输入
-  wire        is_sra_o;//decode输出，id_ex输入
-  wire        is_slt_o;//decode输出，id_ex输入
-  wire        is_sltu_o;//decode输出，id_ex输入
+  wire        is_add_o;  //decode输出，id_ex输入
+  wire        is_sub_o;  //decode输出，id_ex输入
+  wire        is_xor_o;  //decode输出，id_ex输入
+  wire        is_or_o;  //decode输出，id_ex输入
+  wire        is_and_o;  //decode输出，id_ex输入
+  wire        is_sll_o;  //decode输出，id_ex输入
+  wire        is_srl_o;  //decode输出，id_ex输入
+  wire        is_sra_o;  //decode输出，id_ex输入
+  wire        is_slt_o;  //decode输出，id_ex输入
+  wire        is_sltu_o;  //decode输出，id_ex输入
 
-  wire        is_beq_o;//decode输出，id_ex输入
-  wire        is_bne_o;//decode输出，id_ex输入
-  wire        is_blt_o;//decode输出，id_ex输入
-  wire        is_bge_o;//decode输出，id_ex输入
-  wire        is_bltu_o;//decode输出，id_ex输入
-  wire        is_bgeu_o;//decode输出，id_ex输入
+  wire        is_beq_o;  //decode输出，id_ex输入
+  wire        is_bne_o;  //decode输出，id_ex输入
+  wire        is_blt_o;  //decode输出，id_ex输入
+  wire        is_bge_o;  //decode输出，id_ex输入
+  wire        is_bltu_o;  //decode输出，id_ex输入
+  wire        is_bgeu_o;  //decode输出，id_ex输入
 
-  wire        is_jal_o;//decode输出，id_ex输入
-  wire        is_jalr_o;//decode输出，id_ex输入
+  wire        is_jal_o;  //decode输出，id_ex输入
+  wire        is_jalr_o;  //decode输出，id_ex输入
 
-  wire        is_lui_o;//decode输出，id_ex输入
-  wire        is_auipc_o;//decode输出，id_ex输入
+  wire        is_lui_o;  //decode输出，id_ex输入
+  wire        is_auipc_o;  //decode输出，id_ex输入
 
-  wire        is_sw_o;//decode输出，id_ex输入
-  wire        is_sb_o;//decode输出，id_ex输入
-  wire        is_sh_o;//decode输出，id_ex输入
+  wire        is_sw_o;  //decode输出，id_ex输入
+  wire        is_sb_o;  //decode输出，id_ex输入
+  wire        is_sh_o;  //decode输出，id_ex输入
 
-  wire        is_lw_o;//decode输出，id_ex输入
-  wire        is_lb_o;//decode输出，id_ex输入
-  wire        is_lbu_o;//decode输出，id_ex输入
-  wire        is_lh_o;//decode输出，id_ex输入
-  wire        is_lhu_o;//decode输出，id_ex输入
+  wire        is_lw_o;  //decode输出，id_ex输入
+  wire        is_lb_o;  //decode输出，id_ex输入
+  wire        is_lbu_o;  //decode输出，id_ex输入
+  wire        is_lh_o;  //decode输出，id_ex输入
+  wire        is_lhu_o;  //decode输出，id_ex输入
 
-  wire        is_mul_o;//decode输出，id_ex输入
-  wire        is_mulh_o;//decode输出，id_ex输入
-  wire        is_mulhsu_o;//decode输出，id_ex输入
-  wire        is_mulhu_o;//decode输出，id_ex输入
+  wire        is_mul_o;  //decode输出，id_ex输入
+  wire        is_mulh_o;  //decode输出，id_ex输入
+  wire        is_mulhsu_o;  //decode输出，id_ex输入
+  wire        is_mulhu_o;  //decode输出，id_ex输入
 
-  wire        is_div_o;//decode输出，id_ex输入
-  wire        is_divu_o;//decode输出，id_ex输入
-  wire        is_rem_o;//decode输出，id_ex输入
-  wire        is_remu_o;//decode输出，id_ex输入
+  wire        is_div_o;  //decode输出，id_ex输入
+  wire        is_divu_o;  //decode输出，id_ex输入
+  wire        is_rem_o;  //decode输出，id_ex输入
+  wire        is_remu_o;  //decode输出，id_ex输入
 
-  wire        is_csrrw_o;//decode输出，id_ex输入
-  wire        is_csrrs_o;//decode输出，id_ex输入
-  wire        is_csrrc_o;//decode输出，id_ex输入
-  wire        is_csrrwi_o;//decode输出，id_ex输入
-  wire        is_csrrsi_o;//decode输出，id_ex输入
-  wire        is_csrrci_o;//decode输出，id_ex输入
+  wire        is_csrrw_o;  //decode输出，id_ex输入
+  wire        is_csrrs_o;  //decode输出，id_ex输入
+  wire        is_csrrc_o;  //decode输出，id_ex输入
+  wire        is_csrrwi_o;  //decode输出，id_ex输入
+  wire        is_csrrsi_o;  //decode输出，id_ex输入
+  wire        is_csrrci_o;  //decode输出，id_ex输入
 
-  wire        is_ecall_o;//decode输出，id_ex输入
-  wire        is_mret_o;//decode输出，id_ex输入
+  wire        is_ecall_o;  //decode输出，id_ex输入
+  wire        is_mret_o;  //decode输出，id_ex输入
 
-  wire        is_illegal_o;//decode输出，id_ex输入
-  
+  wire        is_illegal_o;  //decode输出，id_ex输入
+
 
   //id_ex
-  wire        valid_idex_i;//id_ex输入，if_id，decode组合逻辑输出
-  wire        valid_idex_o;//id_ex输出，ex输入
-  wire [31:0] pc_idex_o;//id_ex输出
-  wire [31:0] rs1_data_idex_o;//id_ex输出，ex输入
-  wire [31:0] rs2_data_idex_o;//id_ex输出，ex输入
-  wire [31:0] immi_data_idex_o;//id_ex输出，ex输入
-  wire [31:0] immb_data_idex_o;//id_ex输出，ex输入
-  wire [31:0] immj_data_idex_o;//id_ex输出，ex输入
-  wire [31:0] immu_data_idex_o;//id_ex输出，ex输入
-  wire [31:0] imms_data_idex_o;//id_ex输出，ex输入
-  wire [31:0] imm_csr_idex_o;//id_ex输出，ex输入
-  wire [11:0] csr_addr_idex_o;//id_ex输出，ex输入
-  wire [4:0] rd_addr_idex_o;//id_ex输出，ex输入
+  wire        valid_idex_i;  //id_ex输入，if_id，decode组合逻辑输出
+  wire        valid_idex_o;  //id_ex输出，ex输入
+  wire [31:0] pc_idex_o;  //id_ex输出
+  wire [31:0] rs1_data_idex_o;  //id_ex输出，ex输入
+  wire [31:0] rs2_data_idex_o;  //id_ex输出，ex输入
+  wire [31:0] immi_data_idex_o;  //id_ex输出，ex输入
+  wire [31:0] immb_data_idex_o;  //id_ex输出，ex输入
+  wire [31:0] immj_data_idex_o;  //id_ex输出，ex输入
+  wire [31:0] immu_data_idex_o;  //id_ex输出，ex输入
+  wire [31:0] imms_data_idex_o;  //id_ex输出，ex输入
+  wire [31:0] imm_csr_idex_o;  //id_ex输出，ex输入
+  wire [11:0] csr_addr_idex_o;  //id_ex输出，ex输入
+  wire [ 4:0] rd_addr_idex_o;  //id_ex输出，ex输入
 
-  
-  wire        is_addi_idex_o;//id_ex输出 ex输入
-  wire        is_xori_idex_o;//id_ex输出 ex输入
-  wire        is_ori_idex_o;//id_ex输出 ex输入
-  wire        is_andi_idex_o;//id_ex输出 ex输入
-  wire        is_slli_idex_o;//id_ex输出 ex输入
-  wire        is_srli_idex_o;//id_ex输出 ex输入
-  wire        is_srai_idex_o;//id_ex输出 ex输入
-  wire        is_slti_idex_o;//id_ex输出 ex输入
-  wire        is_sltiu_idex_o;//id_ex输出 ex输入
 
-  wire        is_sub_idex_o;//id_ex输出 ex输入
-  wire        is_add_idex_o;//id_ex输出 ex输入
-  wire        is_xor_idex_o;//id_ex输出 ex输入
-  wire        is_or_idex_o;//id_ex输出 ex输入
-  wire        is_and_idex_o;//id_ex输出 ex输入
-  wire        is_sll_idex_o;//id_ex输出 ex输入
-  wire        is_srl_idex_o;//id_ex输出 ex输入
-  wire        is_sra_idex_o;//id_ex输出 ex输入
-  wire        is_slt_idex_o;//id_ex输出 ex输入
-  wire        is_sltu_idex_o;//id_ex输出 ex输入
+  wire        is_addi_idex_o;  //id_ex输出 ex输入
+  wire        is_xori_idex_o;  //id_ex输出 ex输入
+  wire        is_ori_idex_o;  //id_ex输出 ex输入
+  wire        is_andi_idex_o;  //id_ex输出 ex输入
+  wire        is_slli_idex_o;  //id_ex输出 ex输入
+  wire        is_srli_idex_o;  //id_ex输出 ex输入
+  wire        is_srai_idex_o;  //id_ex输出 ex输入
+  wire        is_slti_idex_o;  //id_ex输出 ex输入
+  wire        is_sltiu_idex_o;  //id_ex输出 ex输入
 
-  wire        is_beq_idex_o;//id_ex输出 ex输入
-  wire        is_bne_idex_o;//id_ex输出 ex输入
-  wire        is_blt_idex_o;//id_ex输出 ex输入
-  wire        is_bge_idex_o;//id_ex输出 ex输入
-  wire        is_bltu_idex_o;//id_ex输出 ex输入
-  wire        is_bgeu_idex_o;//id_ex输出 ex输入
+  wire        is_sub_idex_o;  //id_ex输出 ex输入
+  wire        is_add_idex_o;  //id_ex输出 ex输入
+  wire        is_xor_idex_o;  //id_ex输出 ex输入
+  wire        is_or_idex_o;  //id_ex输出 ex输入
+  wire        is_and_idex_o;  //id_ex输出 ex输入
+  wire        is_sll_idex_o;  //id_ex输出 ex输入
+  wire        is_srl_idex_o;  //id_ex输出 ex输入
+  wire        is_sra_idex_o;  //id_ex输出 ex输入
+  wire        is_slt_idex_o;  //id_ex输出 ex输入
+  wire        is_sltu_idex_o;  //id_ex输出 ex输入
 
-  wire        is_jal_idex_o;//id_ex输出 ex输入
-  wire        is_jalr_idex_o;//id_ex输出 ex输入
+  wire        is_beq_idex_o;  //id_ex输出 ex输入
+  wire        is_bne_idex_o;  //id_ex输出 ex输入
+  wire        is_blt_idex_o;  //id_ex输出 ex输入
+  wire        is_bge_idex_o;  //id_ex输出 ex输入
+  wire        is_bltu_idex_o;  //id_ex输出 ex输入
+  wire        is_bgeu_idex_o;  //id_ex输出 ex输入
 
-  wire        is_lui_idex_o;//id_ex输出 ex输入
-  wire        is_auipc_idex_o;//id_ex输出 ex输入
+  wire        is_jal_idex_o;  //id_ex输出 ex输入
+  wire        is_jalr_idex_o;  //id_ex输出 ex输入
 
-  wire        is_sw_idex_o;//id_ex输出 ex输入
-  wire        is_sb_idex_o;//id_ex输出 ex输入
-  wire        is_sh_idex_o;//id_ex输出 ex输入
+  wire        is_lui_idex_o;  //id_ex输出 ex输入
+  wire        is_auipc_idex_o;  //id_ex输出 ex输入
 
-  wire        is_lw_idex_o;//id_ex输出 ex输入
-  wire        is_lb_idex_o;//id_ex输出 ex输入
-  wire        is_lbu_idex_o;//id_ex输出 ex输入
-  wire        is_lh_idex_o;//id_ex输出 ex输入
-  wire        is_lhu_idex_o;//id_ex输出 ex输入
+  wire        is_sw_idex_o;  //id_ex输出 ex输入
+  wire        is_sb_idex_o;  //id_ex输出 ex输入
+  wire        is_sh_idex_o;  //id_ex输出 ex输入
 
-  wire        is_mul_idex_o;//id_ex输出 ex输入
-  wire        is_mulh_idex_o;//id_ex输出 ex输入
-  wire        is_mulhsu_idex_o;//id_ex输出 ex输入
-  wire        is_mulhu_idex_o;//id_ex输出 ex输入
+  wire        is_lw_idex_o;  //id_ex输出 ex输入
+  wire        is_lb_idex_o;  //id_ex输出 ex输入
+  wire        is_lbu_idex_o;  //id_ex输出 ex输入
+  wire        is_lh_idex_o;  //id_ex输出 ex输入
+  wire        is_lhu_idex_o;  //id_ex输出 ex输入
 
-  wire        is_div_idex_o;//id_ex输出 ex输入
-  wire        is_divu_idex_o;//id_ex输出 ex输入
-  wire        is_rem_idex_o;//id_ex输出 ex输入
-  wire        is_remu_idex_o;//id_ex输出 ex输入
+  wire        is_mul_idex_o;  //id_ex输出 ex输入
+  wire        is_mulh_idex_o;  //id_ex输出 ex输入
+  wire        is_mulhsu_idex_o;  //id_ex输出 ex输入
+  wire        is_mulhu_idex_o;  //id_ex输出 ex输入
 
-  wire        is_csrrw_idex_o;//id_ex输出 ex输入
-  wire        is_csrrs_idex_o;//id_ex输出 ex输入
-  wire        is_csrrc_idex_o;//id_ex输出 ex输入
-  wire        is_csrrwi_idex_o;//id_ex输出 ex输入
-  wire        is_csrrsi_idex_o;//id_ex输出 ex输入
-  wire        is_csrrci_idex_o;//id_ex输出 ex输入
+  wire        is_div_idex_o;  //id_ex输出 ex输入
+  wire        is_divu_idex_o;  //id_ex输出 ex输入
+  wire        is_rem_idex_o;  //id_ex输出 ex输入
+  wire        is_remu_idex_o;  //id_ex输出 ex输入
 
-  wire        is_ecall_idex_o;//id_ex输出 ex输入
-  wire        is_mret_idex_o;//id_ex输出 ex输入
+  wire        is_csrrw_idex_o;  //id_ex输出 ex输入
+  wire        is_csrrs_idex_o;  //id_ex输出 ex输入
+  wire        is_csrrc_idex_o;  //id_ex输出 ex输入
+  wire        is_csrrwi_idex_o;  //id_ex输出 ex输入
+  wire        is_csrrsi_idex_o;  //id_ex输出 ex输入
+  wire        is_csrrci_idex_o;  //id_ex输出 ex输入
 
-  wire        is_illegal_idex_o;//id_ex输出 ex输入
+  wire        is_ecall_idex_o;  //id_ex输出 ex输入
+  wire        is_mret_idex_o;  //id_ex输出 ex输入
+
+  wire        is_illegal_idex_o;  //id_ex输出 ex输入
 
   //ex
-  wire wr_en_ex_o;//ex输出，regfile输入
-  wire [4:0] wr_addr_ex_o;//ex输出，regfile输入
-  wire [31:0] wr_data_ex_o;//ex输出，regfile输入
-  wire        pc_brench_flag_ex_o;//ex输出，fetch_unit输入
-  wire [31:0] pc_brench_addr_ex_o;//ex输出，fetch_unit输入
-  wire        clear_valid_ex_o;//ex输出，if_id输入,id_ex输入
-  wire stall_ex_o; //ex输出，fetch_unit输入，if_id输入,id_ex输入
+  wire        wr_en_ex_o;  //ex输出，regfile输入
+  wire [ 4:0] wr_addr_ex_o;  //ex输出，regfile输入
+  wire [31:0] wr_data_ex_o;  //ex输出，regfile输入
+  wire        pc_brench_flag_ex_o;  //ex输出，fetch_unit输入
+  wire [31:0] pc_brench_addr_ex_o;  //ex输出，fetch_unit输入
+  wire        clear_valid_ex_o;  //ex输出，if_id输入,id_ex输入
+  wire        stall_ex_o;  //ex输出，fetch_unit输入，if_id输入,id_ex输入
 
 
-  wire ram_wr_en_ex_o;//ex输出，ram输入
-  wire [31:0] ram_wr_addr_ex_o;//ex输出，ram输入
-  wire [31:0] ram_wr_data_ex_o;//ex输出，ram输入
-  wire [3:0] ram_wr_sel_ex_o;//ex输出，ram输入
-  wire ram_rd_en_ex_o;//ex输出，ram输入
-  wire [31:0] ram_rd_addr_ex_o;//ex输出，ram输入
+  wire        ram_wr_en_ex_o;  //ex输出，ram输入
+  wire [31:0] ram_wr_addr_ex_o;  //ex输出，ram输入
+  wire [31:0] ram_wr_data_ex_o;  //ex输出，ram输入
+  wire [ 3:0] ram_wr_sel_ex_o;  //ex输出，ram输入
+  wire        ram_rd_en_ex_o;  //ex输出，ram输入
+  wire [31:0] ram_rd_addr_ex_o;  //ex输出，ram输入
+
+  wire        data_req;  //外部数据请求读写信号
+  wire        data_we;  //外部数据读写使能信号
+  wire [31:0] data_addr;  //外部数据地址信号
 
 
   //regfile
-  wire [31:0] rs1_data_o; //regfile输出，id_ex输入
-  wire [31:0] rs2_data_o; //regfile输出，id_ex输入
+  wire [31:0] rs1_data_o;  //regfile输出，id_ex输入
+  wire [31:0] rs2_data_o;  //regfile输出，id_ex输入
 
   //ram
-  wire [31:0] ram_rd_data_o;//ram输出，ex输入
-  
+  wire [31:0] ram_rd_data_o;  //ram输出，ex输入
+
+  wire        ram_ready_o;  //ram输出，ex输入
+
+
 
   //旁路，解决数据冒险
-  wire [31:0] rs1_data_forward_o;//id_ex输入
-  wire [31:0] rs2_data_forward_o;//id_ex输入
+  wire [31:0] rs1_data_forward_o;  //id_ex输入
+  wire [31:0] rs2_data_forward_o;  //id_ex输入
 
- 
-  
+
+
 
   fetch_unit fetch_unit_inst (
       .clk(clk),
@@ -270,70 +277,70 @@ module pipeline_core (
       .rs1_addr_o(rs1_addr_o),
       .rs2_addr_o(rs2_addr_o),
       .csr_addr_o(csr_addr_o),
-      .rd_addr_o(rd_addr_o),
+      .rd_addr_o (rd_addr_o),
 
-      .is_addi_o(is_addi_o),
-      .is_xori_o(is_xori_o),
-      .is_ori_o(is_ori_o),
-      .is_andi_o(is_andi_o),
-      .is_slli_o(is_slli_o),
-      .is_srli_o(is_srli_o),
-      .is_srai_o(is_srai_o),
-      .is_slti_o(is_slti_o),
+      .is_addi_o (is_addi_o),
+      .is_xori_o (is_xori_o),
+      .is_ori_o  (is_ori_o),
+      .is_andi_o (is_andi_o),
+      .is_slli_o (is_slli_o),
+      .is_srli_o (is_srli_o),
+      .is_srai_o (is_srai_o),
+      .is_slti_o (is_slti_o),
       .is_sltiu_o(is_sltiu_o),
 
-      .is_add_o(is_add_o),
-      .is_sub_o(is_sub_o),
-      .is_xor_o(is_xor_o),
-      .is_or_o(is_or_o),
-      .is_and_o(is_and_o),
-      .is_sll_o(is_sll_o),
-      .is_srl_o(is_srl_o),
-      .is_sra_o(is_sra_o),
-      .is_slt_o(is_slt_o),
+      .is_add_o (is_add_o),
+      .is_sub_o (is_sub_o),
+      .is_xor_o (is_xor_o),
+      .is_or_o  (is_or_o),
+      .is_and_o (is_and_o),
+      .is_sll_o (is_sll_o),
+      .is_srl_o (is_srl_o),
+      .is_sra_o (is_sra_o),
+      .is_slt_o (is_slt_o),
       .is_sltu_o(is_sltu_o),
 
-      .is_lui_o(is_lui_o),
+      .is_lui_o  (is_lui_o),
       .is_auipc_o(is_auipc_o),
 
-      .is_beq_o(is_beq_o),
-      .is_bne_o(is_bne_o),
-      .is_blt_o(is_blt_o),
-      .is_bge_o(is_bge_o),
+      .is_beq_o (is_beq_o),
+      .is_bne_o (is_bne_o),
+      .is_blt_o (is_blt_o),
+      .is_bge_o (is_bge_o),
       .is_bltu_o(is_bltu_o),
       .is_bgeu_o(is_bgeu_o),
 
-      .is_jal_o(is_jal_o),
+      .is_jal_o (is_jal_o),
       .is_jalr_o(is_jalr_o),
 
-      .is_sw_o(is_sw_o),
-      .is_lw_o(is_lw_o),
-      .is_lb_o(is_lb_o),
+      .is_sw_o (is_sw_o),
+      .is_lw_o (is_lw_o),
+      .is_lb_o (is_lb_o),
       .is_lbu_o(is_lbu_o),
-      .is_lh_o(is_lh_o),
+      .is_lh_o (is_lh_o),
       .is_lhu_o(is_lhu_o),
-      .is_sb_o(is_sb_o),
-      .is_sh_o(is_sh_o),
+      .is_sb_o (is_sb_o),
+      .is_sh_o (is_sh_o),
 
       .is_mul_o(is_mul_o),
       .is_mulh_o(is_mulh_o),
       .is_mulhsu_o(is_mulhsu_o),
       .is_mulhu_o(is_mulhu_o),
 
-      .is_div_o(is_div_o),
+      .is_div_o (is_div_o),
       .is_divu_o(is_divu_o),
-      .is_rem_o(is_rem_o),
+      .is_rem_o (is_rem_o),
       .is_remu_o(is_remu_o),
 
-      .is_csrrw_o(is_csrrw_o),
-      .is_csrrs_o(is_csrrs_o),
-      .is_csrrc_o(is_csrrc_o),
+      .is_csrrw_o (is_csrrw_o),
+      .is_csrrs_o (is_csrrs_o),
+      .is_csrrc_o (is_csrrc_o),
       .is_csrrwi_o(is_csrrwi_o),
       .is_csrrsi_o(is_csrrsi_o),
       .is_csrrci_o(is_csrrci_o),
 
       .is_ecall_o(is_ecall_o),
-      .is_mret_o(is_mret_o),
+      .is_mret_o (is_mret_o),
 
       .is_illegal_o(is_illegal_o)
   );
@@ -359,48 +366,48 @@ module pipeline_core (
       .csr_addr_idex_i(csr_addr_o),
       .rd_addr_idex_i(rd_addr_o),
 
-      .is_addi_idex_i(is_addi_o),
-      .is_xori_idex_i(is_xori_o),
-      .is_ori_idex_i(is_ori_o),
-      .is_andi_idex_i(is_andi_o),
-      .is_slli_idex_i(is_slli_o),
-      .is_srli_idex_i(is_srli_o),
-      .is_srai_idex_i(is_srai_o),
-      .is_slti_idex_i(is_slti_o),
+      .is_addi_idex_i (is_addi_o),
+      .is_xori_idex_i (is_xori_o),
+      .is_ori_idex_i  (is_ori_o),
+      .is_andi_idex_i (is_andi_o),
+      .is_slli_idex_i (is_slli_o),
+      .is_srli_idex_i (is_srli_o),
+      .is_srai_idex_i (is_srai_o),
+      .is_slti_idex_i (is_slti_o),
       .is_sltiu_idex_i(is_sltiu_o),
 
-      .is_sub_idex_i(is_sub_o),
-      .is_add_idex_i(is_add_o),
-      .is_xor_idex_i(is_xor_o),
-      .is_or_idex_i(is_or_o),
-      .is_and_idex_i(is_and_o),
-      .is_sll_idex_i(is_sll_o),
-      .is_srl_idex_i(is_srl_o),
-      .is_sra_idex_i(is_sra_o),
-      .is_slt_idex_i(is_slt_o),
+      .is_sub_idex_i (is_sub_o),
+      .is_add_idex_i (is_add_o),
+      .is_xor_idex_i (is_xor_o),
+      .is_or_idex_i  (is_or_o),
+      .is_and_idex_i (is_and_o),
+      .is_sll_idex_i (is_sll_o),
+      .is_srl_idex_i (is_srl_o),
+      .is_sra_idex_i (is_sra_o),
+      .is_slt_idex_i (is_slt_o),
       .is_sltu_idex_i(is_sltu_o),
 
-      .is_beq_idex_i(is_beq_o),
-      .is_bne_idex_i(is_bne_o),
-      .is_bge_idex_i(is_bge_o),
-      .is_blt_idex_i(is_blt_o),
+      .is_beq_idex_i (is_beq_o),
+      .is_bne_idex_i (is_bne_o),
+      .is_bge_idex_i (is_bge_o),
+      .is_blt_idex_i (is_blt_o),
       .is_bltu_idex_i(is_bltu_o),
       .is_bgeu_idex_i(is_bgeu_o),
 
-      .is_jal_idex_i(is_jal_o),
+      .is_jal_idex_i (is_jal_o),
       .is_jalr_idex_i(is_jalr_o),
 
-      .is_lui_idex_i(is_lui_o),
+      .is_lui_idex_i  (is_lui_o),
       .is_auipc_idex_i(is_auipc_o),
 
       .is_sw_idex_i(is_sw_o),
       .is_sb_idex_i(is_sb_o),
       .is_sh_idex_i(is_sh_o),
 
-      .is_lw_idex_i(is_lw_o),
-      .is_lb_idex_i(is_lb_o),
+      .is_lw_idex_i (is_lw_o),
+      .is_lb_idex_i (is_lb_o),
       .is_lbu_idex_i(is_lbu_o),
-      .is_lh_idex_i(is_lh_o),
+      .is_lh_idex_i (is_lh_o),
       .is_lhu_idex_i(is_lhu_o),
 
       .is_mul_idex_i(is_mul_o),
@@ -408,20 +415,20 @@ module pipeline_core (
       .is_mulhsu_idex_i(is_mulhsu_o),
       .is_mulhu_idex_i(is_mulhu_o),
 
-      .is_div_idex_i(is_div_o),
+      .is_div_idex_i (is_div_o),
       .is_divu_idex_i(is_divu_o),
-      .is_rem_idex_i(is_rem_o),
+      .is_rem_idex_i (is_rem_o),
       .is_remu_idex_i(is_remu_o),
 
-      .is_csrrw_idex_i(is_csrrw_o),
-      .is_csrrs_idex_i(is_csrrs_o),
-      .is_csrrc_idex_i(is_csrrc_o),
+      .is_csrrw_idex_i (is_csrrw_o),
+      .is_csrrs_idex_i (is_csrrs_o),
+      .is_csrrc_idex_i (is_csrrc_o),
       .is_csrrwi_idex_i(is_csrrwi_o),
       .is_csrrsi_idex_i(is_csrrsi_o),
       .is_csrrci_idex_i(is_csrrci_o),
 
       .is_ecall_idex_i(is_ecall_o),
-      .is_mret_idex_i(is_mret_o),
+      .is_mret_idex_i (is_mret_o),
 
       .is_illegal_idex_i(is_illegal_o),
 
@@ -438,48 +445,48 @@ module pipeline_core (
       .csr_addr_idex_o(csr_addr_idex_o),
       .rd_addr_idex_o(rd_addr_idex_o),
 
-      .is_addi_idex_o(is_addi_idex_o),
-      .is_xori_idex_o(is_xori_idex_o),
-      .is_ori_idex_o(is_ori_idex_o),
-      .is_andi_idex_o(is_andi_idex_o),
-      .is_slli_idex_o(is_slli_idex_o),
-      .is_srli_idex_o(is_srli_idex_o),
-      .is_srai_idex_o(is_srai_idex_o),
-      .is_slti_idex_o(is_slti_idex_o),
+      .is_addi_idex_o (is_addi_idex_o),
+      .is_xori_idex_o (is_xori_idex_o),
+      .is_ori_idex_o  (is_ori_idex_o),
+      .is_andi_idex_o (is_andi_idex_o),
+      .is_slli_idex_o (is_slli_idex_o),
+      .is_srli_idex_o (is_srli_idex_o),
+      .is_srai_idex_o (is_srai_idex_o),
+      .is_slti_idex_o (is_slti_idex_o),
       .is_sltiu_idex_o(is_sltiu_idex_o),
 
-      .is_sub_idex_o(is_sub_idex_o),
-      .is_add_idex_o(is_add_idex_o),
-      .is_xor_idex_o(is_xor_idex_o),
-      .is_or_idex_o(is_or_idex_o),
-      .is_and_idex_o(is_and_idex_o),
-      .is_sll_idex_o(is_sll_idex_o),
-      .is_srl_idex_o(is_srl_idex_o),
-      .is_sra_idex_o(is_sra_idex_o),
-      .is_slt_idex_o(is_slt_idex_o),
+      .is_sub_idex_o (is_sub_idex_o),
+      .is_add_idex_o (is_add_idex_o),
+      .is_xor_idex_o (is_xor_idex_o),
+      .is_or_idex_o  (is_or_idex_o),
+      .is_and_idex_o (is_and_idex_o),
+      .is_sll_idex_o (is_sll_idex_o),
+      .is_srl_idex_o (is_srl_idex_o),
+      .is_sra_idex_o (is_sra_idex_o),
+      .is_slt_idex_o (is_slt_idex_o),
       .is_sltu_idex_o(is_sltu_idex_o),
 
-      .is_beq_idex_o(is_beq_idex_o),
-      .is_bne_idex_o(is_bne_idex_o),
-      .is_blt_idex_o(is_blt_idex_o),
-      .is_bge_idex_o(is_bge_idex_o),
+      .is_beq_idex_o (is_beq_idex_o),
+      .is_bne_idex_o (is_bne_idex_o),
+      .is_blt_idex_o (is_blt_idex_o),
+      .is_bge_idex_o (is_bge_idex_o),
       .is_bltu_idex_o(is_bltu_idex_o),
       .is_bgeu_idex_o(is_bgeu_idex_o),
 
-      .is_jal_idex_o(is_jal_idex_o),
+      .is_jal_idex_o (is_jal_idex_o),
       .is_jalr_idex_o(is_jalr_idex_o),
 
-      .is_lui_idex_o(is_lui_idex_o),
+      .is_lui_idex_o  (is_lui_idex_o),
       .is_auipc_idex_o(is_auipc_idex_o),
 
       .is_sw_idex_o(is_sw_idex_o),
       .is_sb_idex_o(is_sb_idex_o),
       .is_sh_idex_o(is_sh_idex_o),
-      
-      .is_lw_idex_o(is_lw_idex_o),
-      .is_lb_idex_o(is_lb_idex_o),
+
+      .is_lw_idex_o (is_lw_idex_o),
+      .is_lb_idex_o (is_lb_idex_o),
       .is_lbu_idex_o(is_lbu_idex_o),
-      .is_lh_idex_o(is_lh_idex_o),
+      .is_lh_idex_o (is_lh_idex_o),
       .is_lhu_idex_o(is_lhu_idex_o),
 
       .is_mul_idex_o(is_mul_idex_o),
@@ -487,20 +494,20 @@ module pipeline_core (
       .is_mulhsu_idex_o(is_mulhsu_idex_o),
       .is_mulhu_idex_o(is_mulhu_idex_o),
 
-      .is_div_idex_o(is_div_idex_o),
+      .is_div_idex_o (is_div_idex_o),
       .is_divu_idex_o(is_divu_idex_o),
-      .is_rem_idex_o(is_rem_idex_o),
+      .is_rem_idex_o (is_rem_idex_o),
       .is_remu_idex_o(is_remu_idex_o),
 
-      .is_csrrw_idex_o(is_csrrw_idex_o),
-      .is_csrrs_idex_o(is_csrrs_idex_o),
-      .is_csrrc_idex_o(is_csrrc_idex_o),
+      .is_csrrw_idex_o (is_csrrw_idex_o),
+      .is_csrrs_idex_o (is_csrrs_idex_o),
+      .is_csrrc_idex_o (is_csrrc_idex_o),
       .is_csrrwi_idex_o(is_csrrwi_idex_o),
       .is_csrrsi_idex_o(is_csrrsi_idex_o),
       .is_csrrci_idex_o(is_csrrci_idex_o),
 
       .is_ecall_idex_o(is_ecall_idex_o),
-      .is_mret_idex_o(is_mret_idex_o),
+      .is_mret_idex_o (is_mret_idex_o),
 
       .is_illegal_idex_o(is_illegal_idex_o)
   );
@@ -511,48 +518,48 @@ module pipeline_core (
       .valid_ex_i(valid_idex_o),
       .pc_ex_i(pc_idex_o),
 
-      .is_addi_ex_i(is_addi_idex_o),
-      .is_xori_ex_i(is_xori_idex_o),
-      .is_ori_ex_i(is_ori_idex_o),
-      .is_andi_ex_i(is_andi_idex_o),
-      .is_slli_ex_i(is_slli_idex_o),
-      .is_srli_ex_i(is_srli_idex_o),
-      .is_srai_ex_i(is_srai_idex_o),
-      .is_slti_ex_i(is_slti_idex_o),
+      .is_addi_ex_i (is_addi_idex_o),
+      .is_xori_ex_i (is_xori_idex_o),
+      .is_ori_ex_i  (is_ori_idex_o),
+      .is_andi_ex_i (is_andi_idex_o),
+      .is_slli_ex_i (is_slli_idex_o),
+      .is_srli_ex_i (is_srli_idex_o),
+      .is_srai_ex_i (is_srai_idex_o),
+      .is_slti_ex_i (is_slti_idex_o),
       .is_sltiu_ex_i(is_sltiu_idex_o),
 
-      .is_add_ex_i(is_add_idex_o),
-      .is_sub_ex_i(is_sub_idex_o),
-      .is_xor_ex_i(is_xor_idex_o),
-      .is_or_ex_i(is_or_idex_o),
-      .is_and_ex_i(is_and_idex_o),
-      .is_sll_ex_i(is_sll_idex_o),
-      .is_srl_ex_i(is_srl_idex_o),
-      .is_sra_ex_i(is_sra_idex_o),
-      .is_slt_ex_i(is_slt_idex_o),
+      .is_add_ex_i (is_add_idex_o),
+      .is_sub_ex_i (is_sub_idex_o),
+      .is_xor_ex_i (is_xor_idex_o),
+      .is_or_ex_i  (is_or_idex_o),
+      .is_and_ex_i (is_and_idex_o),
+      .is_sll_ex_i (is_sll_idex_o),
+      .is_srl_ex_i (is_srl_idex_o),
+      .is_sra_ex_i (is_sra_idex_o),
+      .is_slt_ex_i (is_slt_idex_o),
       .is_sltu_ex_i(is_sltu_idex_o),
 
-      .is_beq_ex_i(is_beq_idex_o),
-      .is_bne_ex_i(is_bne_idex_o),
-      .is_blt_ex_i(is_blt_idex_o),
-      .is_bge_ex_i(is_bge_idex_o),
+      .is_beq_ex_i (is_beq_idex_o),
+      .is_bne_ex_i (is_bne_idex_o),
+      .is_blt_ex_i (is_blt_idex_o),
+      .is_bge_ex_i (is_bge_idex_o),
       .is_bltu_ex_i(is_bltu_idex_o),
       .is_bgeu_ex_i(is_bgeu_idex_o),
 
-      .is_jal_ex_i(is_jal_idex_o),
+      .is_jal_ex_i (is_jal_idex_o),
       .is_jalr_ex_i(is_jalr_idex_o),
 
-      .is_lui_ex_i(is_lui_idex_o),
+      .is_lui_ex_i  (is_lui_idex_o),
       .is_auipc_ex_i(is_auipc_idex_o),
 
       .is_sw_ex_i(is_sw_idex_o),
       .is_sb_ex_i(is_sb_idex_o),
       .is_sh_ex_i(is_sh_idex_o),
-      
-      .is_lw_ex_i(is_lw_idex_o),
-      .is_lb_ex_i(is_lb_idex_o),
+
+      .is_lw_ex_i (is_lw_idex_o),
+      .is_lb_ex_i (is_lb_idex_o),
       .is_lbu_ex_i(is_lbu_idex_o),
-      .is_lh_ex_i(is_lh_idex_o),
+      .is_lh_ex_i (is_lh_idex_o),
       .is_lhu_ex_i(is_lhu_idex_o),
 
       .is_mul_ex_i(is_mul_idex_o),
@@ -560,24 +567,26 @@ module pipeline_core (
       .is_mulhsu_ex_i(is_mulhsu_idex_o),
       .is_mulhu_ex_i(is_mulhu_idex_o),
 
-      .is_div_ex_i(is_div_idex_o),
+      .is_div_ex_i (is_div_idex_o),
       .is_divu_ex_i(is_divu_idex_o),
-      .is_rem_ex_i(is_rem_idex_o),
+      .is_rem_ex_i (is_rem_idex_o),
       .is_remu_ex_i(is_remu_idex_o),
 
-      .is_csrrw_ex_i(is_csrrw_idex_o),
-      .is_csrrs_ex_i(is_csrrs_idex_o),
-      .is_csrrc_ex_i(is_csrrc_idex_o),
+      .is_csrrw_ex_i (is_csrrw_idex_o),
+      .is_csrrs_ex_i (is_csrrs_idex_o),
+      .is_csrrc_ex_i (is_csrrc_idex_o),
       .is_csrrwi_ex_i(is_csrrwi_idex_o),
       .is_csrrsi_ex_i(is_csrrsi_idex_o),
       .is_csrrci_ex_i(is_csrrci_idex_o),
 
       .is_ecall_ex_i(is_ecall_idex_o),
-      .is_mret_ex_i(is_mret_idex_o),
+      .is_mret_ex_i (is_mret_idex_o),
 
       .is_illegal_ex_i(is_illegal_idex_o),
 
-      .irq_external_ex_i(irq_external_i),//CPU外部输入的中断
+      .irq_external_ex_i(irq_external_i),  //CPU外部输入的中断
+
+
 
       .rs1_data_ex_i(rs1_data_idex_o),
       .rs2_data_ex_i(rs2_data_idex_o),
@@ -598,13 +607,14 @@ module pipeline_core (
 
       .clear_valid_ex_o(clear_valid_ex_o),
 
-      .ram_wr_en_ex_o(ram_wr_en_ex_o),
+      .ram_wr_en_ex_o  (ram_wr_en_ex_o),
       .ram_wr_addr_ex_o(ram_wr_addr_ex_o),
       .ram_wr_data_ex_o(ram_wr_data_ex_o),
-      .ram_wr_sel_ex_o(ram_wr_sel_ex_o),
-      .ram_rd_en_ex_o(ram_rd_en_ex_o),
+      .ram_wr_sel_ex_o (ram_wr_sel_ex_o),
+      .ram_rd_en_ex_o  (ram_rd_en_ex_o),
       .ram_rd_addr_ex_o(ram_rd_addr_ex_o),
       .ram_rd_data_ex_i(ram_rd_data_o),
+      .ram_ready_ex_i  (ram_ready_o),
 
       .stall_ex_o(stall_ex_o)
   );
@@ -622,16 +632,20 @@ module pipeline_core (
   );
 
 
-  ram  ram_inst (
-    .clk(clk),
-    .rst_n(rst_n),
-    .ram_wr_addr_i(ram_wr_addr_ex_o[6:2]),
-    .ram_rd_addr_i(ram_rd_addr_ex_o[6:2]),
-    .ram_wr_data_i(ram_wr_data_ex_o),
-    .ram_wr_en_i(ram_wr_en_ex_o),
-    .ram_rd_en_i(ram_rd_en_ex_o),
-    .ram_wr_sel_i(ram_wr_sel_ex_o),
-    .ram_rd_data_o(ram_rd_data_o)
+  assign data_req  = ram_wr_en_ex_o || ram_rd_en_ex_o;
+  assign data_we   = ram_wr_en_ex_o;
+  assign data_addr = ram_wr_en_ex_o ? ram_wr_addr_ex_o : ram_rd_addr_ex_o;
+
+  data_ram_target data_ram_target_inst (
+      .clk(clk),
+      .rst_n(rst_n),
+      .req_i(data_req),
+      .we_i(data_we),
+      .addr_i(data_addr),
+      .wdata_i(ram_wr_data_ex_o),
+      .wstrb_i(ram_wr_sel_ex_o),
+      .ready_o(ram_ready_o),
+      .rdata_o(ram_rd_data_o)
   );
 
 

@@ -106,6 +106,8 @@ module ex (
     input wire [11:0] csr_addr_ex_i,
     input wire [ 4:0] rd_addr_ex_i,
 
+    input wire ram_ready_ex_i,
+
     output reg        wr_en_ex_o,
     output reg [ 4:0] wr_addr_ex_o,
     output reg [31:0] wr_data_ex_o,
@@ -157,10 +159,10 @@ module ex (
   reg                trap_return_ex_o;
   wire        [31:0] csr_mepc_o;
 
-  reg                boundary_valid_reg;//当前是否处于可接收中断的指令边界
-  reg         [31:0] resume_pc_reg;//	若在这里接收，返回后应执行的地址
+  reg                boundary_valid_reg;  //当前是否处于可接收中断的指令边界
+  reg         [31:0] resume_pc_reg;  //	若在这里接收，返回后应执行的地址
   wire               irq_eligible_csr_o;
-  wire irq_take;
+  wire               irq_take;
 
   assign irq_take = boundary_valid_reg & irq_eligible_csr_o;
 
@@ -206,14 +208,14 @@ module ex (
     trap_return_ex_o    = 1'b0;
 
 
-    if(irq_take)begin
-      trap_enter_ex_o = 1'b1;
-      trap_cause_ex_o = 32'h8000_000B;
-      trap_pc_ex_o = resume_pc_reg;
+    if (irq_take) begin
+      trap_enter_ex_o     = 1'b1;
+      trap_cause_ex_o     = 32'h8000_000B;
+      trap_pc_ex_o        = resume_pc_reg;
 
       pc_brench_flag_ex_o = 1'b1;
       pc_brench_addr_ex_o = csr_mtvec_o;
-      clear_valid_ex_o = 1'b1;
+      clear_valid_ex_o    = 1'b1;
     end
     else if (valid_ex_i) begin
       if (is_addi_ex_i) begin
@@ -427,6 +429,13 @@ module ex (
         ram_wr_addr_ex_o = rs1_data_ex_i + imms_data_ex_i;
         ram_wr_data_ex_o = rs2_data_ex_i;
         ram_wr_sel_ex_o  = 4'b1111;
+        if (ram_wr_en_ex_o || ram_rd_en_ex_o) begin
+          stall_ex_o = ~ram_ready_ex_i;
+
+          if (ram_rd_en_ex_o && !ram_ready_ex_i) begin
+            wr_en_ex_o = 1'b0;
+          end
+        end
       end
       else if (is_sb_ex_i) begin
         ram_wr_en_ex_o   = 1'b1;
@@ -449,6 +458,13 @@ module ex (
             ram_wr_data_ex_o[31:24] = rs2_data_ex_i[7:0];
           end
         endcase
+        if (ram_wr_en_ex_o || ram_rd_en_ex_o) begin
+          stall_ex_o = ~ram_ready_ex_i;
+
+          if (ram_rd_en_ex_o && !ram_ready_ex_i) begin
+            wr_en_ex_o = 1'b0;
+          end
+        end
       end
       else if (is_sh_ex_i) begin
         ram_wr_en_ex_o   = 1'b1;
@@ -467,6 +483,13 @@ module ex (
             ram_wr_data_ex_o = 32'h0;
           end
         endcase
+        if (ram_wr_en_ex_o || ram_rd_en_ex_o) begin
+          stall_ex_o = ~ram_ready_ex_i;
+
+          if (ram_rd_en_ex_o && !ram_ready_ex_i) begin
+            wr_en_ex_o = 1'b0;
+          end
+        end
       end
       else if (is_lw_ex_i) begin
         ram_rd_en_ex_o   = 1'b1;
@@ -474,6 +497,13 @@ module ex (
         wr_en_ex_o       = 1'b1;
         wr_addr_ex_o     = rd_addr_ex_i;
         wr_data_ex_o     = ram_rd_data_ex_i;
+        if (ram_wr_en_ex_o || ram_rd_en_ex_o) begin
+          stall_ex_o = ~ram_ready_ex_i;
+
+          if (ram_rd_en_ex_o && !ram_ready_ex_i) begin
+            wr_en_ex_o = 1'b0;
+          end
+        end
       end
       else if (is_lb_ex_i) begin
         ram_rd_en_ex_o   = 1'b1;
@@ -494,6 +524,13 @@ module ex (
             wr_data_ex_o = {{24{ram_rd_data_ex_i[31]}}, ram_rd_data_ex_i[31:24]};
           end
         endcase
+        if (ram_wr_en_ex_o || ram_rd_en_ex_o) begin
+          stall_ex_o = ~ram_ready_ex_i;
+
+          if (ram_rd_en_ex_o && !ram_ready_ex_i) begin
+            wr_en_ex_o = 1'b0;
+          end
+        end
       end
       else if (is_lbu_ex_i) begin
         ram_rd_en_ex_o   = 1'b1;
@@ -514,6 +551,13 @@ module ex (
             wr_data_ex_o = {24'h0, ram_rd_data_ex_i[31:24]};
           end
         endcase
+        if (ram_wr_en_ex_o || ram_rd_en_ex_o) begin
+          stall_ex_o = ~ram_ready_ex_i;
+
+          if (ram_rd_en_ex_o && !ram_ready_ex_i) begin
+            wr_en_ex_o = 1'b0;
+          end
+        end
       end
       else if (is_lh_ex_i) begin
         ram_rd_en_ex_o   = 1'b1;
@@ -531,6 +575,13 @@ module ex (
             wr_data_ex_o = 32'h0;
           end
         endcase
+        if (ram_wr_en_ex_o || ram_rd_en_ex_o) begin
+          stall_ex_o = ~ram_ready_ex_i;
+
+          if (ram_rd_en_ex_o && !ram_ready_ex_i) begin
+            wr_en_ex_o = 1'b0;
+          end
+        end
       end
       else if (is_lhu_ex_i) begin
         ram_rd_en_ex_o   = 1'b1;
@@ -548,6 +599,13 @@ module ex (
             wr_data_ex_o = 32'h0;
           end
         endcase
+        if (ram_wr_en_ex_o || ram_rd_en_ex_o) begin
+          stall_ex_o = ~ram_ready_ex_i;
+
+          if (ram_rd_en_ex_o && !ram_ready_ex_i) begin
+            wr_en_ex_o = 1'b0;
+          end
+        end
       end
 
       else if (is_mul_ex_i) begin
@@ -862,32 +920,30 @@ module ex (
     end
   end
 
-//真实指令完成，就记录新的继续位置；
-//真实指令还没完成，就暂时禁用边界；
-//没有真实指令，就保留已有位置；
-//真正进入处理程序，就撤销已经使用过的边界
-  always@(posedge clk)begin
-    if(!rst_n)begin
+  //真实指令完成，就记录新的继续位置；
+  //真实指令还没完成，就暂时禁用边界；
+  //没有真实指令，就保留已有位置；
+  //真正进入处理程序，就撤销已经使用过的边界
+  always @(posedge clk) begin
+    if (!rst_n) begin
       boundary_valid_reg <= 1'b0;
-      resume_pc_reg <= 32'h0;
+      resume_pc_reg      <= 32'h0;
     end
-    else if(trap_enter_ex_o)begin
+    else if (trap_enter_ex_o) begin
       boundary_valid_reg <= 1'b0;
-      resume_pc_reg <= resume_pc_reg;
+      resume_pc_reg      <= resume_pc_reg;
     end
-    else if(valid_ex_i && !stall_ex_o)begin
+    else if (valid_ex_i && !stall_ex_o) begin
       boundary_valid_reg <= 1'b1;
-      resume_pc_reg <= pc_brench_flag_ex_o
-                       ?pc_brench_addr_ex_o
-                       :pc_ex_i + 32'd4;
+      resume_pc_reg      <= pc_brench_flag_ex_o ? pc_brench_addr_ex_o : pc_ex_i + 32'd4;
     end
-    else if(valid_ex_i && stall_ex_o)begin
+    else if (valid_ex_i && stall_ex_o) begin
       boundary_valid_reg <= 1'b0;
-      resume_pc_reg <= resume_pc_reg;
+      resume_pc_reg      <= resume_pc_reg;
     end
-    else if(!valid_ex_i)begin
+    else if (!valid_ex_i) begin
       boundary_valid_reg <= boundary_valid_reg;
-      resume_pc_reg <= resume_pc_reg;
+      resume_pc_reg      <= resume_pc_reg;
     end
   end
 
