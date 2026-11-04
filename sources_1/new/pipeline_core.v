@@ -24,7 +24,15 @@ module pipeline_core (
     input wire clk,
     input wire rst_n,
 
-    input wire irq_external_i
+    input wire irq_external_i,
+    input wire dev2bus_ready_i,
+    input wire[31:0] dev2bus_rdata_i,
+
+    output wire bus2dev_req_o,
+    output wire bus2dev_we_o,
+    output wire[31:0] bus2dev_addr_o,
+    output wire[31:0] bus2dev_wdata_o,
+    output wire[3:0] bus2dev_wstrb_o
 
 );
 
@@ -225,10 +233,27 @@ module pipeline_core (
   wire [31:0] rs1_data_o;  //regfile输出，id_ex输入
   wire [31:0] rs2_data_o;  //regfile输出，id_ex输入
 
-  //ram
-  wire [31:0] ram_rd_data_o;  //ram输出，ex输入
+  //data_bus
+  wire        bus2ram_req_o;//data_bus输出，ram输入
+  wire        bus2ram_we_o;//data_bus输出，ram输入
+  wire [31:0] bus2ram_addr_o;//data_bus输出，ram输入
+  wire [31:0] bus2ram_wdata_o;//data_bus输出，ram输入
+  wire [ 3:0] bus2ram_wstrb_o;//data_bus输出，ram输入
+//   wire        bus2dev_req_o;//data_bus输出，dev输入
+//   wire        bus2dev_we_o;//data_bus输出，dev输入
+//   wire [31:0] bus2dev_addr_o;//data_bus输出，dev输入
+//   wire [31:0] bus2dev_wdata_o;//data_bus输出，dev输入
+//   wire [ 3:0] bus2dev_wstrb_o;//data_bus输出，dev输入
+  wire        bus2cpu_ready_o;//data_bus输出，ex输入
+  wire [31:0] bus2cpu_rdata_o;//data_bus输出，ex输入
 
-  wire        ram_ready_o;  //ram输出，ex输入
+  //ram
+  wire [31:0] ram_rd_data_o;  //ram输出，data_bus输入
+  wire        ram_ready_o;  //ram输出，data_bus输入
+
+  //dev
+//   wire [31:0] dev_rd_data_o;  //dev输出，data_bus输入
+//   wire        dev_ready_o;  //dev输出，data_bus输入
 
 
 
@@ -613,8 +638,8 @@ module pipeline_core (
       .ram_wr_sel_ex_o (ram_wr_sel_ex_o),
       .ram_rd_en_ex_o  (ram_rd_en_ex_o),
       .ram_rd_addr_ex_o(ram_rd_addr_ex_o),
-      .ram_rd_data_ex_i(ram_rd_data_o),
-      .ram_ready_ex_i  (ram_ready_o),
+      .ram_rd_data_ex_i(bus2cpu_rdata_o),
+      .ram_ready_ex_i  (bus2cpu_ready_o),
 
       .stall_ex_o(stall_ex_o)
   );
@@ -630,20 +655,45 @@ module pipeline_core (
       .rs1_data_o(rs1_data_o),
       .rs2_data_o(rs2_data_o)
   );
-
-
   assign data_req  = ram_wr_en_ex_o || ram_rd_en_ex_o;
   assign data_we   = ram_wr_en_ex_o;
   assign data_addr = ram_wr_en_ex_o ? ram_wr_addr_ex_o : ram_rd_addr_ex_o;
 
+  data_bus  data_bus_inst (
+    .cpu2bus_req_i(data_req),
+    .cpu2bus_we_i(data_we),
+    .cpu2bus_addr_i(data_addr),
+    .cpu2bus_wdata_i(ram_wr_data_ex_o),
+    .cpu2bus_wstrb_i(ram_wr_sel_ex_o),
+    .ram2bus_ready_i(ram_ready_o),
+    .ram2bus_rdata_i(ram_rd_data_o),
+    .dev2bus_ready_i(dev2bus_ready_i),
+    .dev2bus_rdata_i(dev2bus_rdata_i),
+    .bus2ram_req_o(bus2ram_req_o),
+    .bus2ram_we_o(bus2ram_we_o),
+    .bus2ram_addr_o(bus2ram_addr_o),
+    .bus2ram_wdata_o(bus2ram_wdata_o),
+    .bus2ram_wstrb_o(bus2ram_wstrb_o),
+    .bus2dev_req_o(bus2dev_req_o),
+    .bus2dev_we_o(bus2dev_we_o),
+    .bus2dev_addr_o(bus2dev_addr_o),
+    .bus2dev_wdata_o(bus2dev_wdata_o),
+    .bus2dev_wstrb_o(bus2dev_wstrb_o),
+    .bus2cpu_ready_o(bus2cpu_ready_o),
+    .bus2cpu_rdata_o(bus2cpu_rdata_o)
+  );
+
+
+
+
   data_ram_target data_ram_target_inst (
       .clk(clk),
       .rst_n(rst_n),
-      .req_i(data_req),
-      .we_i(data_we),
-      .addr_i(data_addr),
-      .wdata_i(ram_wr_data_ex_o),
-      .wstrb_i(ram_wr_sel_ex_o),
+      .req_i(bus2ram_req_o),
+      .we_i(bus2ram_we_o),
+      .addr_i(bus2ram_addr_o),
+      .wdata_i(bus2ram_wdata_o),
+      .wstrb_i(bus2ram_wstrb_o),
       .ready_o(ram_ready_o),
       .rdata_o(ram_rd_data_o)
   );
