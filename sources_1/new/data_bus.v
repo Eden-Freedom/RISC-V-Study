@@ -56,7 +56,7 @@ module data_bus (
 
   wire dev_hit;
   assign dev_hit = (cpu2bus_addr_i >= 32'h1000_0000
-                    && cpu2bus_addr_i <= 32'h1000_001F);
+                    && cpu2bus_addr_i <= 32'h1000_002F);
 
   assign bus2ram_req_o   = cpu2bus_req_i && ram_hit;
   assign bus2ram_we_o    = cpu2bus_we_i;
