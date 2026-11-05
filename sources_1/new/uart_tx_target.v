@@ -28,8 +28,9 @@ module uart_tx_target (
     input  wire [31:0] addr_i,
     input  wire [31:0] wdata_i,
     input  wire [ 3:0] wstrb_i,
+    input wire         rx_i,
     output reg         ready_o,
-    output wire [31:0] rdata_o,
+    output reg [31:0] rdata_o,
     output wire        tx_o
 );
 
@@ -49,7 +50,6 @@ module uart_tx_target (
   end
 
 
-  assign rdata_o = (req_i && !we_i && (addr_i[3:2] == 2'b01)) ? {31'b0, tx_busy} : 32'b0;
 
 
 
@@ -61,6 +61,57 @@ module uart_tx_target (
       .busy_o(tx_busy),
       .tx_o(tx_o)
   );
+
+
+  wire rx_valid;
+  wire [7:0] rx_data;
+
+  reg [7:0] rx_byte;
+  reg rx_pending;
+
+  always @(*) begin
+    rdata_o = 32'd0;
+
+    if (req_i && !we_i) begin
+        if (addr_i[3:2] == 2'b01) begin
+            // STATUS：bit 1 是待取标志，bit 0 是发送忙标志。
+            rdata_o = {30'd0, rx_pending, tx_busy};
+        end
+        else if (addr_i[3:0] == 4'h8) begin
+            // RXDATA：请补上有字节时的返回值。
+            if (rx_pending) begin
+                rdata_o = {24'd0, rx_byte};
+            end
+        end
+    end
+end
+
+wire  rx_pop;//CPU 已经成功读走一个 UART 接收字节
+
+assign rx_pop = req_i && !we_i && (addr_i[3:0] == 4'h8) && rx_pending && ready_o;
+
+always @(posedge clk ) begin
+    if(!rst_n)begin
+        rx_pending <= 1'b0;
+        rx_byte <= 8'b0;
+    end
+    else if(rx_valid && (!rx_pending || rx_pop))begin
+        rx_pending <= 1'b1;
+        rx_byte <= rx_data;
+    end
+    else if(rx_pop)begin
+        rx_pending <= 1'b0;
+        rx_byte <= rx_byte;
+    end    
+end
+  uart_rx  uart_rx_inst (
+    .clk(clk),
+    .rst_n(rst_n),
+    .rx_i(rx_i),
+    .valid_o(rx_valid),
+    .data_o(rx_data)
+  );
+
 
 
 

@@ -24,6 +24,7 @@ module soc_top (
     input  wire       clk,
     input  wire       rst_n,
     input  wire       irq_external_i,
+    input wire uart_rx_i,
     output wire [7:0] gpio_out_o,
     output wire       uart_tx_o
 );
@@ -140,6 +141,7 @@ module soc_top (
       .wstrb_i(bus2dev_wstrb_o),
       .ready_o(uart_tx_ready_o),
       .rdata_o(uart_tx_rdata_o),
-      .tx_o(uart_tx_o)
+      .tx_o(uart_tx_o),
+      .rx_i(uart_rx_i)
   );
 endmodule
