@@ -55,7 +55,8 @@ module data_bus (
   assign ram_hit     = (cpu2bus_addr_i[31:7] == 25'd0);  //先检查是否发生到RAM地址
 
   wire dev_hit;
-  assign dev_hit = (cpu2bus_addr_i[31:4] == 28'h100_0000);
+  assign dev_hit = (cpu2bus_addr_i >= 32'h1000_0000
+                    && cpu2bus_addr_i <= 32'h1000_001F);
 
   assign bus2ram_req_o   = cpu2bus_req_i && ram_hit;
   assign bus2ram_we_o    = cpu2bus_we_i;
