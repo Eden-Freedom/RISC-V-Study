@@ -21,7 +21,8 @@
 
 
 module soc_top #(
-  parameter USE_UART_DOWNLOAD = 1'b0
+  parameter USE_UART_DOWNLOAD = 1,
+  parameter CLK_PRE_BIT = 434
 ) (
     input  wire       clk,
     input  wire       rst_n,
@@ -167,7 +168,9 @@ assign cpu_rst_n       = rst_n && !download_active;
       .irq_o(timer_irq_o)
   );
 
-  uart_tx_target uart_tx_target_inst (
+  uart_tx_target #(
+    .CLK_PRE_BIT(CLK_PRE_BIT)
+  )uart_tx_target_inst (
       .clk(clk),
       .rst_n(rst_n),
       .req_i(uart_tx_req),

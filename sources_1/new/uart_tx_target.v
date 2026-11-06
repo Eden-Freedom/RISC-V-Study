@@ -20,7 +20,10 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module uart_tx_target (
+module uart_tx_target 
+#(
+  parameter CLK_PRE_BIT = 4
+)(
     input  wire        clk,
     input  wire        rst_n,
     input  wire        req_i,
@@ -66,7 +69,9 @@ assign rx_data_o = rx_data;
 
 
 
-  uart_tx uart_tx_inst (
+  uart_tx #(
+    .CLK_PRE_BIT(CLK_PRE_BIT)
+  )uart_tx_inst (
       .clk(clk),
       .rst_n(rst_n),
       .start_i(tx_start),
@@ -113,7 +118,9 @@ always @(posedge clk ) begin
         rx_byte <= rx_byte;
     end    
 end
-  uart_rx  uart_rx_inst (
+  uart_rx #(
+    .CLK_PRE_BIT(CLK_PRE_BIT)
+  )uart_rx_inst (
     .clk(clk),
     .rst_n(rst_n),
     .rx_i(rx_i),

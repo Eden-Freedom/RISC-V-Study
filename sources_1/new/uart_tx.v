@@ -20,7 +20,9 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module uart_tx (
+module uart_tx #(
+  parameter CLK_PRE_BIT = 4
+)(
     input  wire       clk,
     input  wire       rst_n,
     input  wire       start_i,
@@ -29,7 +31,7 @@ module uart_tx (
     output reg        tx_o
 );
 
-  localparam CLK_PRE_BIT = 4;  //每个bit保持4个时钟周期，便于仿真
+  //localparam CLK_PRE_BIT = 4;  //每个bit保持4个时钟周期，便于仿真
   localparam IDLE = 2'b00;
   localparam START = 2'b01;
   localparam DATA = 2'b10;

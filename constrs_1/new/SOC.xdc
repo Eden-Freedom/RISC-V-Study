@@ -1,0 +1,13 @@
+create_clock -name sys_clk -period 20.000 [get_ports clk]
+
+set_property PACKAGE_PIN W19 [get_ports clk]
+set_property IOSTANDARD LVCMOS33 [get_ports clk]
+set_property PACKAGE_PIN Y19 [get_ports rst_n]
+set_property IOSTANDARD LVCMOS33 [get_ports rst_n]
+set_property PACKAGE_PIN R16 [get_ports download_en_i]
+set_property IOSTANDARD LVCMOS33 [get_ports download_en_i]
+set_property PACKAGE_PIN W17 [get_ports uart_rx_i]
+set_property IOSTANDARD LVCMOS33 [get_ports uart_rx_i]
+set_property PACKAGE_PIN V17 [get_ports uart_tx_o]
+set_property PACKAGE_PIN N20 [get_ports {gpio_out_o[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {gpio_out_o[0]}]
