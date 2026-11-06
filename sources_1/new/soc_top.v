@@ -25,8 +25,12 @@ module soc_top (
     input  wire       rst_n,
     input  wire       irq_external_i,
     input wire uart_rx_i,
+    input wire spi_miso_i,
     output wire [7:0] gpio_out_o,
-    output wire       uart_tx_o
+    output wire       uart_tx_o,
+    output wire       spi_mosi_o,
+    output wire       spi_sclk_o,
+    output wire       spi_cs_n_o
 );
 
 
@@ -37,6 +41,8 @@ module soc_top (
   wire [31:0] timer_rdata_o;
   wire        uart_tx_ready_o;
   wire [31:0] uart_tx_rdata_o;
+  wire        spi_ready_o;
+  wire [31:0] spi_rdata_o;
 
   wire        bus2dev_req_o;
   wire        bus2dev_we_o;
@@ -47,6 +53,7 @@ module soc_top (
   reg         gpio_req;
   reg         timer_req;
   reg         uart_tx_req;
+  reg         spi_req;
 
   reg         dev_ready_o;
   reg  [31:0] dev_rdata_o;
@@ -60,6 +67,7 @@ module soc_top (
     gpio_req    = 1'b0;
     timer_req   = 1'b0;
     uart_tx_req = 1'b0;
+    spi_req     = 1'b0;
     dev_ready_o = 1'b0;
     dev_rdata_o = 32'd0;
     case (bus2dev_addr_o[5:4])
@@ -78,10 +86,16 @@ module soc_top (
         dev_ready_o = uart_tx_ready_o;
         dev_rdata_o = uart_tx_rdata_o;
       end
+      2'b11: begin
+        spi_req     = bus2dev_req_o;
+        dev_ready_o = spi_ready_o;
+        dev_rdata_o = spi_rdata_o;
+      end
       default: begin
         gpio_req    = 1'b0;
         timer_req   = 1'b0;
         uart_tx_req = 1'b0;
+        spi_req     = 1'b0;
         dev_ready_o = 1'b0;
         dev_rdata_o = 32'b0;
       end
@@ -143,5 +157,21 @@ module soc_top (
       .rdata_o(uart_tx_rdata_o),
       .tx_o(uart_tx_o),
       .rx_i(uart_rx_i)
+  );
+
+  spi_target  spi_target_inst (
+    .clk(clk),
+    .rst_n(rst_n),
+    .req_i(spi_req),
+    .we_i(bus2dev_we_o),
+    .miso_i(spi_miso_i),
+    .addr_i(bus2dev_addr_o),
+    .wdata_i(bus2dev_wdata_o),
+    .wstrb_i(bus2dev_wstrb_o),
+    .ready_o(spi_ready_o),
+    .cs_n_o(spi_cs_n_o),
+    .sclk_o(spi_sclk_o),
+    .mosi_o(spi_mosi_o),
+    .rdata_o(spi_rdata_o)
   );
 endmodule
