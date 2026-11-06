@@ -31,8 +31,21 @@ module uart_tx_target (
     input wire         rx_i,
     output reg         ready_o,
     output reg [31:0] rdata_o,
-    output wire        tx_o
+    output wire        tx_o,
+
+    output wire        rx_valid_o,
+    output wire [7:0]  rx_data_o
+
 );
+
+wire rx_valid;
+wire [7:0] rx_data;
+
+reg [7:0] rx_byte;
+reg rx_pending;
+
+assign rx_valid_o = rx_valid;
+assign rx_data_o = rx_data;
 
 
   wire tx_busy;
@@ -63,11 +76,7 @@ module uart_tx_target (
   );
 
 
-  wire rx_valid;
-  wire [7:0] rx_data;
 
-  reg [7:0] rx_byte;
-  reg rx_pending;
 
   always @(*) begin
     rdata_o = 32'd0;

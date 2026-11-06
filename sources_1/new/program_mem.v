@@ -35,7 +35,7 @@ module program_mem(
     reg [31:0] mem [0:63];
 
     always @(*) begin
-        if(fetch_addr_i[1:0] == 2'b00) begin
+        if(fetch_addr_i[31:8] == 24'h0 && fetch_addr_i[1:0] == 2'b00) begin
             instr_o = mem[fetch_addr_i[7:2]];
         end
         else begin
@@ -44,7 +44,7 @@ module program_mem(
     end
 
     always @(posedge clk) begin
-        if(load_we_i && load_addr_i[1:0] == 2'b00) begin
+        if(load_we_i && load_addr_i[31:8] == 24'h0 && load_addr_i[1:0] == 2'b00) begin
             mem[load_addr_i[7:2]] <= load_data_i;
         end
     end

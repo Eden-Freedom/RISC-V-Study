@@ -20,7 +20,9 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module pipeline_core (
+module pipeline_core#(
+  parameter USE_EXTERNAL_PROGRAM = 0
+)(
     input wire clk,
     input wire rst_n,
 
@@ -28,11 +30,15 @@ module pipeline_core (
     input wire dev2bus_ready_i,
     input wire[31:0] dev2bus_rdata_i,
 
+    input wire[31:0] external_instr_i,
+
     output wire bus2dev_req_o,
     output wire bus2dev_we_o,
     output wire[31:0] bus2dev_addr_o,
     output wire[31:0] bus2dev_wdata_o,
-    output wire[3:0] bus2dev_wstrb_o
+    output wire[3:0] bus2dev_wstrb_o,
+
+    output wire [31:0] fetch_addr_o
 
 );
 
@@ -264,9 +270,15 @@ module pipeline_core (
 
 
 
-  fetch_unit fetch_unit_inst (
+assign fetch_addr_o = pc_o;
+
+  fetch_unit #(
+    .USE_EXTERNAL_INSTR(USE_EXTERNAL_PROGRAM)
+  ) fetch_unit_inst
+  (
       .clk(clk),
       .rst_n(rst_n),
+      .external_instr_i(external_instr_i),
       .pc_brench_flag_i(pc_brench_flag_ex_o),
       .pc_brench_addr_i(pc_brench_addr_ex_o),
       .pc_stall_i(stall_ex_o),

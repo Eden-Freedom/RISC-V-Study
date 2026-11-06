@@ -1,95 +1,56 @@
 `timescale 1ns / 1ps
 
-// 1. 模块接口
-module spi_target (
+module uart_download (
     input  wire        clk,
     input  wire        rst_n,
-    input  wire        req_i,
-    input  wire        we_i,
-    input  wire [31:0] addr_i,
-    input  wire [31:0] wdata_i,
-    input  wire [ 3:0] wstrb_i,
-    input  wire        miso_i,
+    input  wire        download_en_i,
+    input  wire        byte_valid_i,
+    input  wire [7:0]  byte_data_i,
 
-    output reg         ready_o,
-    output reg  [31:0] rdata_o,
-    output wire        cs_n_o,
-    output wire        sclk_o,
-    output wire        mosi_o
+    output wire        load_we_o,
+    output wire [31:0] load_addr_o,
+    output wire [31:0] load_data_o
 );
 
-    // 2. 地址、内部连线和寄存器
-    localparam [3:0] XFER_OFFSET   = 4'h0;
-    localparam [3:0] STATUS_OFFSET = 4'h4;
-    localparam [3:0] RXDATA_OFFSET = 4'h8;
+    localparam [8:0] END_ADDR = 9'h100;
 
-    wire       xfer_write;
-    wire       spi_start;
-    wire       spi_busy;
-    wire       spi_done;
-    wire [7:0] spi_rx_data;
+    reg [1:0]  byte_index;
+    reg [23:0] byte_buf;
+    reg [8:0]  next_addr;
 
-    reg done_pending;
+    wire accept_byte;
 
-    // 3. 从总线写请求产生 SPI 启动
-    assign xfer_write = req_i && we_i &&
-                        (addr_i[3:0] == XFER_OFFSET) &&
-                        wstrb_i[0];
+    // 下载模式下，只接收存储器还有空间时送来的有效字节。
+    assign accept_byte = rst_n && download_en_i && byte_valid_i
+                         && (next_addr < END_ADDR);
 
-    always @(*) begin
-        if (!req_i) begin
-            ready_o = 1'b0;
-        end
-        else if (xfer_write && spi_busy) begin
-            ready_o = 1'b0;
-        end
-        else begin
-            ready_o = 1'b1;
-        end
-    end
+    // 第四字节有效时，当前输入与前三字节组成一个完整字。
+    assign load_we_o   = accept_byte && (byte_index == 2'd3);
+    assign load_addr_o = {23'd0, next_addr};
+    assign load_data_o = {byte_data_i, byte_buf};
 
-    assign spi_start = xfer_write && ready_o;
-
-    // 4. 保存完成状态
     always @(posedge clk) begin
-        if (!rst_n) begin
-            done_pending <= 1'b0;
+        if (!rst_n || !download_en_i) begin
+            byte_index <= 2'd0;
+            byte_buf   <= 24'd0;
+            next_addr  <= 9'd0;
         end
-        else if (spi_start) begin
-            done_pending <= 1'b0;
-        end
-        else if (spi_done) begin
-            done_pending <= 1'b1;
-        end
-    end
-
-    // 5. 总线组合读回
-    always @(*) begin
-        rdata_o = 32'd0;
-
-        if (req_i && !we_i) begin
-            if (addr_i[3:0] == STATUS_OFFSET) begin
-                rdata_o = {30'd0, done_pending, spi_busy};
+        else if (accept_byte) begin
+            if (load_we_o) begin
+                // program_mem 在这个沿写入当前字，地址同时推进到下一字。
+                byte_index <= 2'd0;
+                next_addr  <= next_addr + 9'd4;
             end
-            else if (addr_i[3:0] == RXDATA_OFFSET) begin
-                rdata_o = {24'd0, spi_rx_data};
+            else begin
+                // 前三个字节按低位到高位保存。
+                case (byte_index)
+                    2'd0: byte_buf[7:0]   <= byte_data_i;
+                    2'd1: byte_buf[15:8]  <= byte_data_i;
+                    2'd2: byte_buf[23:16] <= byte_data_i;
+                endcase
+                byte_index <= byte_index + 2'd1;
             end
         end
     end
-
-    // 6. 例化 SPI 主机
-    spi_master spi_master_inst (
-        .clk       (clk),
-        .rst_n     (rst_n),
-        .start_i   (spi_start),
-        .tx_data_i (wdata_i[7:0]),
-        .miso_i    (miso_i),
-        .cs_n_o    (cs_n_o),
-        .sclk_o    (sclk_o),
-        .mosi_o    (mosi_o),
-        .busy_o    (spi_busy),
-        .done_o    (spi_done),
-        .rx_data_o (spi_rx_data)
-    );
 
 endmodule

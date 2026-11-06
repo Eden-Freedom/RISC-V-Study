@@ -20,12 +20,15 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module soc_top (
+module soc_top #(
+  parameter USE_UART_DOWNLOAD = 1'b0
+) (
     input  wire       clk,
     input  wire       rst_n,
     input  wire       irq_external_i,
-    input wire uart_rx_i,
-    input wire spi_miso_i,
+    input  wire       uart_rx_i,
+    input  wire       spi_miso_i,
+    input  wire       download_en_i,
     output wire [7:0] gpio_out_o,
     output wire       uart_tx_o,
     output wire       spi_mosi_o,
@@ -61,6 +64,21 @@ module soc_top (
   wire        timer_irq_o;
   wire        irq2cpu;
 
+  wire        rx_valid_o;
+  wire [7:0]  rx_data_o;
+
+  wire [31:0] instr_o;
+  wire [31:0] fetch_addr_o;
+
+
+  wire        load_we_o;
+wire [31:0] load_addr_o;
+wire [31:0] load_data_o;
+wire        download_active;
+wire        cpu_rst_n;
+
+assign download_active = USE_UART_DOWNLOAD && download_en_i;
+assign cpu_rst_n       = rst_n && !download_active;
 
   always @(*) begin
 
@@ -105,17 +123,21 @@ module soc_top (
 
   assign irq2cpu = timer_irq_o || irq_external_i;
 
-  pipeline_core pipeline_core_inst (
+  pipeline_core #(
+    .USE_EXTERNAL_PROGRAM(USE_UART_DOWNLOAD)
+  )pipeline_core_inst (
       .clk(clk),
-      .rst_n(rst_n),
+      .rst_n(cpu_rst_n),
       .irq_external_i(irq2cpu),
+      .external_instr_i(instr_o),
       .dev2bus_ready_i(dev_ready_o),
       .dev2bus_rdata_i(dev_rdata_o),
       .bus2dev_req_o(bus2dev_req_o),
       .bus2dev_we_o(bus2dev_we_o),
       .bus2dev_addr_o(bus2dev_addr_o),
       .bus2dev_wdata_o(bus2dev_wdata_o),
-      .bus2dev_wstrb_o(bus2dev_wstrb_o)
+      .bus2dev_wstrb_o(bus2dev_wstrb_o),
+      .fetch_addr_o(fetch_addr_o)
   );
 
 
@@ -156,22 +178,47 @@ module soc_top (
       .ready_o(uart_tx_ready_o),
       .rdata_o(uart_tx_rdata_o),
       .tx_o(uart_tx_o),
-      .rx_i(uart_rx_i)
+      .rx_i(uart_rx_i),
+
+      .rx_valid_o(rx_valid_o),
+      .rx_data_o(rx_data_o)
   );
 
-  spi_target  spi_target_inst (
+  spi_target spi_target_inst (
+      .clk(clk),
+      .rst_n(rst_n),
+      .req_i(spi_req),
+      .we_i(bus2dev_we_o),
+      .miso_i(spi_miso_i),
+      .addr_i(bus2dev_addr_o),
+      .wdata_i(bus2dev_wdata_o),
+      .wstrb_i(bus2dev_wstrb_o),
+      .ready_o(spi_ready_o),
+      .cs_n_o(spi_cs_n_o),
+      .sclk_o(spi_sclk_o),
+      .mosi_o(spi_mosi_o),
+      .rdata_o(spi_rdata_o)
+  );
+
+  uart_program_downloader  uart_program_downloader_inst (
     .clk(clk),
     .rst_n(rst_n),
-    .req_i(spi_req),
-    .we_i(bus2dev_we_o),
-    .miso_i(spi_miso_i),
-    .addr_i(bus2dev_addr_o),
-    .wdata_i(bus2dev_wdata_o),
-    .wstrb_i(bus2dev_wstrb_o),
-    .ready_o(spi_ready_o),
-    .cs_n_o(spi_cs_n_o),
-    .sclk_o(spi_sclk_o),
-    .mosi_o(spi_mosi_o),
-    .rdata_o(spi_rdata_o)
+    .download_en_i(download_active),
+    .byte_valid_i(rx_valid_o),
+    .byte_data_i(rx_data_o),
+    .load_we_o(load_we_o),
+    .load_addr_o(load_addr_o),
+    .load_data_o(load_data_o)
+  );
+
+
+  //存储指令
+  program_mem  program_mem_inst (
+    .fetch_addr_i(fetch_addr_o),
+    .instr_o(instr_o),
+    .clk(clk),
+    .load_we_i(load_we_o),
+    .load_addr_i(load_addr_o),
+    .load_data_i(load_data_o)
   );
 endmodule

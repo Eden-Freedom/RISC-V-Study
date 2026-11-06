@@ -20,16 +20,32 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 //取指
-module fetch_unit(
+module fetch_unit#(
+  parameter USE_EXTERNAL_INSTR = 0
+)(
     input wire clk,
     input wire rst_n,
     input wire pc_brench_flag_i,
     input wire [31:0] pc_brench_addr_i,
     input wire pc_stall_i,
 
+    input wire[31:0] external_instr_i,
+
     output wire [31:0] pc_o,
-    output wire [31:0] instr_o
+    output reg [31:0] instr_o
     );
+
+    wire [31:0]imem_instr_o;
+
+    always @(*) begin
+      if(USE_EXTERNAL_INSTR) begin
+        instr_o = external_instr_i;
+      end
+      else begin
+        instr_o = imem_instr_o;
+    end
+  end
+
 
     pc_reg  pc_reg_inst (
     .clk(clk),
@@ -39,8 +55,9 @@ module fetch_unit(
     .pc_brench_addr_i(pc_brench_addr_i),
     .pc_stall_i(pc_stall_i)
   );
+
   imem imem_inst(
     .addr_i(pc_o),
-    .instr_o(instr_o)
+    .instr_o(imem_instr_o)
   );
 endmodule
