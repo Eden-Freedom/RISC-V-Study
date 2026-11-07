@@ -22,7 +22,8 @@
 
 module uart_tx_target 
 #(
-  parameter CLK_PRE_BIT = 4
+  parameter CLK_PRE_BIT = 4,
+  parameter USE_UPSTREAM_MAP = 0
 )(
     input  wire        clk,
     input  wire        rst_n,
@@ -56,7 +57,13 @@ assign rx_data_o = rx_data;
   wire tx_write;
 
 
-  assign tx_write = req_i && we_i && (addr_i[3:2] == 2'b00) && wstrb_i[0];
+  wire tx_addr_hit;
+
+  assign tx_addr_hit = USE_UPSTREAM_MAP
+                     ? (addr_i[3:0] == 4'hC)
+                     : (addr_i[3:2] == 2'b00);
+
+  assign tx_write = req_i && we_i && tx_addr_hit && wstrb_i[0];
   assign tx_start = tx_write && ready_o;
 
   always @(*) begin

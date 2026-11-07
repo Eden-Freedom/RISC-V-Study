@@ -20,11 +20,14 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module ram(
+module ram#(
+    parameter ADDR_WIDTH = 5,
+    parameter SYNC_READ = 0
+)(
     input wire clk,
     input wire rst_n,
-    input wire [4:0] ram_wr_addr_i,
-    input wire [4:0] ram_rd_addr_i,
+    input wire [ADDR_WIDTH-1:0] ram_wr_addr_i,
+    input wire [ADDR_WIDTH-1:0] ram_rd_addr_i,
     input wire [31:0] ram_wr_data_i,
     input wire ram_wr_en_i,
     input wire ram_rd_en_i,
@@ -32,7 +35,31 @@ module ram(
     output reg [31:0] ram_rd_data_o
     );
 
-    reg [31:0] memory[0:31];
+    reg [31:0] memory[0:(1 << ADDR_WIDTH)-1];
+
+    
+
+    generate
+        if (SYNC_READ) begin : gen_sync_ram
+            always @(posedge clk) begin
+                if (ram_rd_en_i) begin
+                    ram_rd_data_o <= memory[ram_rd_addr_i];
+                end
+            end
+
+            always @(posedge clk) begin
+                if (rst_n && ram_wr_en_i) begin
+                    if (ram_wr_sel_i[0])
+                        memory[ram_wr_addr_i][7:0] <= ram_wr_data_i[7:0];
+                    if (ram_wr_sel_i[1])
+                        memory[ram_wr_addr_i][15:8] <= ram_wr_data_i[15:8];
+                    if (ram_wr_sel_i[2])
+                        memory[ram_wr_addr_i][23:16] <= ram_wr_data_i[23:16];
+                    if (ram_wr_sel_i[3])
+                        memory[ram_wr_addr_i][31:24] <= ram_wr_data_i[31:24];
+                end
+            end
+        end else begin : gen_legacy_ram
     integer i;
 
     //读逻辑
@@ -66,5 +93,6 @@ module ram(
             end
         end
     end
-
+end
+endgenerate
 endmodule

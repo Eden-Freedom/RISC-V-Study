@@ -21,7 +21,8 @@
 
 
 module pipeline_core#(
-  parameter USE_EXTERNAL_PROGRAM = 0
+  parameter USE_EXTERNAL_PROGRAM = 0,
+  parameter USE_UPSTREAM_MAP = 0
 )(
     input wire clk,
     input wire rst_n,
@@ -671,7 +672,9 @@ assign fetch_addr_o = pc_o;
   assign data_we   = ram_wr_en_ex_o;
   assign data_addr = ram_wr_en_ex_o ? ram_wr_addr_ex_o : ram_rd_addr_ex_o;
 
-  data_bus  data_bus_inst (
+  data_bus #(
+    .USE_UPSTREAM_MAP(USE_UPSTREAM_MAP)
+  )data_bus_inst (
     .cpu2bus_req_i(data_req),
     .cpu2bus_we_i(data_we),
     .cpu2bus_addr_i(data_addr),
@@ -698,7 +701,9 @@ assign fetch_addr_o = pc_o;
 
 
 
-  data_ram_target data_ram_target_inst (
+  data_ram_target #(
+    .USE_UPSTREAM_MAP(USE_UPSTREAM_MAP)
+)data_ram_target_inst (
       .clk(clk),
       .rst_n(rst_n),
       .req_i(bus2ram_req_o),

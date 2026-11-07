@@ -22,7 +22,8 @@
 
 module soc_top #(
   parameter USE_UART_DOWNLOAD = 1,
-  parameter CLK_PRE_BIT = 434
+  parameter CLK_PRE_BIT = 434,
+  parameter USE_UPSTREAM_MAP = 0
 ) (
     input  wire       clk,
     input  wire       rst_n,
@@ -71,6 +72,8 @@ module soc_top #(
   wire [31:0] instr_o;
   wire [31:0] fetch_addr_o;
 
+  wire [31:0] program_data_word;
+
 
   wire        load_we_o;
 wire [31:0] load_addr_o;
@@ -89,6 +92,18 @@ assign cpu_rst_n       = rst_n && !download_active;
     spi_req     = 1'b0;
     dev_ready_o = 1'b0;
     dev_rdata_o = 32'd0;
+    if (USE_UPSTREAM_MAP && bus2dev_req_o &&
+    (bus2dev_addr_o[31:12] == 20'd0)) begin
+  dev_ready_o = 1'b1;
+  dev_rdata_o = program_data_word;
+end
+else if (USE_UPSTREAM_MAP && bus2dev_req_o &&
+  (bus2dev_addr_o[31:4] == 28'h300_0000)) begin
+uart_tx_req = bus2dev_req_o;
+dev_ready_o = uart_tx_ready_o;
+dev_rdata_o = uart_tx_rdata_o;
+end
+else begin
     case (bus2dev_addr_o[5:4])
       2'b00: begin
         gpio_req    = bus2dev_req_o;
@@ -120,12 +135,14 @@ assign cpu_rst_n       = rst_n && !download_active;
       end
     endcase
   end
+end
 
 
   assign irq2cpu = timer_irq_o || irq_external_i;
 
   pipeline_core #(
-    .USE_EXTERNAL_PROGRAM(USE_UART_DOWNLOAD)
+    .USE_EXTERNAL_PROGRAM(USE_UART_DOWNLOAD),
+    .USE_UPSTREAM_MAP(USE_UPSTREAM_MAP)
   )pipeline_core_inst (
       .clk(clk),
       .rst_n(cpu_rst_n),
@@ -169,7 +186,8 @@ assign cpu_rst_n       = rst_n && !download_active;
   );
 
   uart_tx_target #(
-    .CLK_PRE_BIT(CLK_PRE_BIT)
+    .CLK_PRE_BIT(CLK_PRE_BIT),
+    .USE_UPSTREAM_MAP(USE_UPSTREAM_MAP)
   )uart_tx_target_inst (
       .clk(clk),
       .rst_n(rst_n),
@@ -222,6 +240,8 @@ assign cpu_rst_n       = rst_n && !download_active;
     .clk(clk),
     .load_we_i(load_we_o),
     .load_addr_i(load_addr_o),
-    .load_data_i(load_data_o)
+    .load_data_i(load_data_o),
+    .data_addr_i(bus2dev_addr_o),
+    .data_word_o(program_data_word)
   );
 endmodule
