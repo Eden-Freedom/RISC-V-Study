@@ -21,7 +21,8 @@
 
 
 module data_bus #(
-    parameter USE_UPSTREAM_MAP = 0
+    parameter USE_UPSTREAM_MAP = 0,
+    parameter PROGRAM_ADDR_WIDTH = 12
 ) (
     //cpu输入
     input wire cpu2bus_req_i,  //cpu输入请求
@@ -77,21 +78,20 @@ wire program_read_hit;
 assign ram_hit = USE_UPSTREAM_MAP
                ? (cpu2bus_addr_i[31:14] == 18'h04000)
                : (cpu2bus_addr_i[31:7] == 25'd0);
-
 assign program_read_hit = USE_UPSTREAM_MAP && !cpu2bus_we_i &&
-                          (cpu2bus_addr_i[31:12] == 20'd0);
+               (cpu2bus_addr_i[31:PROGRAM_ADDR_WIDTH] == 0);
 
-                          wire upstream_uart_hit;
+wire upstream_uart_hit;
 
-                          assign upstream_uart_hit = USE_UPSTREAM_MAP &&
-                                                     ((cpu2bus_addr_i == 32'h3000_0000) ||
-                                                      (cpu2bus_addr_i == 32'h3000_0004) ||
-                                                      (cpu2bus_addr_i == 32'h3000_000C));
+ assign upstream_uart_hit = USE_UPSTREAM_MAP &&
+                            ((cpu2bus_addr_i == 32'h3000_0000) ||
+                            (cpu2bus_addr_i == 32'h3000_0004) ||
+                            (cpu2bus_addr_i == 32'h3000_000C));
                         
-                          assign dev_hit = program_read_hit || upstream_uart_hit ||
-                                           (!USE_UPSTREAM_MAP &&
-                                            cpu2bus_addr_i >= 32'h1000_0000 &&
-                                            cpu2bus_addr_i <= 32'h1000_003F);
+ assign dev_hit = program_read_hit || upstream_uart_hit ||
+                   (!USE_UPSTREAM_MAP &&
+                  cpu2bus_addr_i >= 32'h1000_0000 &&
+                    cpu2bus_addr_i <= 32'h1000_003F);
 
   assign bus2ram_req_o = cpu2bus_req_i && ram_hit;
   assign bus2ram_we_o = cpu2bus_we_i;

@@ -23,7 +23,8 @@
 module soc_top #(
   parameter USE_UART_DOWNLOAD = 1,
   parameter CLK_PRE_BIT = 434,
-  parameter USE_UPSTREAM_MAP = 0
+  parameter USE_UPSTREAM_MAP = 0,
+  parameter USE_BRAM_PROGRAM = 0
 ) (
     input  wire       clk,
     input  wire       rst_n,
@@ -83,6 +84,26 @@ wire        cpu_rst_n;
 
 assign download_active = USE_UART_DOWNLOAD && download_en_i;
 assign cpu_rst_n       = rst_n && !download_active;
+localparam PROGRAM_ADDR_WIDTH = USE_BRAM_PROGRAM ? 15 : 12;
+
+wire fetch_en;
+wire program_read_req;
+wire program_data_rd_en;
+reg  program_read_pending;
+
+assign program_read_req = USE_UPSTREAM_MAP && bus2dev_req_o &&
+                          !bus2dev_we_o &&
+                          (bus2dev_addr_o[31:PROGRAM_ADDR_WIDTH] == 0);
+
+assign program_data_rd_en = USE_BRAM_PROGRAM && cpu_rst_n &&
+                            program_read_req && !program_read_pending;
+
+always @(posedge clk) begin
+  if (!cpu_rst_n)
+    program_read_pending <= 1'b0;
+  else
+    program_read_pending <= program_data_rd_en;
+end
 
   always @(*) begin
 
@@ -92,11 +113,12 @@ assign cpu_rst_n       = rst_n && !download_active;
     spi_req     = 1'b0;
     dev_ready_o = 1'b0;
     dev_rdata_o = 32'd0;
-    if (USE_UPSTREAM_MAP && bus2dev_req_o &&
-    (bus2dev_addr_o[31:12] == 20'd0)) begin
-  dev_ready_o = 1'b1;
-  dev_rdata_o = program_data_word;
-end
+    if (program_read_req) begin
+      dev_ready_o = !USE_BRAM_PROGRAM || program_read_pending;
+      if (dev_ready_o) begin
+        dev_rdata_o = program_data_word;
+      end
+    end
 else if (USE_UPSTREAM_MAP && bus2dev_req_o &&
   (bus2dev_addr_o[31:4] == 28'h300_0000)) begin
 uart_tx_req = bus2dev_req_o;
@@ -142,7 +164,8 @@ end
 
   pipeline_core #(
     .USE_EXTERNAL_PROGRAM(USE_UART_DOWNLOAD),
-    .USE_UPSTREAM_MAP(USE_UPSTREAM_MAP)
+    .USE_UPSTREAM_MAP(USE_UPSTREAM_MAP),
+    .USE_BRAM_PROGRAM(USE_BRAM_PROGRAM)
   )pipeline_core_inst (
       .clk(clk),
       .rst_n(cpu_rst_n),
@@ -155,7 +178,8 @@ end
       .bus2dev_addr_o(bus2dev_addr_o),
       .bus2dev_wdata_o(bus2dev_wdata_o),
       .bus2dev_wstrb_o(bus2dev_wstrb_o),
-      .fetch_addr_o(fetch_addr_o)
+      .fetch_addr_o(fetch_addr_o),
+      .fetch_en_o(fetch_en)
   );
 
 
@@ -221,7 +245,9 @@ end
       .rdata_o(spi_rdata_o)
   );
 
-  uart_program_downloader  uart_program_downloader_inst (
+  uart_program_downloader #(
+    .PROGRAM_ADDR_WIDTH(PROGRAM_ADDR_WIDTH)
+  ) uart_program_downloader_inst (
     .clk(clk),
     .rst_n(rst_n),
     .download_en_i(download_active),
@@ -234,13 +260,17 @@ end
 
 
   //存储指令
-  program_mem  program_mem_inst (
+  program_mem #(
+    .USE_BRAM_PROGRAM(USE_BRAM_PROGRAM)
+  ) program_mem_inst (
+    .fetch_en_i(fetch_en),
     .fetch_addr_i(fetch_addr_o),
     .instr_o(instr_o),
     .clk(clk),
     .load_we_i(load_we_o),
     .load_addr_i(load_addr_o),
     .load_data_i(load_data_o),
+    .data_rd_en_i(program_data_rd_en),
     .data_addr_i(bus2dev_addr_o),
     .data_word_o(program_data_word)
   );

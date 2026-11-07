@@ -51,7 +51,16 @@ module csr_unit (
   reg     [31:0] mepc_reg;//保存异常指令的地址，可由软件调整为返回地址
   reg     [31:0] mcause_reg;//保存异常或中断原因
   reg     [31:0] mie_reg;//保存中断使能寄存器
+  reg [63:0] cycle_count;
 
+  always @(posedge clk) begin
+    if (!rst_n) begin
+      cycle_count <= 64'd0;
+    end
+    else begin
+      cycle_count <= cycle_count + 64'd1;
+    end
+  end
   reg [31:0] csr_sw_old;
   reg [31:0] csr_sw_new;
  reg csr_sw_op_valid;
@@ -165,6 +174,8 @@ always@(*)begin
       12'h341: csr_rdata_o = mepc_reg;
       12'h342: csr_rdata_o = mcause_reg;
       12'h344: csr_rdata_o = mip_value;
+      12'hC00: csr_rdata_o = cycle_count[31:0];
+      12'hC80: csr_rdata_o = cycle_count[63:32];
     endcase
   end
 end

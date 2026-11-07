@@ -22,7 +22,8 @@
 
 module pipeline_core#(
   parameter USE_EXTERNAL_PROGRAM = 0,
-  parameter USE_UPSTREAM_MAP = 0
+  parameter USE_UPSTREAM_MAP = 0,
+  parameter USE_BRAM_PROGRAM = 0
 )(
     input wire clk,
     input wire rst_n,
@@ -39,7 +40,8 @@ module pipeline_core#(
     output wire[31:0] bus2dev_wdata_o,
     output wire[3:0] bus2dev_wstrb_o,
 
-    output wire [31:0] fetch_addr_o
+    output wire [31:0] fetch_addr_o,
+    output wire        fetch_en_o
 
 );
 
@@ -272,6 +274,27 @@ module pipeline_core#(
 
 
 assign fetch_addr_o = pc_o;
+localparam SYNC_FETCH = USE_EXTERNAL_PROGRAM && USE_BRAM_PROGRAM;
+
+reg [31:0] fetch_pc_q;
+reg        fetch_valid_q;
+
+assign fetch_en_o = SYNC_FETCH && rst_n &&
+                    !stall_ex_o && !clear_valid_ex_o;
+
+always @(posedge clk) begin
+  if (!rst_n) begin
+    fetch_pc_q    <= 32'd0;
+    fetch_valid_q <= 1'b0;
+  end
+  else if (clear_valid_ex_o) begin
+    fetch_valid_q <= 1'b0;
+  end
+  else if (fetch_en_o) begin
+    fetch_pc_q    <= pc_o;
+    fetch_valid_q <= 1'b1;
+  end
+end
 
   fetch_unit #(
     .USE_EXTERNAL_INSTR(USE_EXTERNAL_PROGRAM)
@@ -293,10 +316,10 @@ assign fetch_addr_o = pc_o;
   if_id if_id_inst (
       .clk(clk),
       .rst_n(rst_n),
-      .valid_i(1'b1),
+      .valid_i(SYNC_FETCH ? fetch_valid_q : 1'b1),
       .flush_ifid_i(clear_valid_ex_o),
       .stall_ifid_i(stall_ex_o),
-      .pc_ifid_i(pc_o),
+      .pc_ifid_i(SYNC_FETCH ? fetch_pc_q : pc_o),
       .instr_ifid_i(instr_o),
       .valid_o(valid_ifid_o),
       .pc_ifid_o(pc_ifid_o),
@@ -673,7 +696,8 @@ assign fetch_addr_o = pc_o;
   assign data_addr = ram_wr_en_ex_o ? ram_wr_addr_ex_o : ram_rd_addr_ex_o;
 
   data_bus #(
-    .USE_UPSTREAM_MAP(USE_UPSTREAM_MAP)
+    .USE_UPSTREAM_MAP(USE_UPSTREAM_MAP),
+    .PROGRAM_ADDR_WIDTH(USE_BRAM_PROGRAM ? 15 : 12)
   )data_bus_inst (
     .cpu2bus_req_i(data_req),
     .cpu2bus_we_i(data_we),

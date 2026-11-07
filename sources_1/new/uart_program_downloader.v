@@ -20,7 +20,9 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module uart_program_downloader (
+module uart_program_downloader #(
+  parameter PROGRAM_ADDR_WIDTH = 12
+)  (
     input  wire        clk,
     input  wire        rst_n,
     input  wire        download_en_i,
@@ -31,11 +33,11 @@ module uart_program_downloader (
     output wire [31:0] load_data_o
 );
 
-  localparam [12:0] END_ADDR = 13'h1000;
+localparam [PROGRAM_ADDR_WIDTH:0] END_ADDR = {1'b1, {PROGRAM_ADDR_WIDTH{1'b0}}};
 
   reg  [ 1:0] byte_index;
   reg  [23:0] byte_buf;
-  reg  [ 12:0] next_addr;
+  reg [PROGRAM_ADDR_WIDTH:0] next_addr;
 
   wire        accept_byte;
 
@@ -44,20 +46,20 @@ module uart_program_downloader (
 
   // 第四字节有效时，当前输入与前三字节组成一个完整字。
   assign load_we_o   = accept_byte && (byte_index == 2'd3);
-  assign load_addr_o = {19'd0, next_addr};
+  assign load_addr_o = next_addr;
   assign load_data_o = {byte_data_i, byte_buf};
 
   always @(posedge clk) begin
     if (!rst_n || !download_en_i) begin
       byte_index <= 2'd0;
       byte_buf   <= 24'd0;
-      next_addr  <= 13'd0;
+      next_addr  <= 0;
     end
     else if (accept_byte) begin
       if (load_we_o) begin
         // program_mem 在这个沿写入当前字，地址同时推进到下一字。
         byte_index <= 2'd0;
-        next_addr  <= next_addr + 13'd4;
+        next_addr  <= next_addr + 3'd4;
       end
       else begin
         // 前三个字节按低位到高位保存。

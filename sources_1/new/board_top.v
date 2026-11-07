@@ -64,7 +64,8 @@ output wire uart_tx_o
     soc_top # (
     .USE_UART_DOWNLOAD(USE_UART_DOWNLOAD),
     .CLK_PRE_BIT(CLK_PRE_BIT),
-    .USE_UPSTREAM_MAP(1'b1)
+    .USE_UPSTREAM_MAP(1'b1),
+    .USE_BRAM_PROGRAM(1'b1)
   )
   soc_top_inst (
     .clk(clk),
