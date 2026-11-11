@@ -264,8 +264,8 @@ module tb_uart_tx_system;
             edge_number = edge_number + 1;
             check((^{ex_valid, cpu_req, cpu_ready, cpu_stall, wb_en, uart_start}) !== 1'bx,
                   "control signals contain no X/Z");
-            check(dut.pipeline_core_inst.execute_unit_inst.irq_take === 1'b0 &&
-                  dut.pipeline_core_inst.execute_unit_inst.trap_enter_ex_o === 1'b0,
+            check(dut.pipeline_core_inst.ex_inst.irq_take === 1'b0 &&
+                  dut.pipeline_core_inst.ex_inst.trap_enter_ex_o === 1'b0,
                   "program runs without a trap");
             prepare_expectations;
             if (ex_valid === 1'b1) begin

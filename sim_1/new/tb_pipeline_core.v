@@ -10,7 +10,7 @@
 // Target Devices: 
 // Tool Versions: 
 // Description: Testbench for pipeline_core (top)
-//              - verify fetch / if_id / decode / id_ex / execute_unit / regfile
+//              - verify fetch / if_id / decode / id_ex / ex / regfile
 //              - check if_id and id_ex bundles advance per cycle, no field crossing
 //              - check nop creates bubble (valid_idex_o=0)
 //              - check regfile writeback values (x1..x31)
@@ -196,7 +196,7 @@ module tb_pipeline_core();
     // 每个上升沿、NBL 更新前，检查本沿 wr_*
     //
     // 该 always 块在 active region 执行，而所有 <= 写入在 NBA region
-    // 执行；所以此处读到的 wr_* 是 id_ex 上拍内容驱动的 execute_unit 组合输出，
+    // 执行；所以此处读到的 wr_* 是 id_ex 上拍内容驱动的 ex 组合输出，
     // 也就是本沿真正要写入 regfile 的值。
     //
     // 期望值（按 instr_rom 内短程序与 id_ex 每拍延迟 1 拍推导）：

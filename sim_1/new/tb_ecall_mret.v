@@ -76,14 +76,14 @@ endtask
 // 不含延时，可在更新沿前检查旧状态，也可在 #1 后检查新状态。
 task check_csr_state;
 begin
-    check("mstatus", u_pipeline_core.execute_unit_inst.csr_unit_inst.mstatus_reg, exp_mstatus);
-    check("mtvec", u_pipeline_core.execute_unit_inst.csr_unit_inst.mtvec_reg, exp_mtvec);
-    check("mepc", u_pipeline_core.execute_unit_inst.csr_unit_inst.mepc_reg, exp_mepc);
-    check("mcause", u_pipeline_core.execute_unit_inst.csr_unit_inst.mcause_reg, exp_mcause);
+    check("mstatus", u_pipeline_core.ex_inst.csr_unit_inst.mstatus_reg, exp_mstatus);
+    check("mtvec", u_pipeline_core.ex_inst.csr_unit_inst.mtvec_reg, exp_mtvec);
+    check("mepc", u_pipeline_core.ex_inst.csr_unit_inst.mepc_reg, exp_mepc);
+    check("mcause", u_pipeline_core.ex_inst.csr_unit_inst.mcause_reg, exp_mcause);
     check("mscratch must remain zero",
-          u_pipeline_core.execute_unit_inst.csr_unit_inst.mscratch_reg, 32'b0);
-    check("mtvec hardware output", u_pipeline_core.execute_unit_inst.csr_mtvec_o, exp_mtvec);
-    check("mepc hardware output", u_pipeline_core.execute_unit_inst.csr_mepc_o, exp_mepc);
+          u_pipeline_core.ex_inst.csr_unit_inst.mscratch_reg, 32'b0);
+    check("mtvec hardware output", u_pipeline_core.ex_inst.csr_mtvec_o, exp_mtvec);
+    check("mepc hardware output", u_pipeline_core.ex_inst.csr_mepc_o, exp_mepc);
 end
 endtask
 
@@ -91,10 +91,10 @@ endtask
 task check_bubble;
 begin
     check("GPR write in bubble", {31'b0,u_pipeline_core.wr_en_ex_o}, 32'd0);
-    check("CSR write in bubble", {31'b0,u_pipeline_core.execute_unit_inst.csr_wr_en_ex_o}, 32'd0);
-    check("CSR read in bubble", {31'b0,u_pipeline_core.execute_unit_inst.csr_rd_en_ex_o}, 32'd0);
-    check("entry in bubble", {31'b0,u_pipeline_core.execute_unit_inst.trap_enter_ex_o}, 32'd0);
-    check("return in bubble", {31'b0,u_pipeline_core.execute_unit_inst.trap_return_ex_o}, 32'd0);
+    check("CSR write in bubble", {31'b0,u_pipeline_core.ex_inst.csr_wr_en_ex_o}, 32'd0);
+    check("CSR read in bubble", {31'b0,u_pipeline_core.ex_inst.csr_rd_en_ex_o}, 32'd0);
+    check("entry in bubble", {31'b0,u_pipeline_core.ex_inst.trap_enter_ex_o}, 32'd0);
+    check("return in bubble", {31'b0,u_pipeline_core.ex_inst.trap_return_ex_o}, 32'd0);
     check("redirect in bubble", {31'b0,u_pipeline_core.pc_brench_flag_ex_o}, 32'd0);
     check("flush in bubble", {31'b0,u_pipeline_core.clear_valid_ex_o}, 32'd0);
 end
@@ -207,9 +207,9 @@ initial begin
         check("stall_ex_o", {31'b0,u_pipeline_core.stall_ex_o}, 32'd0);
         check("RAM write must be zero", {31'b0,u_pipeline_core.ram_wr_en_ex_o}, 32'd0);
 
-        if (u_pipeline_core.execute_unit_inst.trap_enter_ex_o === 1'b1)
+        if (u_pipeline_core.ex_inst.trap_enter_ex_o === 1'b1)
             enter_count = enter_count + 1;
-        if (u_pipeline_core.execute_unit_inst.trap_return_ex_o === 1'b1)
+        if (u_pipeline_core.ex_inst.trap_return_ex_o === 1'b1)
             return_count = return_count + 1;
 
         if (u_pipeline_core.valid_idex_o === 1'b1) begin
@@ -220,23 +220,23 @@ initial begin
                 check("GPR destination", {27'b0,u_pipeline_core.wr_addr_ex_o}, {27'b0,exp_rd});
                 check("GPR write data", u_pipeline_core.wr_data_ex_o, exp_wdata);
             end
-            check("entry event", {31'b0,u_pipeline_core.execute_unit_inst.trap_enter_ex_o}, {31'b0,exp_enter});
-            check("return event", {31'b0,u_pipeline_core.execute_unit_inst.trap_return_ex_o}, {31'b0,exp_return});
-            check("CSR instruction write", {31'b0,u_pipeline_core.execute_unit_inst.csr_wr_en_ex_o}, {31'b0,exp_csr_write});
-            check("CSR read enable", {31'b0,u_pipeline_core.execute_unit_inst.csr_rd_en_ex_o}, {31'b0,exp_csr_read});
+            check("entry event", {31'b0,u_pipeline_core.ex_inst.trap_enter_ex_o}, {31'b0,exp_enter});
+            check("return event", {31'b0,u_pipeline_core.ex_inst.trap_return_ex_o}, {31'b0,exp_return});
+            check("CSR instruction write", {31'b0,u_pipeline_core.ex_inst.csr_wr_en_ex_o}, {31'b0,exp_csr_write});
+            check("CSR read enable", {31'b0,u_pipeline_core.ex_inst.csr_rd_en_ex_o}, {31'b0,exp_csr_read});
             check("PC redirect", {31'b0,u_pipeline_core.pc_brench_flag_ex_o}, {31'b0,exp_redirect});
             check("pipeline flush", {31'b0,u_pipeline_core.clear_valid_ex_o}, {31'b0,exp_redirect});
             if (exp_redirect)
                 check("redirect target", u_pipeline_core.pc_brench_addr_ex_o, exp_target);
             if (exp_csr_write) begin
-                check("CSR write address", {20'b0,u_pipeline_core.execute_unit_inst.csr_wr_addr_ex_o}, {20'b0,exp_csr_addr});
-                check("CSR source", u_pipeline_core.execute_unit_inst.csr_wr_data_ex_o, exp_csr_source);
+                check("CSR write address", {20'b0,u_pipeline_core.ex_inst.csr_wr_addr_ex_o}, {20'b0,exp_csr_addr});
+                check("CSR source", u_pipeline_core.ex_inst.csr_wr_data_ex_o, exp_csr_source);
             end
             if (exp_csr_read)
-                check("CSR read address", {20'b0,u_pipeline_core.execute_unit_inst.csr_rd_addr_ex_o}, {20'b0,exp_csr_addr});
+                check("CSR read address", {20'b0,u_pipeline_core.ex_inst.csr_rd_addr_ex_o}, {20'b0,exp_csr_addr});
             if (exp_enter) begin
-                check("ECALL saved PC source", u_pipeline_core.execute_unit_inst.trap_pc_ex_o, 32'h10);
-                check("ECALL cause source", u_pipeline_core.execute_unit_inst.trap_cause_ex_o, 32'd11);
+                check("ECALL saved PC source", u_pipeline_core.ex_inst.trap_pc_ex_o, 32'h10);
+                check("ECALL cause source", u_pipeline_core.ex_inst.trap_cause_ex_o, 32'd11);
             end
 
             #1; // NBA 更新以及组合逻辑稳定后检查实际状态
@@ -270,11 +270,11 @@ initial begin
     check_regfile(5'd2,32'd8);
     check_regfile(5'd5,32'd7);
     check_regfile(5'd10,32'h14);
-    check("final mepc", u_pipeline_core.execute_unit_inst.csr_unit_inst.mepc_reg, 32'h14);
-    check("final mcause", u_pipeline_core.execute_unit_inst.csr_unit_inst.mcause_reg, 32'd11);
-    check("final mstatus", u_pipeline_core.execute_unit_inst.csr_unit_inst.mstatus_reg, 32'h1888);
+    check("final mepc", u_pipeline_core.ex_inst.csr_unit_inst.mepc_reg, 32'h14);
+    check("final mcause", u_pipeline_core.ex_inst.csr_unit_inst.mcause_reg, 32'd11);
+    check("final mstatus", u_pipeline_core.ex_inst.csr_unit_inst.mstatus_reg, 32'h1888);
     check("wrong-path CSR writes cancelled",
-          u_pipeline_core.execute_unit_inst.csr_unit_inst.mscratch_reg, 32'b0);
+          u_pipeline_core.ex_inst.csr_unit_inst.mscratch_reg, 32'b0);
     // 冲刷后的读地址为零，通过实际读口检查架构 x0。
     check("x0 rs1 address", {27'b0,u_pipeline_core.regfile_inst.rs1_addr_i}, 32'd0);
     check("x0 rs1 data", u_pipeline_core.regfile_inst.rs1_data_o, 32'd0);

@@ -11,11 +11,11 @@ module tb_timer_irq_system;
     wire ex_valid=dut.pipeline_core_inst.valid_idex_o;
     wire [31:0] ex_pc=dut.pipeline_core_inst.pc_idex_o;
     wire stall=dut.pipeline_core_inst.stall_ex_o;
-    wire irq_take=dut.pipeline_core_inst.execute_unit_inst.irq_take;
-    wire trap_enter=dut.pipeline_core_inst.execute_unit_inst.trap_enter_ex_o;
-    wire trap_return=dut.pipeline_core_inst.execute_unit_inst.trap_return_ex_o;
-    wire csr_wr=dut.pipeline_core_inst.execute_unit_inst.csr_wr_en_ex_o;
-    wire csr_rd=dut.pipeline_core_inst.execute_unit_inst.csr_rd_en_ex_o;
+    wire irq_take=dut.pipeline_core_inst.ex_inst.irq_take;
+    wire trap_enter=dut.pipeline_core_inst.ex_inst.trap_enter_ex_o;
+    wire trap_return=dut.pipeline_core_inst.ex_inst.trap_return_ex_o;
+    wire csr_wr=dut.pipeline_core_inst.ex_inst.csr_wr_en_ex_o;
+    wire csr_rd=dut.pipeline_core_inst.ex_inst.csr_rd_en_ex_o;
     wire cpu_req=dut.pipeline_core_inst.data_req;
     wire cpu_we=dut.pipeline_core_inst.data_we;
     wire [31:0] cpu_addr=dut.pipeline_core_inst.data_addr;
@@ -75,12 +75,12 @@ module tb_timer_irq_system;
     task check_state;
         integer r;
         begin
-            check(dut.pipeline_core_inst.execute_unit_inst.csr_unit_inst.mstatus_reg === expected_mstatus,"mstatus storage");
-            check(dut.pipeline_core_inst.execute_unit_inst.csr_unit_inst.mtvec_reg === expected_mtvec,"mtvec storage");
-            check(dut.pipeline_core_inst.execute_unit_inst.csr_unit_inst.mie_reg === expected_mie,"mie storage");
-            check(dut.pipeline_core_inst.execute_unit_inst.csr_unit_inst.mepc_reg === expected_mepc,"mepc storage");
-            check(dut.pipeline_core_inst.execute_unit_inst.csr_unit_inst.mcause_reg === expected_mcause,"mcause storage");
-            check(dut.pipeline_core_inst.execute_unit_inst.csr_unit_inst.mscratch_reg === 32'd0,"mscratch unchanged");
+            check(dut.pipeline_core_inst.ex_inst.csr_unit_inst.mstatus_reg === expected_mstatus,"mstatus storage");
+            check(dut.pipeline_core_inst.ex_inst.csr_unit_inst.mtvec_reg === expected_mtvec,"mtvec storage");
+            check(dut.pipeline_core_inst.ex_inst.csr_unit_inst.mie_reg === expected_mie,"mie storage");
+            check(dut.pipeline_core_inst.ex_inst.csr_unit_inst.mepc_reg === expected_mepc,"mepc storage");
+            check(dut.pipeline_core_inst.ex_inst.csr_unit_inst.mcause_reg === expected_mcause,"mcause storage");
+            check(dut.pipeline_core_inst.ex_inst.csr_unit_inst.mscratch_reg === 32'd0,"mscratch unchanged");
             for(r=1;r<32;r=r+1)
                 if(dut.pipeline_core_inst.regfile_inst.reg_file[r] !== regs_expected[r]) begin
                     errors=errors+1;
@@ -96,7 +96,7 @@ module tb_timer_irq_system;
             check(dut.timer_irq_o === timer_irq_expected && dut.irq2cpu === timer_irq_expected,
                   "device request through soc_top merge with external input zero");
             check(dut.pipeline_core_inst.irq_external_i === timer_irq_expected &&
-                  dut.pipeline_core_inst.execute_unit_inst.irq_external_ex_i === timer_irq_expected,
+                  dut.pipeline_core_inst.ex_inst.irq_external_ex_i === timer_irq_expected,
                   "request reaches CPU and EX");
             check(dut.irq_external_i === 1'b0,"TB never injects an external request");
             check(gpio_out_o === gpio_expected,"GPIO changes only at handler marker store");
@@ -113,7 +113,7 @@ module tb_timer_irq_system;
                   dut.pipeline_core_inst.ram_rd_en_ex_o === 1'b0,"no ordinary memory access");
             check(ram_req === 1'b0 && dut.gpio_req === 1'b0 && dut.timer_req === 1'b0,"all target requests idle");
             check(cpu_ready === 1'b0 && cpu_rdata === 32'd0,"idle memory response");
-            check(dut.pipeline_core_inst.execute_unit_inst.start_ex_o === 1'b0,"no divider start");
+            check(dut.pipeline_core_inst.ex_inst.start_ex_o === 1'b0,"no divider start");
         end
     endtask
 
@@ -255,7 +255,7 @@ module tb_timer_irq_system;
             check((^{irq_take,ex_valid,stall,wb_en,csr_wr,csr_rd,trap_enter,trap_return,cpu_req,cpu_ready,
                       dut.timer_irq_o,dut.irq2cpu,dut.timer_req,dut.gpio_req,ram_req}) !== 1'bx,
                   "control signals contain no X/Z");
-            check(dut.pipeline_core_inst.execute_unit_inst.start_ex_o === 1'b0,"program never starts divider");
+            check(dut.pipeline_core_inst.ex_inst.start_ex_o === 1'b0,"program never starts divider");
             check_state;
             if(waiting) check(payload === saved_payload,"RAM request payload held through completion");
             if(timer_irq_expected && !expected_mstatus[3])
@@ -283,10 +283,10 @@ module tb_timer_irq_system;
                       "real Timer request and both CPU permissions at entry");
                 no_instruction_effect;
                 check(trap_enter === 1'b1 && trap_return === 1'b0,"IRQ entry control");
-                check(dut.pipeline_core_inst.execute_unit_inst.trap_pc_ex_o === 32'h3C &&
-                      dut.pipeline_core_inst.execute_unit_inst.trap_cause_ex_o === 32'h8000000B,"entry resume PC/cause");
+                check(dut.pipeline_core_inst.ex_inst.trap_pc_ex_o === 32'h3C &&
+                      dut.pipeline_core_inst.ex_inst.trap_cause_ex_o === 32'h8000000B,"entry resume PC/cause");
                 check(redirect === 1'b1 && flush === 1'b1 && redirect_pc === 32'h100,"IRQ redirect and flush");
-                check(dut.pipeline_core_inst.execute_unit_inst.resume_pc_reg === 32'h3C,"boundary records next main PC");
+                check(dut.pipeline_core_inst.ex_inst.resume_pc_reg === 32'h3C,"boundary records next main PC");
                 expected_mepc=32'h3C;expected_mcause=32'h8000000B;expected_mstatus=32'h1880;
                 enter_count=enter_count+1;entry_before=1;saved_target=32'h100;
             end else if(irq_take === 1'b0) begin
@@ -312,10 +312,10 @@ module tb_timer_irq_system;
                         end
                         check(csr_wr === exp_cwr && csr_rd === exp_crd,"instruction CSR enables");
                         if(exp_cwr)
-                            check(dut.pipeline_core_inst.execute_unit_inst.csr_wr_addr_ex_o === exp_caddr &&
-                                  dut.pipeline_core_inst.execute_unit_inst.csr_wr_data_ex_o === exp_csource,"CSR write address/source");
+                            check(dut.pipeline_core_inst.ex_inst.csr_wr_addr_ex_o === exp_caddr &&
+                                  dut.pipeline_core_inst.ex_inst.csr_wr_data_ex_o === exp_csource,"CSR write address/source");
                         if(exp_crd)
-                            check(dut.pipeline_core_inst.execute_unit_inst.csr_rd_addr_ex_o === exp_caddr,"CSR read address");
+                            check(dut.pipeline_core_inst.ex_inst.csr_rd_addr_ex_o === exp_caddr,"CSR read address");
                         check(trap_return === exp_return && redirect === exp_redirect && flush === exp_redirect,
                               "normal instruction return/redirect/flush controls");
                         if(exp_redirect) begin
@@ -389,7 +389,7 @@ module tb_timer_irq_system;
                       dut.pipeline_core_inst.valid_idex_o === 1'b0,"both pipeline packets flushed");
             end
             if(entry_before)
-                check(dut.pipeline_core_inst.execute_unit_inst.boundary_valid_reg === 1'b0,"entry consumes old boundary");
+                check(dut.pipeline_core_inst.ex_inst.boundary_valid_reg === 1'b0,"entry consumes old boundary");
             if(stall_before) begin
                 check(ex_pc === saved_ex_pc && dut.pipeline_core_inst.pc_o === saved_fetch_pc,"CPU PCs hold during RAM wait");
                 check({dut.pipeline_core_inst.valid_ifid_o,dut.pipeline_core_inst.pc_ifid_o,

@@ -127,12 +127,12 @@ begin
             errors=errors+1;
         end
     end
-    check("mstatus",u_pipeline_core.execute_unit_inst.csr_unit_inst.mstatus_reg,mstatus);
-    check("mtvec",u_pipeline_core.execute_unit_inst.csr_unit_inst.mtvec_reg,mtvec);
-    check("mie",u_pipeline_core.execute_unit_inst.csr_unit_inst.mie_reg,mie);
-    check("mepc",u_pipeline_core.execute_unit_inst.csr_unit_inst.mepc_reg,mepc);
-    check("mcause",u_pipeline_core.execute_unit_inst.csr_unit_inst.mcause_reg,mcause);
-    check("mscratch unchanged",u_pipeline_core.execute_unit_inst.csr_unit_inst.mscratch_reg,0);
+    check("mstatus",u_pipeline_core.ex_inst.csr_unit_inst.mstatus_reg,mstatus);
+    check("mtvec",u_pipeline_core.ex_inst.csr_unit_inst.mtvec_reg,mtvec);
+    check("mie",u_pipeline_core.ex_inst.csr_unit_inst.mie_reg,mie);
+    check("mepc",u_pipeline_core.ex_inst.csr_unit_inst.mepc_reg,mepc);
+    check("mcause",u_pipeline_core.ex_inst.csr_unit_inst.mcause_reg,mcause);
+    check("mscratch unchanged",u_pipeline_core.ex_inst.csr_unit_inst.mscratch_reg,0);
     if(u_pipeline_core.regfile_inst.rs1_addr_i===5'd0)
         check("architectural x0",u_pipeline_core.regfile_inst.rs1_data_o,0);
 end
@@ -221,14 +221,14 @@ begin
         check("GPR destination",{27'b0,u_pipeline_core.wr_addr_ex_o},{27'b0,exp_rd});
         check("GPR result",u_pipeline_core.wr_data_ex_o,exp_result);
     end
-    check("CSR write",{31'b0,u_pipeline_core.execute_unit_inst.csr_wr_en_ex_o},{31'b0,exp_cwr});
-    check("CSR read",{31'b0,u_pipeline_core.execute_unit_inst.csr_rd_en_ex_o},{31'b0,exp_crd});
+    check("CSR write",{31'b0,u_pipeline_core.ex_inst.csr_wr_en_ex_o},{31'b0,exp_cwr});
+    check("CSR read",{31'b0,u_pipeline_core.ex_inst.csr_rd_en_ex_o},{31'b0,exp_crd});
     if(exp_cwr) begin
-        check("CSR write address",{20'b0,u_pipeline_core.execute_unit_inst.csr_wr_addr_ex_o},{20'b0,exp_caddr});
-        check("CSR source",u_pipeline_core.execute_unit_inst.csr_wr_data_ex_o,exp_csource);
+        check("CSR write address",{20'b0,u_pipeline_core.ex_inst.csr_wr_addr_ex_o},{20'b0,exp_caddr});
+        check("CSR source",u_pipeline_core.ex_inst.csr_wr_data_ex_o,exp_csource);
     end
-    if(exp_crd) check("CSR read address",{20'b0,u_pipeline_core.execute_unit_inst.csr_rd_addr_ex_o},{20'b0,exp_caddr});
-    check("return event",{31'b0,u_pipeline_core.execute_unit_inst.trap_return_ex_o},{31'b0,exp_return});
+    if(exp_crd) check("CSR read address",{20'b0,u_pipeline_core.ex_inst.csr_rd_addr_ex_o},{20'b0,exp_caddr});
+    check("return event",{31'b0,u_pipeline_core.ex_inst.trap_return_ex_o},{31'b0,exp_return});
     check("redirect",{31'b0,u_pipeline_core.pc_brench_flag_ex_o},{31'b0,exp_jump});
     check("flush",{31'b0,u_pipeline_core.clear_valid_ex_o},{31'b0,exp_jump});
     if(exp_jump) check("redirect target",u_pipeline_core.pc_brench_addr_ex_o,exp_target);
@@ -239,9 +239,9 @@ task check_empty;
 begin
     check("no data request",{31'b0,u_pipeline_core.data_req},0);
     check("no GPR write",{31'b0,u_pipeline_core.wr_en_ex_o},0);
-    check("no CSR write",{31'b0,u_pipeline_core.execute_unit_inst.csr_wr_en_ex_o},0);
-    check("no CSR read",{31'b0,u_pipeline_core.execute_unit_inst.csr_rd_en_ex_o},0);
-    check("no return",{31'b0,u_pipeline_core.execute_unit_inst.trap_return_ex_o},0);
+    check("no CSR write",{31'b0,u_pipeline_core.ex_inst.csr_wr_en_ex_o},0);
+    check("no CSR read",{31'b0,u_pipeline_core.ex_inst.csr_rd_en_ex_o},0);
+    check("no return",{31'b0,u_pipeline_core.ex_inst.trap_return_ex_o},0);
     check("no stall",{31'b0,u_pipeline_core.stall_ex_o},0);
     check("no pending access",{31'b0,u_pipeline_core.ram_ready_o},0);
     check("no target write",{31'b0,u_pipeline_core.data_ram_target_inst.data_ram_inst.ram_wr_en_i},0);
@@ -333,13 +333,13 @@ initial begin
     expected_pc[30]=32'h6C;
     expected_pc[31]=32'h70;
     #15; check_state; check_empty;
-    check("reset entry",{31'b0,u_pipeline_core.execute_unit_inst.trap_enter_ex_o},0);
+    check("reset entry",{31'b0,u_pipeline_core.ex_inst.trap_enter_ex_o},0);
     #10; rst_n=1;
     while(!finished) begin
         @(posedge clk);
         check_state;
-        check("no DIV start",{31'b0,u_pipeline_core.execute_unit_inst.start_ex_o},0);
-        if(u_pipeline_core.execute_unit_inst.irq_take===1'b1) begin
+        check("no DIV start",{31'b0,u_pipeline_core.ex_inst.start_ex_o},0);
+        if(u_pipeline_core.ex_inst.irq_take===1'b1) begin
             check("one IRQ only",irq_count,0);
             check("IRQ after LW completion",step,10);
             check("no in-flight memory at IRQ",{31'b0,memory_waiting},0);
@@ -347,17 +347,17 @@ initial begin
             check("consumer not executed",u_pipeline_core.regfile_inst.reg_file[3],0);
             check_empty;
             check("IRQ request asserted",{31'b0,irq_external_i},1);
-            check("entry",{31'b0,u_pipeline_core.execute_unit_inst.trap_enter_ex_o},1);
-            check("saved address source",u_pipeline_core.execute_unit_inst.trap_pc_ex_o,32'h28);
-            check("interrupt cause",u_pipeline_core.execute_unit_inst.trap_cause_ex_o,32'h8000000B);
+            check("entry",{31'b0,u_pipeline_core.ex_inst.trap_enter_ex_o},1);
+            check("saved address source",u_pipeline_core.ex_inst.trap_pc_ex_o,32'h28);
+            check("interrupt cause",u_pipeline_core.ex_inst.trap_cause_ex_o,32'h8000000B);
             check("IRQ redirect",{31'b0,u_pipeline_core.pc_brench_flag_ex_o},1);
             check("IRQ flush",{31'b0,u_pipeline_core.clear_valid_ex_o},1);
             check("IRQ target",u_pipeline_core.pc_brench_addr_ex_o,32'h100);
             mepc=32'h28; mcause=32'h8000000B; mstatus=32'h1880;
             #1; check_state; check_flush(32'h100); check_empty;
             irq_count=irq_count+1;
-        end else if(u_pipeline_core.execute_unit_inst.irq_take===1'b0) begin
-            check("no synchronous exception",{31'b0,u_pipeline_core.execute_unit_inst.trap_enter_ex_o},0);
+        end else if(u_pipeline_core.ex_inst.irq_take===1'b0) begin
+            check("no synchronous exception",{31'b0,u_pipeline_core.ex_inst.trap_enter_ex_o},0);
             if(u_pipeline_core.valid_idex_o===1'b1) begin
                 if(step>=32) $fatal(1,"Extra instruction");
                 check("instruction order",u_pipeline_core.pc_idex_o,expected_pc[step]);
@@ -378,7 +378,7 @@ initial begin
                         check_hold; check_state; check_payload;
                         check_target(1); check_controls(1);
                         check("stall clears after A",{31'b0,u_pipeline_core.stall_ex_o},0);
-                        check("old boundary closed",{31'b0,u_pipeline_core.execute_unit_inst.boundary_valid_reg},0);
+                        check("old boundary closed",{31'b0,u_pipeline_core.ex_inst.boundary_valid_reg},0);
                         if(expected_pc[step]==32'h24) lw_prepared=1;
                         // No step advance: ready=1 after A is not a submission.
                     end else if(u_pipeline_core.ram_ready_o===1'b1) begin
@@ -393,10 +393,10 @@ initial begin
                         check("target ready resets after B",{31'b0,u_pipeline_core.ram_ready_o},0);
                         check("target write inactive after B",{31'b0,u_pipeline_core.data_ram_target_inst.data_ram_inst.ram_wr_en_i},0);
                         check("target read inactive after B",{31'b0,u_pipeline_core.data_ram_target_inst.data_ram_inst.ram_rd_en_i},0);
-                        check("boundary established",{31'b0,u_pipeline_core.execute_unit_inst.boundary_valid_reg},1);
-                        check("resume after memory",u_pipeline_core.execute_unit_inst.resume_pc_reg,expected_pc[step]+4);
+                        check("boundary established",{31'b0,u_pipeline_core.ex_inst.boundary_valid_reg},1);
+                        check("resume after memory",u_pipeline_core.ex_inst.resume_pc_reg,expected_pc[step]+4);
                         if(expected_pc[step]==32'h24)
-                            check("IRQ becomes eligible after LW submission",{31'b0,u_pipeline_core.execute_unit_inst.irq_take},1);
+                            check("IRQ becomes eligible after LW submission",{31'b0,u_pipeline_core.ex_inst.irq_take},1);
                         // A following memory instruction may already assert a NEW req.
                         step=step+1;
                     end else $fatal(1,"Unknown memory ready");
@@ -410,7 +410,7 @@ initial begin
                     if(exp_return) return_count=return_count+1;
                     if(expected_pc[step]==32'h70) begin
                         check_empty;
-                        check("no event in final bubble",{31'b0,u_pipeline_core.execute_unit_inst.trap_enter_ex_o},0);
+                        check("no event in final bubble",{31'b0,u_pipeline_core.ex_inst.trap_enter_ex_o},0);
                         finished=1;
                     end
                     step=step+1;

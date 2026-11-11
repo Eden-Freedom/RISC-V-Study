@@ -5,7 +5,7 @@
 // 
 // Create Date: 2026/10/22 19:54:47
 // Design Name: 
-// Module Name: execute_unit
+// Module Name: ex
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module execute_unit (
+module ex (
 
     input wire clk,
     input wire rst_n,

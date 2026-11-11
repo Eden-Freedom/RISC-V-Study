@@ -56,12 +56,12 @@ endtask
 task check_no_control_events;
 begin
     check("no stall",{31'b0,u_pipeline_core.stall_ex_o},32'd0);
-    check("no IRQ",{31'b0,u_pipeline_core.execute_unit_inst.irq_take},32'd0);
-    check("no trap entry",{31'b0,u_pipeline_core.execute_unit_inst.trap_enter_ex_o},32'd0);
-    check("no trap return",{31'b0,u_pipeline_core.execute_unit_inst.trap_return_ex_o},32'd0);
-    check("no DIV start",{31'b0,u_pipeline_core.execute_unit_inst.start_ex_o},32'd0);
-    check("no CSR write",{31'b0,u_pipeline_core.execute_unit_inst.csr_wr_en_ex_o},32'd0);
-    check("no CSR read",{31'b0,u_pipeline_core.execute_unit_inst.csr_rd_en_ex_o},32'd0);
+    check("no IRQ",{31'b0,u_pipeline_core.ex_inst.irq_take},32'd0);
+    check("no trap entry",{31'b0,u_pipeline_core.ex_inst.trap_enter_ex_o},32'd0);
+    check("no trap return",{31'b0,u_pipeline_core.ex_inst.trap_return_ex_o},32'd0);
+    check("no DIV start",{31'b0,u_pipeline_core.ex_inst.start_ex_o},32'd0);
+    check("no CSR write",{31'b0,u_pipeline_core.ex_inst.csr_wr_en_ex_o},32'd0);
+    check("no CSR read",{31'b0,u_pipeline_core.ex_inst.csr_rd_en_ex_o},32'd0);
 end
 endtask
 
@@ -81,7 +81,7 @@ begin
     check("RAM write pin",{31'b0,u_pipeline_core.data_ram_inst.ram_wr_en_i},{31'b0,exp_wr_selected});
     check("RAM read pin",{31'b0,u_pipeline_core.data_ram_inst.ram_rd_en_i},{31'b0,exp_rd_selected});
     check("RAM read word",u_pipeline_core.ram_rd_data_o,exp_read_word);
-    check("EX read data input",u_pipeline_core.execute_unit_inst.ram_rd_data_ex_i,exp_read_word);
+    check("EX read data input",u_pipeline_core.ex_inst.ram_rd_data_ex_i,exp_read_word);
     check("EX store byte mask",{28'b0,u_pipeline_core.ram_wr_sel_ex_o},{28'b0,exp_sel});
     check("EX store data",u_pipeline_core.ram_wr_data_ex_o,exp_wr_data);
     if (exp_wr) begin

@@ -5,18 +5,18 @@
 // 
 // Create Date: 2026/10/22 20:10:00
 // Design Name: 
-// Module Name: tb_execute_unit
+// Module Name: tb_ex
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: Testbench for execute_unit module (pure combinational, no clock)
+// Description: Testbench for ex module (pure combinational, no clock)
 //              - ADDI: 5 + 7 = 12
 //              - ADD : 2 + 3 = 5
 //              - SUB : 9 - 4 = 5
 //              - invalid bundle: valid=0, controls=1, must NOT write back
 //              - change inputs without waiting for a clock edge
 // 
-// Dependencies: execute_unit.v
+// Dependencies: ex.v
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -24,7 +24,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-module tb_execute_unit();
+module tb_ex();
 
     //---------------------------------------------------------------
     // DUT 输入
@@ -193,7 +193,7 @@ module tb_execute_unit();
     //---------------------------------------------------------------
     // DUT
     //---------------------------------------------------------------
-    execute_unit u_execute_unit(
+    ex u_ex(
         .valid_ex_i    (valid_ex_i),
         .is_addi_ex_i  (is_addi_ex_i),
         .is_add_ex_i   (is_add_ex_i),
