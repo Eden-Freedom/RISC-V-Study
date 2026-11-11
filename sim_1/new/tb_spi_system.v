@@ -71,7 +71,7 @@ module tb_spi_system;
         rst_n = 1'b1;
     end
 
-    // TB 只驱动顶层 MISO。总线访问全部来自 CPU 执行 imem 中的程序。
+    // TB 只驱动顶层 MISO。总线访问全部来自 CPU 执行 instr_rom 中的程序。
     always @(negedge spi_cs_n_o) begin
         if (rst_n) begin
             case (frame_count)

@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-// 真实 imem -> IF -> ID/EX -> EX -> CSR/PC，不强制任何指令或事件信号。
+// 真实 instr_rom -> IF -> ID/EX -> EX -> CSR/PC，不强制任何指令或事件信号。
 module tb_ecall_mret();
 
 reg clk;
@@ -195,7 +195,7 @@ initial begin
     check_csr_state;
     check_bubble;
     if (u_pipeline_core.instr_o !== 32'h10000093)
-        $fatal(1, "ECALL ROM mismatch: recompile imem.v with this test program");
+        $fatal(1, "ECALL ROM mismatch: recompile instr_rom.v with this test program");
 
     #10; // t=25，在上升沿之间释放复位
     rst_n = 1'b1;

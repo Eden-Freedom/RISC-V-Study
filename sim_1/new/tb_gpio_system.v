@@ -70,10 +70,10 @@ module tb_gpio_system;
             for (i = 1; i <= 9; i = i + 1)
                 check(dut.pipeline_core_inst.regfile_inst.reg_file[i] === expected_regs[i],
                       "final program register value");
-            check(dut.pipeline_core_inst.data_ram_target_inst.ram_inst.memory[0] === 32'hA6,
+            check(dut.pipeline_core_inst.data_ram_target_inst.data_ram_inst.memory[0] === 32'hA6,
                   "RAM address 0 holds A6");
             for (i = 1; i < 32; i = i + 1)
-                check(dut.pipeline_core_inst.data_ram_target_inst.ram_inst.memory[i] === 32'd0,
+                check(dut.pipeline_core_inst.data_ram_target_inst.data_ram_inst.memory[i] === 32'd0,
                       "other RAM words remain zero");
             if (errors == 0) begin
                 $display("PASS: GPIO system checks passed");

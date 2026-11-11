@@ -5,7 +5,7 @@
 // 
 // Create Date: 2026/10/19 11:07:23
 // Design Name: 
-// Module Name: addi_decode
+// Module Name: decode
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module addi_decode (
+module decode (
     input  wire [31:0] instr_i,
     output wire [31:0] imm_typei_o,
     output wire [31:0] imm_typeu_o,

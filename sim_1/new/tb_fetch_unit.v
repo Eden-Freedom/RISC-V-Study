@@ -60,7 +60,7 @@ fetch_unit u_fetch_unit(
     .instr_o(instr_o)
 );
 
-addi_decode u_addi_decode(
+decode u_decode(
     .instr_i(instr_o),
     .imm_o(imm_o),
     .rs1_addr_o(rs1_addr_o),

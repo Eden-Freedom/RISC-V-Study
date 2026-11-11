@@ -116,9 +116,9 @@ task check_state;
 integer n;
 begin
     for(n=0;n<32;n=n+1) begin
-        if(u_pipeline_core.data_ram_target_inst.ram_inst.memory[n] !== expected_ram[n]) begin
+        if(u_pipeline_core.data_ram_target_inst.data_ram_inst.memory[n] !== expected_ram[n]) begin
             $display("FAIL t=%0t step=%0d RAM[%0d]=%h expected=%h",$time,step,n,
-                u_pipeline_core.data_ram_target_inst.ram_inst.memory[n],expected_ram[n]);
+                u_pipeline_core.data_ram_target_inst.data_ram_inst.memory[n],expected_ram[n]);
             errors=errors+1;
         end
         if(n!=0 && u_pipeline_core.regfile_inst.reg_file[n] !== expected_regs[n]) begin
@@ -205,9 +205,9 @@ input complete_phase;
 begin
     check("ready",{31'b0,u_pipeline_core.ram_ready_o},{31'b0,complete_phase});
     check("target pending",{31'b0,u_pipeline_core.data_ram_target_inst.pending_reg},{31'b0,complete_phase});
-    check("RAM write pin",{31'b0,u_pipeline_core.data_ram_target_inst.ram_inst.ram_wr_en_i},
+    check("RAM write pin",{31'b0,u_pipeline_core.data_ram_target_inst.data_ram_inst.ram_wr_en_i},
           {31'b0,(complete_phase && exp_req && exp_we && exp_mapped)});
-    check("RAM read pin",{31'b0,u_pipeline_core.data_ram_target_inst.ram_inst.ram_rd_en_i},
+    check("RAM read pin",{31'b0,u_pipeline_core.data_ram_target_inst.data_ram_inst.ram_rd_en_i},
           {31'b0,(complete_phase && exp_req && !exp_we && exp_mapped)});
     check("target read word",u_pipeline_core.ram_rd_data_o,complete_phase ? exp_word : 32'd0);
 end
@@ -244,8 +244,8 @@ begin
     check("no return",{31'b0,u_pipeline_core.ex_inst.trap_return_ex_o},0);
     check("no stall",{31'b0,u_pipeline_core.stall_ex_o},0);
     check("no pending access",{31'b0,u_pipeline_core.ram_ready_o},0);
-    check("no target write",{31'b0,u_pipeline_core.data_ram_target_inst.ram_inst.ram_wr_en_i},0);
-    check("no target read",{31'b0,u_pipeline_core.data_ram_target_inst.ram_inst.ram_rd_en_i},0);
+    check("no target write",{31'b0,u_pipeline_core.data_ram_target_inst.data_ram_inst.ram_wr_en_i},0);
+    check("no target read",{31'b0,u_pipeline_core.data_ram_target_inst.data_ram_inst.ram_rd_en_i},0);
     check("idle target read data",u_pipeline_core.ram_rd_data_o,0);
 end
 endtask
@@ -391,8 +391,8 @@ initial begin
                         commits[step]=commits[step]+1; memory_waiting=0;
                         #1; check_state;
                         check("target ready resets after B",{31'b0,u_pipeline_core.ram_ready_o},0);
-                        check("target write inactive after B",{31'b0,u_pipeline_core.data_ram_target_inst.ram_inst.ram_wr_en_i},0);
-                        check("target read inactive after B",{31'b0,u_pipeline_core.data_ram_target_inst.ram_inst.ram_rd_en_i},0);
+                        check("target write inactive after B",{31'b0,u_pipeline_core.data_ram_target_inst.data_ram_inst.ram_wr_en_i},0);
+                        check("target read inactive after B",{31'b0,u_pipeline_core.data_ram_target_inst.data_ram_inst.ram_rd_en_i},0);
                         check("boundary established",{31'b0,u_pipeline_core.ex_inst.boundary_valid_reg},1);
                         check("resume after memory",u_pipeline_core.ex_inst.resume_pc_reg,expected_pc[step]+4);
                         if(expected_pc[step]==32'h24)
@@ -436,9 +436,9 @@ initial begin
         endcase
     end
     check_state;
-    check("final RAM[0]",u_pipeline_core.data_ram_target_inst.ram_inst.memory[0],32'h81238055);
-    check("final RAM[1]",u_pipeline_core.data_ram_target_inst.ram_inst.memory[1],32'h56);
-    check("final RAM[2]",u_pipeline_core.data_ram_target_inst.ram_inst.memory[2],32'h81238055);
+    check("final RAM[0]",u_pipeline_core.data_ram_target_inst.data_ram_inst.memory[0],32'h81238055);
+    check("final RAM[1]",u_pipeline_core.data_ram_target_inst.data_ram_inst.memory[1],32'h56);
+    check("final RAM[2]",u_pipeline_core.data_ram_target_inst.data_ram_inst.memory[2],32'h81238055);
     if(errors==0) begin
         $display("PASS: CPU data handshake checks passed"); $finish;
     end else $fatal(1,"FAIL: %0d CPU data handshake checks failed",errors);

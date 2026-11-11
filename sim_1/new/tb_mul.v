@@ -2,7 +2,7 @@
 
 // Assistant-authored testbench, requested by the learner.
 // Style follows the current Vivado tb_check.v: tasks, errors, !== and #1.
-// Install the matching mul_imem_case.txt entries in imem before simulation.
+// Install the matching mul_imem_case.txt entries in instr_rom before simulation.
 // Checks include both JALs and their commits. No Python or run-time reference
 // multiplication is used by this testbench.
 module tb_mul();

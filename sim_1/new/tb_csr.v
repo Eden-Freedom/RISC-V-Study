@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
-// 程序来自 fetch_unit 内部的 imem，不由 TB 注入指令或 rs1 数据。
-// 更换 imem.v 中的程序时，同步调整下面的提交顺序和预期值。
+// 程序来自 fetch_unit 内部的 instr_rom，不由 TB 注入指令或 rs1 数据。
+// 更换 instr_rom.v 中的程序时，同步调整下面的提交顺序和预期值。
 module tb_csr();
 
 reg clk;
@@ -105,7 +105,7 @@ initial begin
     #15;
     // Fail immediately if Vivado reused a compiled ROM from another test.
     if (u_pipeline_core.instr_o !== 32'h03500093) begin
-        $fatal(1, "CSR ROM mismatch at PC=0: actual=%08h expected=03500093. Fully recompile imem.v; restarting the old snapshot is insufficient.",
+        $fatal(1, "CSR ROM mismatch at PC=0: actual=%08h expected=03500093. Fully recompile instr_rom.v; restarting the old snapshot is insufficient.",
                u_pipeline_core.instr_o);
     end
     check_valid(1'b0, 1'b0);

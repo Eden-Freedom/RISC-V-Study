@@ -36,9 +36,9 @@ task check_state;
 integer n;
 begin
     for (n=0;n<32;n=n+1) begin
-        if (u_pipeline_core.ram_inst.memory[n] !== expected_ram[n]) begin
+        if (u_pipeline_core.data_ram_inst.memory[n] !== expected_ram[n]) begin
             $display("FAIL t=%0t step=%0d RAM[%0d]=%h expected=%h",$time,step,n,
-                     u_pipeline_core.ram_inst.memory[n],expected_ram[n]);
+                     u_pipeline_core.data_ram_inst.memory[n],expected_ram[n]);
             errors=errors+1;
         end
         // x0内部存储未复位，架构读口的零值另行检查。
@@ -78,20 +78,20 @@ begin
           (exp_rd_addr==32'h80 || exp_rd_addr==32'h10000000 || exp_rd_addr==32'hFC) ? 32'd0 : 32'd1);
     check("selected RAM write",{31'b0,u_pipeline_core.ram_wr_en_selected},{31'b0,exp_wr_selected});
     check("selected RAM read",{31'b0,u_pipeline_core.ram_rd_en_selected},{31'b0,exp_rd_selected});
-    check("RAM write pin",{31'b0,u_pipeline_core.ram_inst.ram_wr_en_i},{31'b0,exp_wr_selected});
-    check("RAM read pin",{31'b0,u_pipeline_core.ram_inst.ram_rd_en_i},{31'b0,exp_rd_selected});
+    check("RAM write pin",{31'b0,u_pipeline_core.data_ram_inst.ram_wr_en_i},{31'b0,exp_wr_selected});
+    check("RAM read pin",{31'b0,u_pipeline_core.data_ram_inst.ram_rd_en_i},{31'b0,exp_rd_selected});
     check("RAM read word",u_pipeline_core.ram_rd_data_o,exp_read_word);
     check("EX read data input",u_pipeline_core.ex_inst.ram_rd_data_ex_i,exp_read_word);
     check("EX store byte mask",{28'b0,u_pipeline_core.ram_wr_sel_ex_o},{28'b0,exp_sel});
     check("EX store data",u_pipeline_core.ram_wr_data_ex_o,exp_wr_data);
     if (exp_wr) begin
-        check("RAM store word index",{27'b0,u_pipeline_core.ram_inst.ram_wr_addr_i},
+        check("RAM store word index",{27'b0,u_pipeline_core.data_ram_inst.ram_wr_addr_i},
               (step==4 || step==16 || step==20) ? 32'd31 : 32'd0);
-        check("RAM store data pin",u_pipeline_core.ram_inst.ram_wr_data_i,exp_wr_data);
-        check("RAM byte mask pin",{28'b0,u_pipeline_core.ram_inst.ram_wr_sel_i},{28'b0,exp_sel});
+        check("RAM store data pin",u_pipeline_core.data_ram_inst.ram_wr_data_i,exp_wr_data);
+        check("RAM byte mask pin",{28'b0,u_pipeline_core.data_ram_inst.ram_wr_sel_i},{28'b0,exp_sel});
     end
     if (exp_rd)
-        check("RAM load word index",{27'b0,u_pipeline_core.ram_inst.ram_rd_addr_i},
+        check("RAM load word index",{27'b0,u_pipeline_core.data_ram_inst.ram_rd_addr_i},
               (step==13 || step==17 || step==18 || step==21 || step==22) ? 32'd31 : 32'd0);
 end
 endtask
@@ -225,8 +225,8 @@ initial begin
         end else $fatal(1,"Unknown EX valid");
     end
     check("all instructions submitted",step,24);
-    check("final RAM[0]",u_pipeline_core.ram_inst.memory[0],32'h55);
-    check("final RAM[31]",u_pipeline_core.ram_inst.memory[31],32'h7A000066);
+    check("final RAM[0]",u_pipeline_core.data_ram_inst.memory[0],32'h55);
+    check("final RAM[31]",u_pipeline_core.data_ram_inst.memory[31],32'h7A000066);
     if (errors==0) begin
         $display("PASS: data address decode pipeline checks passed");
         $finish;

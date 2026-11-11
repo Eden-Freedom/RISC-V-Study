@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 // TB drives only soc_top clock/reset/IRQ=0. Internal references observe the DUT.
-// CPU requests are generated exclusively by the imem program.
+// CPU requests are generated exclusively by the instr_rom program.
 module tb_timer_system;
     reg clk = 1'b0;
     reg rst_n = 1'b0;
@@ -105,10 +105,10 @@ module tb_timer_system;
             for (i=14; i<32; i=i+1)
                 check(dut.pipeline_core_inst.regfile_inst.reg_file[i] === 32'd0,
                       "unused registers remain zero");
-            check(dut.pipeline_core_inst.data_ram_target_inst.ram_inst.memory[0] === 32'd3,
+            check(dut.pipeline_core_inst.data_ram_target_inst.data_ram_inst.memory[0] === 32'd3,
                   "RAM address zero stores three");
             for (i=1; i<32; i=i+1)
-                check(dut.pipeline_core_inst.data_ram_target_inst.ram_inst.memory[i] === 32'd0,
+                check(dut.pipeline_core_inst.data_ram_target_inst.data_ram_inst.memory[i] === 32'd0,
                       "other RAM words unchanged");
             check_timer_state;
             if (errors == 0) begin

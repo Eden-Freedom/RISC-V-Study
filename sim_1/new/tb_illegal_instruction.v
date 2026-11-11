@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-// 真实 imem -> IF -> ID/EX -> EX -> CSR/PC，不强制任何指令或事件信号。
+// 真实 instr_rom -> IF -> ID/EX -> EX -> CSR/PC，不强制任何指令或事件信号。
 module tb_illegal_instruction();
 
 reg clk;
@@ -210,7 +210,7 @@ initial begin
     check_csr_state;
     check_bubble;
     if (u_pipeline_core.instr_o !== 32'h10000093)
-        $fatal(1, "illegal ROM mismatch: recompile imem.v with this test program");
+        $fatal(1, "illegal ROM mismatch: recompile instr_rom.v with this test program");
 
     #10; // t=25，在上升沿之间释放复位
     rst_n = 1'b1;
@@ -316,7 +316,7 @@ end
 
 //---------------------------------------------------------------
 // Check the actual fetched ROM word, including speculative wrong-path fetches.
-// This observes imem; it never forces internal signals or supplies instructions.
+// This observes instr_rom; it never forces internal signals or supplies instructions.
 function [31:0] expected_instr;
 input [31:0] pc;
 begin
@@ -343,7 +343,7 @@ endfunction
 always @(posedge clk) begin
     if (rst_n === 1'b1) begin
         if (u_pipeline_core.instr_o !== expected_instr(u_pipeline_core.pc_o))
-            $fatal(1,"Illegal-instruction ROM mismatch at PC=%h: actual=%h expected=%h; update imem.v",
+            $fatal(1,"Illegal-instruction ROM mismatch at PC=%h: actual=%h expected=%h; update instr_rom.v",
                    u_pipeline_core.pc_o, u_pipeline_core.instr_o,
                    expected_instr(u_pipeline_core.pc_o));
     end

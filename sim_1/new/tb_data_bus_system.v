@@ -84,10 +84,10 @@ module tb_data_bus_system;
             check(dut.regfile_inst.reg_file[5] === 32'h12345679, "x5 consumes DEV load");
             check(dut.regfile_inst.reg_file[6] === 32'd0, "x6 = unmapped read zero");
             check(dut.regfile_inst.reg_file[7] === 32'h12345679, "x7 = final RAM readback");
-            check(dut.data_ram_target_inst.ram_inst.memory[0] === 32'h35, "RAM address 0 unchanged");
-            check(dut.data_ram_target_inst.ram_inst.memory[1] === 32'h12345679, "RAM address 4 result");
+            check(dut.data_ram_target_inst.data_ram_inst.memory[0] === 32'h35, "RAM address 0 unchanged");
+            check(dut.data_ram_target_inst.data_ram_inst.memory[1] === 32'h12345679, "RAM address 4 result");
             for (i = 2; i < 32; i = i + 1)
-                check(dut.data_ram_target_inst.ram_inst.memory[i] === 32'd0,
+                check(dut.data_ram_target_inst.data_ram_inst.memory[i] === 32'd0,
                       "other RAM words unchanged");
             if (errors == 0) begin
                 $display("PASS: data bus system checks passed");

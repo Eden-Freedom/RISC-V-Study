@@ -60,7 +60,7 @@ initial begin
     u_addi_core.regfile_inst.reg_file[4],
     u_addi_core.regfile_inst.reg_file[5],
     u_addi_core.regfile_inst.reg_file[6],
-    u_addi_core.ram_inst.memory[16],
+    u_addi_core.data_ram_inst.memory[16],
     u_addi_core.ram_wr_sel_o,
     u_addi_core.ram_wr_addr_o,
     u_addi_core.ram_wr_data_o
@@ -112,9 +112,9 @@ initial begin
         errors = errors + 1;
     end
 
-    if (u_addi_core.ram_inst.memory[16] !== 32'hFF805678) begin
+    if (u_addi_core.data_ram_inst.memory[16] !== 32'hFF805678) begin
         $display("FAIL memory16: actual=%h expected=%h",
-                 u_addi_core.ram_inst.memory[16],
+                 u_addi_core.data_ram_inst.memory[16],
                  32'hFF805678);
         errors = errors + 1;
     end

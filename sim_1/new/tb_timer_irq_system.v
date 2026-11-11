@@ -100,7 +100,7 @@ module tb_timer_irq_system;
                   "request reaches CPU and EX");
             check(dut.irq_external_i === 1'b0,"TB never injects an external request");
             check(gpio_out_o === gpio_expected,"GPIO changes only at handler marker store");
-            check(dut.pipeline_core_inst.data_ram_target_inst.ram_inst.memory[0] === ram_zero_expected,
+            check(dut.pipeline_core_inst.data_ram_target_inst.data_ram_inst.memory[0] === ram_zero_expected,
                   "RAM word zero follows program store");
         end
     endtask
@@ -213,7 +213,7 @@ module tb_timer_irq_system;
             for(r=1;r<32;r=r+1)
                 check(dut.pipeline_core_inst.regfile_inst.reg_file[r] === final_regs[r],"final register result");
             for(r=1;r<32;r=r+1)
-                check(dut.pipeline_core_inst.data_ram_target_inst.ram_inst.memory[r] === 32'd0,
+                check(dut.pipeline_core_inst.data_ram_target_inst.data_ram_inst.memory[r] === 32'd0,
                       "other RAM words remain zero");
             check_state;
             if(errors==0) begin

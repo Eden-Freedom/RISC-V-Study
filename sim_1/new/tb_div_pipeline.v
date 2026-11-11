@@ -603,7 +603,7 @@ module tb_div_pipeline;
         end
 
         for (m = 0; m < 32; m = m + 1) begin
-            if (dut.ram_inst.memory[m] !== 32'd0)
+            if (dut.data_ram_inst.memory[m] !== 32'd0)
                 fail("RAM changed unexpectedly");
         end
 

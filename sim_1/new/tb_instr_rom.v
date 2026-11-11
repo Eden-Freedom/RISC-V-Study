@@ -5,7 +5,7 @@
 // 
 // Create Date: 2026/10/19 09:59:44
 // Design Name: 
-// Module Name: tb_imem
+// Module Name: tb_instr_rom
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,12 +20,12 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module tb_imem();
+module tb_instr_rom();
 
 reg [31:0] addr;
 wire [31:0] instr;
 
-imem imem_inst(
+instr_rom instr_rom_inst(
     .addr_i(addr),
     .instr_o(instr)
 );
