@@ -84,15 +84,4 @@ wire [31:0] load_data_o;
     .load_data_i(load_data_o)
   );
 
-
-
-
-
-
-
-
-
-
-
-
 endmodule
