@@ -23,10 +23,10 @@ task check_regfile;
 input [4:0] idx;
 input [31:0] exp_val;
 begin
-    if (u_pipeline_core.regfile_inst.reg_file[idx] !== exp_val) begin
+    if (u_pipeline_core.register_file_inst.reg_file[idx] !== exp_val) begin
         $display("FAIL [%0t] x%0d actual=%h expected=%h",
                  $time, idx,
-                 u_pipeline_core.regfile_inst.reg_file[idx],
+                 u_pipeline_core.register_file_inst.reg_file[idx],
                  exp_val);
         errors = errors + 1;
     end
@@ -100,10 +100,10 @@ begin
     @(posedge clk);
     #1;
 
-    if (u_pipeline_core.ram_inst.memory[16] !== mem_exp) begin
+    if (u_pipeline_core.data_ram_inst.memory[16] !== mem_exp) begin
         $display("FAIL [%0t] memory[16] actual=%h expected=%h",
                  $time,
-                 u_pipeline_core.ram_inst.memory[16],
+                 u_pipeline_core.data_ram_inst.memory[16],
                  mem_exp);
         errors = errors + 1;
     end
@@ -420,10 +420,10 @@ initial begin
     check_regfile(5'd18, 32'h33441122);
     check_regfile(5'd19, 32'h33441123);
 
-    if (u_pipeline_core.ram_inst.memory[16] !== 32'h33441122) begin
+    if (u_pipeline_core.data_ram_inst.memory[16] !== 32'h33441122) begin
         $display("FAIL [%0t] final memory[16] actual=%h expected=33441122",
                  $time,
-                 u_pipeline_core.ram_inst.memory[16]);
+                 u_pipeline_core.data_ram_inst.memory[16]);
         errors = errors + 1;
     end
 

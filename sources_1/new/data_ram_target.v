@@ -57,13 +57,13 @@ module data_ram_target (
       pending_reg <= 1'b0;
     end
   end
-//由于不同的地址会造成写入ram还是写入GPIO输出恶寄存器，因此需要增加条件进行判断
+//由于不同的地址会造成写入data_ram还是写入GPIO输出恶寄存器，因此需要增加条件进行判断
   assign ram_wr_hit = (addr_i[31:7] == 25'd0);
   assign ram_rd_hit = (addr_i[31:7] == 25'd0);
   assign ram_wr_en  = ram_wr_hit & we_i & done;
   assign ram_rd_en  = ram_rd_hit & ~we_i & done;
 
-  ram ram_inst (
+  data_ram data_ram_inst (
       .clk(clk),
       .rst_n(rst_n),
       .ram_wr_addr_i(addr_i[6:2]),

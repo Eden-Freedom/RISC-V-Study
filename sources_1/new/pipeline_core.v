@@ -52,7 +52,7 @@ module pipeline_core#(
   wire [31:0] pc_ifid_o;  //if_id输出，id_ex输入   
   wire [31:0] instr_ifid_o;  //if_id输出，decode输入
 
-  //addi_decode
+  //instruction_decoder
   wire [31:0] imm_typei_o;  //decode输出，id_ex输入
   wire [31:0] imm_typeb_o;  //decode输出，id_ex输入
   wire [31:0] imm_typej_o;  //decode输出，id_ex输入
@@ -60,8 +60,8 @@ module pipeline_core#(
   wire [31:0] imm_types_o;  //decode输出，id_ex输入
   wire [31:0] imm_csr_o;  //decode输出，id_ex输入
 
-  wire [ 4:0] rs1_addr_o;  //decode输出，id_ex，regfile输入
-  wire [ 4:0] rs2_addr_o;  //decode输出，id_ex，regfile输入
+  wire [ 4:0] rs1_addr_o;  //decode输出，id_ex，register_file输入
+  wire [ 4:0] rs2_addr_o;  //decode输出，id_ex，register_file输入
   wire [11:0] csr_addr_o;  //decode输出，id_ex输入
   wire [ 4:0] rd_addr_o;  //decode输出，id_ex输入
   wire        is_addi_o;  //decode输出，id_ex输入
@@ -133,129 +133,129 @@ module pipeline_core#(
 
   //id_ex
   wire        valid_idex_i;  //id_ex输入，if_id，decode组合逻辑输出
-  wire        valid_idex_o;  //id_ex输出，ex输入
+  wire        valid_idex_o;  //id_ex输出，execute_unit输入
   wire [31:0] pc_idex_o;  //id_ex输出
-  wire [31:0] rs1_data_idex_o;  //id_ex输出，ex输入
-  wire [31:0] rs2_data_idex_o;  //id_ex输出，ex输入
-  wire [31:0] immi_data_idex_o;  //id_ex输出，ex输入
-  wire [31:0] immb_data_idex_o;  //id_ex输出，ex输入
-  wire [31:0] immj_data_idex_o;  //id_ex输出，ex输入
-  wire [31:0] immu_data_idex_o;  //id_ex输出，ex输入
-  wire [31:0] imms_data_idex_o;  //id_ex输出，ex输入
-  wire [31:0] imm_csr_idex_o;  //id_ex输出，ex输入
-  wire [11:0] csr_addr_idex_o;  //id_ex输出，ex输入
-  wire [ 4:0] rd_addr_idex_o;  //id_ex输出，ex输入
+  wire [31:0] rs1_data_idex_o;  //id_ex输出，execute_unit输入
+  wire [31:0] rs2_data_idex_o;  //id_ex输出，execute_unit输入
+  wire [31:0] immi_data_idex_o;  //id_ex输出，execute_unit输入
+  wire [31:0] immb_data_idex_o;  //id_ex输出，execute_unit输入
+  wire [31:0] immj_data_idex_o;  //id_ex输出，execute_unit输入
+  wire [31:0] immu_data_idex_o;  //id_ex输出，execute_unit输入
+  wire [31:0] imms_data_idex_o;  //id_ex输出，execute_unit输入
+  wire [31:0] imm_csr_idex_o;  //id_ex输出，execute_unit输入
+  wire [11:0] csr_addr_idex_o;  //id_ex输出，execute_unit输入
+  wire [ 4:0] rd_addr_idex_o;  //id_ex输出，execute_unit输入
 
 
-  wire        is_addi_idex_o;  //id_ex输出 ex输入
-  wire        is_xori_idex_o;  //id_ex输出 ex输入
-  wire        is_ori_idex_o;  //id_ex输出 ex输入
-  wire        is_andi_idex_o;  //id_ex输出 ex输入
-  wire        is_slli_idex_o;  //id_ex输出 ex输入
-  wire        is_srli_idex_o;  //id_ex输出 ex输入
-  wire        is_srai_idex_o;  //id_ex输出 ex输入
-  wire        is_slti_idex_o;  //id_ex输出 ex输入
-  wire        is_sltiu_idex_o;  //id_ex输出 ex输入
+  wire        is_addi_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_xori_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_ori_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_andi_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_slli_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_srli_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_srai_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_slti_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_sltiu_idex_o;  //id_ex输出 execute_unit输入
 
-  wire        is_sub_idex_o;  //id_ex输出 ex输入
-  wire        is_add_idex_o;  //id_ex输出 ex输入
-  wire        is_xor_idex_o;  //id_ex输出 ex输入
-  wire        is_or_idex_o;  //id_ex输出 ex输入
-  wire        is_and_idex_o;  //id_ex输出 ex输入
-  wire        is_sll_idex_o;  //id_ex输出 ex输入
-  wire        is_srl_idex_o;  //id_ex输出 ex输入
-  wire        is_sra_idex_o;  //id_ex输出 ex输入
-  wire        is_slt_idex_o;  //id_ex输出 ex输入
-  wire        is_sltu_idex_o;  //id_ex输出 ex输入
+  wire        is_sub_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_add_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_xor_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_or_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_and_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_sll_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_srl_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_sra_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_slt_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_sltu_idex_o;  //id_ex输出 execute_unit输入
 
-  wire        is_beq_idex_o;  //id_ex输出 ex输入
-  wire        is_bne_idex_o;  //id_ex输出 ex输入
-  wire        is_blt_idex_o;  //id_ex输出 ex输入
-  wire        is_bge_idex_o;  //id_ex输出 ex输入
-  wire        is_bltu_idex_o;  //id_ex输出 ex输入
-  wire        is_bgeu_idex_o;  //id_ex输出 ex输入
+  wire        is_beq_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_bne_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_blt_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_bge_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_bltu_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_bgeu_idex_o;  //id_ex输出 execute_unit输入
 
-  wire        is_jal_idex_o;  //id_ex输出 ex输入
-  wire        is_jalr_idex_o;  //id_ex输出 ex输入
+  wire        is_jal_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_jalr_idex_o;  //id_ex输出 execute_unit输入
 
-  wire        is_lui_idex_o;  //id_ex输出 ex输入
-  wire        is_auipc_idex_o;  //id_ex输出 ex输入
+  wire        is_lui_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_auipc_idex_o;  //id_ex输出 execute_unit输入
 
-  wire        is_sw_idex_o;  //id_ex输出 ex输入
-  wire        is_sb_idex_o;  //id_ex输出 ex输入
-  wire        is_sh_idex_o;  //id_ex输出 ex输入
+  wire        is_sw_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_sb_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_sh_idex_o;  //id_ex输出 execute_unit输入
 
-  wire        is_lw_idex_o;  //id_ex输出 ex输入
-  wire        is_lb_idex_o;  //id_ex输出 ex输入
-  wire        is_lbu_idex_o;  //id_ex输出 ex输入
-  wire        is_lh_idex_o;  //id_ex输出 ex输入
-  wire        is_lhu_idex_o;  //id_ex输出 ex输入
+  wire        is_lw_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_lb_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_lbu_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_lh_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_lhu_idex_o;  //id_ex输出 execute_unit输入
 
-  wire        is_mul_idex_o;  //id_ex输出 ex输入
-  wire        is_mulh_idex_o;  //id_ex输出 ex输入
-  wire        is_mulhsu_idex_o;  //id_ex输出 ex输入
-  wire        is_mulhu_idex_o;  //id_ex输出 ex输入
+  wire        is_mul_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_mulh_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_mulhsu_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_mulhu_idex_o;  //id_ex输出 execute_unit输入
 
-  wire        is_div_idex_o;  //id_ex输出 ex输入
-  wire        is_divu_idex_o;  //id_ex输出 ex输入
-  wire        is_rem_idex_o;  //id_ex输出 ex输入
-  wire        is_remu_idex_o;  //id_ex输出 ex输入
+  wire        is_div_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_divu_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_rem_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_remu_idex_o;  //id_ex输出 execute_unit输入
 
-  wire        is_csrrw_idex_o;  //id_ex输出 ex输入
-  wire        is_csrrs_idex_o;  //id_ex输出 ex输入
-  wire        is_csrrc_idex_o;  //id_ex输出 ex输入
-  wire        is_csrrwi_idex_o;  //id_ex输出 ex输入
-  wire        is_csrrsi_idex_o;  //id_ex输出 ex输入
-  wire        is_csrrci_idex_o;  //id_ex输出 ex输入
+  wire        is_csrrw_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_csrrs_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_csrrc_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_csrrwi_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_csrrsi_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_csrrci_idex_o;  //id_ex输出 execute_unit输入
 
-  wire        is_ecall_idex_o;  //id_ex输出 ex输入
-  wire        is_mret_idex_o;  //id_ex输出 ex输入
+  wire        is_ecall_idex_o;  //id_ex输出 execute_unit输入
+  wire        is_mret_idex_o;  //id_ex输出 execute_unit输入
 
-  wire        is_illegal_idex_o;  //id_ex输出 ex输入
+  wire        is_illegal_idex_o;  //id_ex输出 execute_unit输入
 
-  //ex
-  wire        wr_en_ex_o;  //ex输出，regfile输入
-  wire [ 4:0] wr_addr_ex_o;  //ex输出，regfile输入
-  wire [31:0] wr_data_ex_o;  //ex输出，regfile输入
-  wire        pc_brench_flag_ex_o;  //ex输出，fetch_unit输入
-  wire [31:0] pc_brench_addr_ex_o;  //ex输出，fetch_unit输入
-  wire        clear_valid_ex_o;  //ex输出，if_id输入,id_ex输入
-  wire        stall_ex_o;  //ex输出，fetch_unit输入，if_id输入,id_ex输入
+  //execute_unit
+  wire        wr_en_ex_o;  //execute_unit输出，register_file输入
+  wire [ 4:0] wr_addr_ex_o;  //execute_unit输出，register_file输入
+  wire [31:0] wr_data_ex_o;  //execute_unit输出，register_file输入
+  wire        pc_brench_flag_ex_o;  //execute_unit输出，fetch_unit输入
+  wire [31:0] pc_brench_addr_ex_o;  //execute_unit输出，fetch_unit输入
+  wire        clear_valid_ex_o;  //execute_unit输出，if_id输入,id_ex输入
+  wire        stall_ex_o;  //execute_unit输出，fetch_unit输入，if_id输入,id_ex输入
 
 
-  wire        ram_wr_en_ex_o;  //ex输出，ram输入
-  wire [31:0] ram_wr_addr_ex_o;  //ex输出，ram输入
-  wire [31:0] ram_wr_data_ex_o;  //ex输出，ram输入
-  wire [ 3:0] ram_wr_sel_ex_o;  //ex输出，ram输入
-  wire        ram_rd_en_ex_o;  //ex输出，ram输入
-  wire [31:0] ram_rd_addr_ex_o;  //ex输出，ram输入
+  wire        ram_wr_en_ex_o;  //execute_unit输出，data_ram输入
+  wire [31:0] ram_wr_addr_ex_o;  //execute_unit输出，data_ram输入
+  wire [31:0] ram_wr_data_ex_o;  //execute_unit输出，data_ram输入
+  wire [ 3:0] ram_wr_sel_ex_o;  //execute_unit输出，data_ram输入
+  wire        ram_rd_en_ex_o;  //execute_unit输出，data_ram输入
+  wire [31:0] ram_rd_addr_ex_o;  //execute_unit输出，data_ram输入
 
   wire        data_req;  //外部数据请求读写信号
   wire        data_we;  //外部数据读写使能信号
   wire [31:0] data_addr;  //外部数据地址信号
 
 
-  //regfile
-  wire [31:0] rs1_data_o;  //regfile输出，id_ex输入
-  wire [31:0] rs2_data_o;  //regfile输出，id_ex输入
+  //register_file
+  wire [31:0] rs1_data_o;  //register_file输出，id_ex输入
+  wire [31:0] rs2_data_o;  //register_file输出，id_ex输入
 
   //data_bus
-  wire        bus2ram_req_o;//data_bus输出，ram输入
-  wire        bus2ram_we_o;//data_bus输出，ram输入
-  wire [31:0] bus2ram_addr_o;//data_bus输出，ram输入
-  wire [31:0] bus2ram_wdata_o;//data_bus输出，ram输入
-  wire [ 3:0] bus2ram_wstrb_o;//data_bus输出，ram输入
+  wire        bus2ram_req_o;//data_bus输出，data_ram输入
+  wire        bus2ram_we_o;//data_bus输出，data_ram输入
+  wire [31:0] bus2ram_addr_o;//data_bus输出，data_ram输入
+  wire [31:0] bus2ram_wdata_o;//data_bus输出，data_ram输入
+  wire [ 3:0] bus2ram_wstrb_o;//data_bus输出，data_ram输入
 //   wire        bus2dev_req_o;//data_bus输出，dev输入
 //   wire        bus2dev_we_o;//data_bus输出，dev输入
 //   wire [31:0] bus2dev_addr_o;//data_bus输出，dev输入
 //   wire [31:0] bus2dev_wdata_o;//data_bus输出，dev输入
 //   wire [ 3:0] bus2dev_wstrb_o;//data_bus输出，dev输入
-  wire        bus2cpu_ready_o;//data_bus输出，ex输入
-  wire [31:0] bus2cpu_rdata_o;//data_bus输出，ex输入
+  wire        bus2cpu_ready_o;//data_bus输出，execute_unit输入
+  wire [31:0] bus2cpu_rdata_o;//data_bus输出，execute_unit输入
 
-  //ram
-  wire [31:0] ram_rd_data_o;  //ram输出，data_bus输入
-  wire        ram_ready_o;  //ram输出，data_bus输入
+  //data_ram
+  wire [31:0] ram_rd_data_o;  //data_ram输出，data_bus输入
+  wire        ram_ready_o;  //data_ram输出，data_bus输入
 
   //dev
 //   wire [31:0] dev_rd_data_o;  //dev输出，data_bus输入
@@ -302,7 +302,7 @@ assign fetch_addr_o = pc_o;
       .instr_ifid_o(instr_ifid_o)
   );
 
-  addi_decode addi_decode_inst (
+  instruction_decoder instruction_decoder_inst (
       .instr_i(instr_ifid_o),
       .imm_typei_o(imm_typei_o),
       .imm_typeu_o(imm_typeu_o),
@@ -549,7 +549,7 @@ assign fetch_addr_o = pc_o;
       .is_illegal_idex_o(is_illegal_idex_o)
   );
 
-  ex ex_inst (
+  execute_unit execute_unit_inst (
       .clk(clk),
       .rst_n(rst_n),
       .valid_ex_i(valid_idex_o),
@@ -656,7 +656,7 @@ assign fetch_addr_o = pc_o;
       .stall_ex_o(stall_ex_o)
   );
 
-  regfile regfile_inst (
+  register_file register_file_inst (
       .clk(clk),
       .rst_n(rst_n),
       .wr_en_i(wr_en_ex_o),

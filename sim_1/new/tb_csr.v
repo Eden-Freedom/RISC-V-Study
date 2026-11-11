@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
-// 程序来自 fetch_unit 内部的 imem，不由 TB 注入指令或 rs1 数据。
-// 更换 imem.v 中的程序时，同步调整下面的提交顺序和预期值。
+// 程序来自 fetch_unit 内部的 instruction_rom，不由 TB 注入指令或 rs1 数据。
+// 更换 instruction_rom.v 中的程序时，同步调整下面的提交顺序和预期值。
 module tb_csr();
 
 reg clk;
@@ -37,7 +37,7 @@ reg [8*64-1:0] item;
 begin
     // x0 不存放在数组中，必须通过读端口检查。
     $sformat(item, "x%0d", idx);
-    check(item, u_pipeline_core.regfile_inst.reg_file[idx], exp_val);
+    check(item, u_pipeline_core.register_file_inst.reg_file[idx], exp_val);
 end
 endtask
 
@@ -74,23 +74,23 @@ begin
           {27'b0, exp_rd});
     check("wr_data_ex_o", u_pipeline_core.wr_data_ex_o, exp_data);
     check("mscratch before commit",
-          u_pipeline_core.ex_inst.csr_unit_inst.mscratch_reg, exp_csr_old);
-    check("CSR read enable", {31'b0, u_pipeline_core.ex_inst.csr_rd_en_ex_o},
+          u_pipeline_core.execute_unit_inst.csr_unit_inst.mscratch_reg, exp_csr_old);
+    check("CSR read enable", {31'b0, u_pipeline_core.execute_unit_inst.csr_rd_en_ex_o},
           {31'b0, exp_csr_read});
-    check("CSR write enable", {31'b0, u_pipeline_core.ex_inst.csr_wr_en_ex_o},
+    check("CSR write enable", {31'b0, u_pipeline_core.execute_unit_inst.csr_wr_en_ex_o},
           {31'b0, exp_csr_write});
     if (exp_csr_read)
-        check("CSR read address", {20'b0, u_pipeline_core.ex_inst.csr_rd_addr_ex_o},
+        check("CSR read address", {20'b0, u_pipeline_core.execute_unit_inst.csr_rd_addr_ex_o},
               32'h0000_0340);
     if (exp_csr_write)
-        check("CSR write address", {20'b0, u_pipeline_core.ex_inst.csr_wr_addr_ex_o},
+        check("CSR write address", {20'b0, u_pipeline_core.execute_unit_inst.csr_wr_addr_ex_o},
               32'h0000_0340);
 
     #1;
     if (exp_rd != 5'd0)
         check_regfile(exp_rd, exp_data);
     check("mscratch after commit",
-          u_pipeline_core.ex_inst.csr_unit_inst.mscratch_reg, exp_csr_new);
+          u_pipeline_core.execute_unit_inst.csr_unit_inst.mscratch_reg, exp_csr_new);
 end
 endtask
 
@@ -105,14 +105,14 @@ initial begin
     #15;
     // Fail immediately if Vivado reused a compiled ROM from another test.
     if (u_pipeline_core.instr_o !== 32'h03500093) begin
-        $fatal(1, "CSR ROM mismatch at PC=0: actual=%08h expected=03500093. Fully recompile imem.v; restarting the old snapshot is insufficient.",
+        $fatal(1, "CSR ROM mismatch at PC=0: actual=%08h expected=03500093. Fully recompile instruction_rom.v; restarting the old snapshot is insufficient.",
                u_pipeline_core.instr_o);
     end
     check_valid(1'b0, 1'b0);
-    check("reset mscratch", u_pipeline_core.ex_inst.csr_unit_inst.mscratch_reg,
+    check("reset mscratch", u_pipeline_core.execute_unit_inst.csr_unit_inst.mscratch_reg,
           32'h0000_0000);
     check("reset GPR write", {31'b0, u_pipeline_core.wr_en_ex_o}, 32'd0);
-    check("reset CSR write", {31'b0, u_pipeline_core.ex_inst.csr_wr_en_ex_o}, 32'd0);
+    check("reset CSR write", {31'b0, u_pipeline_core.execute_unit_inst.csr_wr_en_ex_o}, 32'd0);
 
     // t=25ns：释放复位；仅等待流水线自然填充，不在 ROM 中插 NOP。
     #10;
@@ -133,18 +133,18 @@ initial begin
     // JAL 提交沿后：错误路径的 ID、IF 指令必须同时失效。
     check_valid(1'b0, 1'b0);
     check("jump target PC", u_pipeline_core.pc_o, 32'h0000_0020);
-    check("flushed CSR write", {31'b0, u_pipeline_core.ex_inst.csr_wr_en_ex_o}, 32'd0);
+    check("flushed CSR write", {31'b0, u_pipeline_core.execute_unit_inst.csr_wr_en_ex_o}, 32'd0);
 
     // 两个冲刷/重新填充周期内，CSR 不允许写入或变化。
     @(posedge clk); #1;
     check_valid(1'b1, 1'b0);
-    check("bubble CSR write", {31'b0, u_pipeline_core.ex_inst.csr_wr_en_ex_o}, 32'd0);
-    check("bubble mscratch", u_pipeline_core.ex_inst.csr_unit_inst.mscratch_reg,
+    check("bubble CSR write", {31'b0, u_pipeline_core.execute_unit_inst.csr_wr_en_ex_o}, 32'd0);
+    check("bubble mscratch", u_pipeline_core.execute_unit_inst.csr_unit_inst.mscratch_reg,
           32'h0000_0035);
     @(posedge clk); #1;
     check_valid(1'b1, 1'b1);
-    check("target CSR write suppressed", {31'b0, u_pipeline_core.ex_inst.csr_wr_en_ex_o}, 32'd0);
-    check("target mscratch", u_pipeline_core.ex_inst.csr_unit_inst.mscratch_reg,
+    check("target CSR write suppressed", {31'b0, u_pipeline_core.execute_unit_inst.csr_wr_en_ex_o}, 32'd0);
+    check("target mscratch", u_pipeline_core.execute_unit_inst.csr_unit_inst.mscratch_reg,
           32'h0000_0035);
 
     check_commit(32'h0000_0020, 5'd6, 32'h0000_0035, 32'h0000_0035, 32'h0000_0035, 1'b1, 1'b0); // CSRRS rs1=x0，只读
@@ -158,10 +158,10 @@ initial begin
     check_regfile(5'd4, 32'h0000_0035);
     check_regfile(5'd5, 32'h0000_003F);
     check_regfile(5'd6, 32'h0000_0035);
-    check("x0 rs1 address", {27'b0, u_pipeline_core.regfile_inst.rs1_addr_i}, 32'd0);
-    check("x0 rs1 read", u_pipeline_core.regfile_inst.rs1_data_o, 32'd0);
-    check("x0 rs2 address", {27'b0, u_pipeline_core.regfile_inst.rs2_addr_i}, 32'd0);
-    check("x0 rs2 read", u_pipeline_core.regfile_inst.rs2_data_o, 32'd0);
+    check("x0 rs1 address", {27'b0, u_pipeline_core.register_file_inst.rs1_addr_i}, 32'd0);
+    check("x0 rs1 read", u_pipeline_core.register_file_inst.rs1_data_o, 32'd0);
+    check("x0 rs2 address", {27'b0, u_pipeline_core.register_file_inst.rs2_addr_i}, 32'd0);
+    check("x0 rs2 read", u_pipeline_core.register_file_inst.rs2_data_o, 32'd0);
 
     if (errors == 0) begin
         $display("PASS: CSR pipeline checks passed");

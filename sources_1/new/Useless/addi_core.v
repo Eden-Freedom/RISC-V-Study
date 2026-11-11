@@ -94,7 +94,7 @@ module addi_core(
         .instr_o(instr_o)
     );
 
-    addi_decode addi_decode_inst(
+    instruction_decoder instruction_decoder_inst(
         .instr_i(instr_o),
         .imm_typei_o(imm_typei_o),
         .imm_typeu_o(imm_typeu_o),
@@ -200,7 +200,7 @@ module addi_core(
         .ram_rd_data_i(ram_rd_data_o)
     );
 
-    ram  ram_inst (
+    data_ram  data_ram_inst (
         .clk(clk),
         .rst_n(rst_n),
         .ram_wr_addr_i(ram_wr_addr_o[6:2]),
@@ -213,7 +213,7 @@ module addi_core(
       );
 
 
-    regfile regfile_inst(
+    register_file register_file_inst(
         .clk(clk),
         .rst_n(rst_n),
         .wr_en_i(wr_en),

@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-// 直接验证 csr_unit，不依赖 imem、EX 或完整流水线。
+// 直接验证 csr_unit，不依赖 instruction_rom、EX 或完整流水线。
 module tb_csr_irq();
 
 reg clk;

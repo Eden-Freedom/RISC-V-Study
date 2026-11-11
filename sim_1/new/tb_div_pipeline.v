@@ -409,9 +409,9 @@ module tb_div_pipeline;
         s_ifid           = ifid_state;
         s_idex           = idex_state;
         s_id_valid_input = dut.valid_idex_i;
-        s_start          = dut.ex_inst.start_ex_o;
-        s_done           = dut.ex_inst.done_div_o;
-        s_busy           = dut.ex_inst.busy_div_o;
+        s_start          = dut.execute_unit_inst.start_ex_o;
+        s_done           = dut.execute_unit_inst.done_div_o;
+        s_busy           = dut.execute_unit_inst.busy_div_o;
         s_terminal       = 1'b0;
 
         s_instr = 32'd0;
@@ -501,14 +501,14 @@ module tb_div_pipeline;
                         total_starts = total_starts + 1;
                         starts_at[index] = starts_at[index] + 1;
 
-                        if (dut.ex_inst.signed_ex_o !==
+                        if (dut.execute_unit_inst.signed_ex_o !==
                             ((s_kind == 4'b0001) ||
                              (s_kind == 4'b0100)))
                             fail("signed mode incorrect at start");
 
-                        if ((dut.ex_inst.dividend_ex_o !==
+                        if ((dut.execute_unit_inst.dividend_ex_o !==
                              model_regs[s_instr[19:15]]) ||
-                            (dut.ex_inst.divisor_ex_o !==
+                            (dut.execute_unit_inst.divisor_ex_o !==
                              model_regs[s_instr[24:20]]))
                             fail("division start operands incorrect");
                     end
@@ -598,12 +598,12 @@ module tb_div_pipeline;
         #1;
 
         for (m = 1; m < 32; m = m + 1) begin
-            if (dut.regfile_inst.reg_file[m] !== model_regs[m])
+            if (dut.register_file_inst.reg_file[m] !== model_regs[m])
                 fail("architectural register mismatch after rising edge");
         end
 
         for (m = 0; m < 32; m = m + 1) begin
-            if (dut.ram_inst.memory[m] !== 32'd0)
+            if (dut.data_ram_inst.memory[m] !== 32'd0)
                 fail("RAM changed unexpectedly");
         end
 
@@ -611,17 +611,17 @@ module tb_div_pipeline;
             if ((dut.pc_o !== 32'd0) ||
                 (dut.valid_ifid_o !== 1'b0) ||
                 (dut.valid_idex_o !== 1'b0) ||
-                (dut.ex_inst.busy_div_o !== 1'b0) ||
-                (dut.ex_inst.done_div_o !== 1'b0) ||
-                (dut.ex_inst.quotient_div_o !== 32'd0) ||
-                (dut.ex_inst.remainder_div_o !== 32'd0))
+                (dut.execute_unit_inst.busy_div_o !== 1'b0) ||
+                (dut.execute_unit_inst.done_div_o !== 1'b0) ||
+                (dut.execute_unit_inst.quotient_div_o !== 32'd0) ||
+                (dut.execute_unit_inst.remainder_div_o !== 32'd0))
                 fail("reset failed to cancel/clear pipeline and divider");
         end
         else if (s_flush) begin
             if ((dut.pc_o !== s_jump_addr) ||
                 (dut.valid_ifid_o !== 1'b0) ||
                 (dut.valid_idex_o !== 1'b0) ||
-                (dut.ex_inst.start_ex_o !== 1'b0))
+                (dut.execute_unit_inst.start_ex_o !== 1'b0))
                 fail("flush failed to cancel younger instructions");
         end
         else if (s_stall) begin

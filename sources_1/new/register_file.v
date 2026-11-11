@@ -5,7 +5,7 @@
 // 
 // Create Date: 2026/10/19 11:33:22
 // Design Name: 
-// Module Name: regfile
+// Module Name: register_file
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module regfile(
+module register_file(
     input wire clk,
     input wire rst_n,
 

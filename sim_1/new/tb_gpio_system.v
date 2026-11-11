@@ -68,12 +68,12 @@ module tb_gpio_system;
             check(ram_reads == 1 && ram_writes == 1, "RAM read and write completed once");
             check(gpio_out_o === 8'h3C, "final external GPIO output is 3C");
             for (i = 1; i <= 9; i = i + 1)
-                check(dut.pipeline_core_inst.regfile_inst.reg_file[i] === expected_regs[i],
+                check(dut.pipeline_core_inst.register_file_inst.reg_file[i] === expected_regs[i],
                       "final program register value");
-            check(dut.pipeline_core_inst.data_ram_target_inst.ram_inst.memory[0] === 32'hA6,
+            check(dut.pipeline_core_inst.data_ram_target_inst.data_ram_inst.memory[0] === 32'hA6,
                   "RAM address 0 holds A6");
             for (i = 1; i < 32; i = i + 1)
-                check(dut.pipeline_core_inst.data_ram_target_inst.ram_inst.memory[i] === 32'd0,
+                check(dut.pipeline_core_inst.data_ram_target_inst.data_ram_inst.memory[i] === 32'd0,
                       "other RAM words remain zero");
             if (errors == 0) begin
                 $display("PASS: GPIO system checks passed");
@@ -245,12 +245,12 @@ module tb_gpio_system;
             saved_ifid = {dut.pipeline_core_inst.valid_ifid_o,
                           dut.pipeline_core_inst.pc_ifid_o, dut.pipeline_core_inst.instr_ifid_o};
             for (i = 1; i < 32; i = i + 1)
-                saved_regs[i] = dut.pipeline_core_inst.regfile_inst.reg_file[i];
+                saved_regs[i] = dut.pipeline_core_inst.register_file_inst.reg_file[i];
 
             #1;
             check(gpio_out_o === expected_gpio, "GPIO output after every clock edge");
             if (wb_before)
-                check(dut.pipeline_core_inst.regfile_inst.reg_file[rd_before] === wb_data_before,
+                check(dut.pipeline_core_inst.register_file_inst.reg_file[rd_before] === wb_data_before,
                       "register storage after writeback edge");
             if (stall_before) begin
                 check(ex_pc === saved_pc && dut.pipeline_core_inst.pc_o === saved_fetch_pc,
@@ -258,7 +258,7 @@ module tb_gpio_system;
                 check({dut.pipeline_core_inst.valid_ifid_o, dut.pipeline_core_inst.pc_ifid_o,
                        dut.pipeline_core_inst.instr_ifid_o} === saved_ifid, "IF/ID held during RAM wait");
                 for (i = 1; i < 32; i = i + 1)
-                    check(dut.pipeline_core_inst.regfile_inst.reg_file[i] === saved_regs[i],
+                    check(dut.pipeline_core_inst.register_file_inst.reg_file[i] === saved_regs[i],
                           "register storage unchanged during RAM wait");
             end
             if (finish_before)

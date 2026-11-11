@@ -31,10 +31,10 @@ task check_regfile;
     input [4:0]  idx;
     input [31:0] exp_val;
     begin
-        if (u_pipeline_core.regfile_inst.reg_file[idx] !== exp_val) begin
+        if (u_pipeline_core.register_file_inst.reg_file[idx] !== exp_val) begin
             $display("FAIL [%0t] x%0d: actual=%h expected=%h",
                      $time, idx,
-                     u_pipeline_core.regfile_inst.reg_file[idx],
+                     u_pipeline_core.register_file_inst.reg_file[idx],
                      exp_val);
             errors = errors + 1;
         end
@@ -101,19 +101,19 @@ endtask
 //---------------------------------------------------------------
 task check_x0;
     begin
-        if (u_pipeline_core.regfile_inst.rs1_addr_i !== 5'd0 ||
-            u_pipeline_core.regfile_inst.rs2_addr_i !== 5'd0) begin
+        if (u_pipeline_core.register_file_inst.rs1_addr_i !== 5'd0 ||
+            u_pipeline_core.register_file_inst.rs2_addr_i !== 5'd0) begin
             $display("FAIL [%0t] x0 probe: read addresses are not both zero",
                      $time);
             errors = errors + 1;
         end
 
-        if (u_pipeline_core.regfile_inst.rs1_data_o !== 32'h0 ||
-            u_pipeline_core.regfile_inst.rs2_data_o !== 32'h0) begin
+        if (u_pipeline_core.register_file_inst.rs1_data_o !== 32'h0 ||
+            u_pipeline_core.register_file_inst.rs2_data_o !== 32'h0) begin
             $display("FAIL [%0t] x0 read: rs1=%h rs2=%h expected=0/0",
                      $time,
-                     u_pipeline_core.regfile_inst.rs1_data_o,
-                     u_pipeline_core.regfile_inst.rs2_data_o);
+                     u_pipeline_core.register_file_inst.rs1_data_o,
+                     u_pipeline_core.register_file_inst.rs2_data_o);
             errors = errors + 1;
         end
 

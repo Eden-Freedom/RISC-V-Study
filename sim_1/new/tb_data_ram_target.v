@@ -39,9 +39,9 @@ task check_ram;
 integer word_index;
 begin
     for (word_index=0;word_index<32;word_index=word_index+1)
-        if (u_target.ram_inst.memory[word_index] !== expected_ram[word_index]) begin
+        if (u_target.data_ram_inst.memory[word_index] !== expected_ram[word_index]) begin
             $display("FAIL t=%0t test=%0d RAM[%0d]=%h expected=%h",$time,test_id,
-                     word_index,u_target.ram_inst.memory[word_index],expected_ram[word_index]);
+                     word_index,u_target.data_ram_inst.memory[word_index],expected_ram[word_index]);
             errors=errors+1;
         end
 end
@@ -56,8 +56,8 @@ begin
     check("completion condition (done)",{31'b0,u_target.done},{31'b0,exp_done});
     check("RAM write enable",{31'b0,u_target.ram_wr_en},{31'b0,exp_write});
     check("RAM read enable",{31'b0,u_target.ram_rd_en},{31'b0,exp_read});
-    check("RAM write enable pin",{31'b0,u_target.ram_inst.ram_wr_en_i},{31'b0,exp_write});
-    check("RAM read enable pin",{31'b0,u_target.ram_inst.ram_rd_en_i},{31'b0,exp_read});
+    check("RAM write enable pin",{31'b0,u_target.data_ram_inst.ram_wr_en_i},{31'b0,exp_write});
+    check("RAM read enable pin",{31'b0,u_target.data_ram_inst.ram_rd_en_i},{31'b0,exp_read});
     check("rdata",rdata_o,exp_data);
 end
 endtask
@@ -102,10 +102,10 @@ begin
     check_phase(0,0,0,0,0);
     check_ram;
     check("no completion before A",observed_completions,expected_completions);
-    check("write address index",{27'b0,u_target.ram_inst.ram_wr_addr_i},{27'b0,address[6:2]});
-    check("read address index",{27'b0,u_target.ram_inst.ram_rd_addr_i},{27'b0,address[6:2]});
-    check("write data connection",u_target.ram_inst.ram_wr_data_i,write_data);
-    check("byte mask connection",{28'b0,u_target.ram_inst.ram_wr_sel_i},{28'b0,byte_mask});
+    check("write address index",{27'b0,u_target.data_ram_inst.ram_wr_addr_i},{27'b0,address[6:2]});
+    check("read address index",{27'b0,u_target.data_ram_inst.ram_rd_addr_i},{27'b0,address[6:2]});
+    check("write data connection",u_target.data_ram_inst.ram_wr_data_i,write_data);
+    check("byte mask connection",{28'b0,u_target.data_ram_inst.ram_wr_sel_i},{28'b0,byte_mask});
 
     @(posedge clk); // 沿A的Active区：仍未完成。
     check_phase(0,0,0,0,0);

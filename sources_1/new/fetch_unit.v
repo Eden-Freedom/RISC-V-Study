@@ -56,7 +56,7 @@ module fetch_unit#(
     .pc_stall_i(pc_stall_i)
   );
 
-  imem imem_inst(
+  instruction_rom instruction_rom_inst(
     .addr_i(pc_o),
     .instr_o(imem_instr_o)
   );

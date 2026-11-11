@@ -182,13 +182,13 @@ module tb_uart_tx_system;
                   dut.timer_target_inst.irq_en_reg === 1'b0 &&
                   dut.timer_target_inst.cnt_value_o === 32'd0, "Timer stays disabled");
             check(dut.timer_irq_o === 1'b0 && dut.irq2cpu === 1'b0, "no interrupt source");
-            check(dut.pipeline_core_inst.data_ram_target_inst.ram_inst.memory[0] === expected_ram_word,
+            check(dut.pipeline_core_inst.data_ram_target_inst.data_ram_inst.memory[0] === expected_ram_word,
                   "RAM word zero follows the program store");
             for (reg_index=1; reg_index<32; reg_index=reg_index+1) begin
-                if (dut.pipeline_core_inst.regfile_inst.reg_file[reg_index] !== expected_regs[reg_index]) begin
+                if (dut.pipeline_core_inst.register_file_inst.reg_file[reg_index] !== expected_regs[reg_index]) begin
                     errors = errors + 1;
                     $display("FAIL: x%0d=%08h expected=%08h t=%0t", reg_index,
-                             dut.pipeline_core_inst.regfile_inst.reg_file[reg_index],
+                             dut.pipeline_core_inst.register_file_inst.reg_file[reg_index],
                              expected_regs[reg_index], $time);
                 end
             end
@@ -231,7 +231,7 @@ module tb_uart_tx_system;
             check(expected_gpio == 8'h3C && expected_limit == 32'd3 && expected_ram_word == 32'h3C,
                   "program reached GPIO/Timer/RAM writes");
             for (word_index=1; word_index<32; word_index=word_index+1)
-                check(dut.pipeline_core_inst.data_ram_target_inst.ram_inst.memory[word_index] === 32'd0,
+                check(dut.pipeline_core_inst.data_ram_target_inst.data_ram_inst.memory[word_index] === 32'd0,
                       "other RAM words unchanged");
             if (errors == 0) begin
                 $display("PASS: UART TX system checks passed");
@@ -264,8 +264,8 @@ module tb_uart_tx_system;
             edge_number = edge_number + 1;
             check((^{ex_valid, cpu_req, cpu_ready, cpu_stall, wb_en, uart_start}) !== 1'bx,
                   "control signals contain no X/Z");
-            check(dut.pipeline_core_inst.ex_inst.irq_take === 1'b0 &&
-                  dut.pipeline_core_inst.ex_inst.trap_enter_ex_o === 1'b0,
+            check(dut.pipeline_core_inst.execute_unit_inst.irq_take === 1'b0 &&
+                  dut.pipeline_core_inst.execute_unit_inst.trap_enter_ex_o === 1'b0,
                   "program runs without a trap");
             prepare_expectations;
             if (ex_valid === 1'b1) begin

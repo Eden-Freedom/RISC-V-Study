@@ -5,7 +5,7 @@
 // 
 // Create Date: 2026/10/21 19:50:06
 // Design Name: 
-// Module Name: ram
+// Module Name: data_ram
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module ram(
+module data_ram(
     input wire clk,
     input wire rst_n,
     input wire [4:0] ram_wr_addr_i,
