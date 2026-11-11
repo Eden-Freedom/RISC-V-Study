@@ -43,10 +43,10 @@ task check_regfile;
 input [4:0]  idx;
 input [31:0] exp_val;
 begin
-    if (u_pipeline_core.register_file_inst.reg_file[idx] !== exp_val) begin
+    if (u_pipeline_core.regfile_inst.reg_file[idx] !== exp_val) begin
         $display("FAIL [%0t] x%0d: actual=%h expected=%h",
                  $time, idx,
-                 u_pipeline_core.register_file_inst.reg_file[idx], exp_val);
+                 u_pipeline_core.regfile_inst.reg_file[idx], exp_val);
         errors = errors + 1;
     end
 end

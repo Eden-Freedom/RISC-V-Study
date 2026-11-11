@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-// 真实 instruction_rom -> IF -> ID/EX -> EX -> CSR/PC，不强制任何指令或事件信号。
+// 真实 instr_rom -> IF -> ID/EX -> EX -> CSR/PC，不强制任何指令或事件信号。
 module tb_illegal_instruction();
 
 reg clk;
@@ -55,10 +55,10 @@ task check_regfile;
 input [4:0] idx;
 input [31:0] exp_val;
 begin
-    if (u_pipeline_core.register_file_inst.reg_file[idx] !== exp_val) begin
+    if (u_pipeline_core.regfile_inst.reg_file[idx] !== exp_val) begin
         $display("FAIL [%0t] x%0d: actual=%h expected=%h",
                  $time, idx,
-                 u_pipeline_core.register_file_inst.reg_file[idx], exp_val);
+                 u_pipeline_core.regfile_inst.reg_file[idx], exp_val);
         errors = errors + 1;
     end
 end
@@ -164,7 +164,7 @@ begin
         14: begin // 18 ADDI x5,x0,7: only after both returns
             exp_wen = 1'b1; exp_rd = 5'd5; exp_wdata = 32'd7;
         end
-        15: begin // 1C JAL x0,0: register_file ignores write to x0
+        15: begin // 1C JAL x0,0: regfile ignores write to x0
             exp_wen = 1'b1; exp_rd = 5'd0; exp_wdata = 32'h20;
             exp_redirect = 1'b1; exp_target = 32'h1C;
         end
@@ -210,7 +210,7 @@ initial begin
     check_csr_state;
     check_bubble;
     if (u_pipeline_core.instr_o !== 32'h10000093)
-        $fatal(1, "illegal ROM mismatch: recompile instruction_rom.v with this test program");
+        $fatal(1, "illegal ROM mismatch: recompile instr_rom.v with this test program");
 
     #10; // t=25，在上升沿之间释放复位
     rst_n = 1'b1;
@@ -295,10 +295,10 @@ initial begin
     check("wrong-path CSR writes cancelled",
           u_pipeline_core.execute_unit_inst.csr_unit_inst.mscratch_reg, 32'b0);
     // 冲刷后的读地址为零，通过实际读口检查架构 x0。
-    check("x0 rs1 address", {27'b0,u_pipeline_core.register_file_inst.rs1_addr_i}, 32'd0);
-    check("x0 rs1 data", u_pipeline_core.register_file_inst.rs1_data_o, 32'd0);
-    check("x0 rs2 address", {27'b0,u_pipeline_core.register_file_inst.rs2_addr_i}, 32'd0);
-    check("x0 rs2 data", u_pipeline_core.register_file_inst.rs2_data_o, 32'd0);
+    check("x0 rs1 address", {27'b0,u_pipeline_core.regfile_inst.rs1_addr_i}, 32'd0);
+    check("x0 rs1 data", u_pipeline_core.regfile_inst.rs1_data_o, 32'd0);
+    check("x0 rs2 address", {27'b0,u_pipeline_core.regfile_inst.rs2_addr_i}, 32'd0);
+    check("x0 rs2 data", u_pipeline_core.regfile_inst.rs2_data_o, 32'd0);
 
     if (errors == 0) begin
         $display("PASS: illegal-instruction/MRET pipeline checks passed");
@@ -316,7 +316,7 @@ end
 
 //---------------------------------------------------------------
 // Check the actual fetched ROM word, including speculative wrong-path fetches.
-// This observes instruction_rom; it never forces internal signals or supplies instructions.
+// This observes instr_rom; it never forces internal signals or supplies instructions.
 function [31:0] expected_instr;
 input [31:0] pc;
 begin
@@ -343,7 +343,7 @@ endfunction
 always @(posedge clk) begin
     if (rst_n === 1'b1) begin
         if (u_pipeline_core.instr_o !== expected_instr(u_pipeline_core.pc_o))
-            $fatal(1,"Illegal-instruction ROM mismatch at PC=%h: actual=%h expected=%h; update instruction_rom.v",
+            $fatal(1,"Illegal-instruction ROM mismatch at PC=%h: actual=%h expected=%h; update instr_rom.v",
                    u_pipeline_core.pc_o, u_pipeline_core.instr_o,
                    expected_instr(u_pipeline_core.pc_o));
     end

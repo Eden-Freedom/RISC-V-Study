@@ -10,10 +10,10 @@
 // Target Devices: 
 // Tool Versions: 
 // Description: Testbench for pipeline_core (top)
-//              - verify fetch / if_id / decode / id_ex / execute_unit / register_file
+//              - verify fetch / if_id / decode / id_ex / execute_unit / regfile
 //              - check if_id and id_ex bundles advance per cycle, no field crossing
 //              - check nop creates bubble (valid_idex_o=0)
-//              - check register_file writeback values (x1..x31)
+//              - check regfile writeback values (x1..x31)
 //              - check x0 correctness via READ PORT, not via reg_file[0]
 //              - check wr_en/addr/data at EVERY posedge BEFORE NBA update
 // 
@@ -115,10 +115,10 @@ module tb_pipeline_core();
         input [4:0]  idx;
         input [31:0] exp_val;
         begin
-            if (u_pipeline_core.register_file_inst.reg_file[idx] !== exp_val) begin
+            if (u_pipeline_core.regfile_inst.reg_file[idx] !== exp_val) begin
                 $display("FAIL [%0t] x%0d: actual=%h expected=%h",
                          $time, idx,
-                         u_pipeline_core.register_file_inst.reg_file[idx], exp_val);
+                         u_pipeline_core.regfile_inst.reg_file[idx], exp_val);
                 errors = errors + 1;
             end
         end
@@ -129,24 +129,24 @@ module tb_pipeline_core();
     //---------------------------------------------------------------
     task check_x0_read_ports;
         begin
-            if (u_pipeline_core.register_file_inst.rs1_addr_i !== 5'd0) begin
+            if (u_pipeline_core.regfile_inst.rs1_addr_i !== 5'd0) begin
                 $display("FAIL [%0t] rs1_addr_i: actual=%h expected=%h (must be 0 to verify x0 read)",
-                         $time, u_pipeline_core.register_file_inst.rs1_addr_i, 5'd0);
+                         $time, u_pipeline_core.regfile_inst.rs1_addr_i, 5'd0);
                 errors = errors + 1;
             end
-            if (u_pipeline_core.register_file_inst.rs1_data_o !== 32'h0) begin
+            if (u_pipeline_core.regfile_inst.rs1_data_o !== 32'h0) begin
                 $display("FAIL [%0t] rs1_data_o: actual=%h expected=%h (x0 read port)",
-                         $time, u_pipeline_core.register_file_inst.rs1_data_o, 32'h0);
+                         $time, u_pipeline_core.regfile_inst.rs1_data_o, 32'h0);
                 errors = errors + 1;
             end
-            if (u_pipeline_core.register_file_inst.rs2_addr_i !== 5'd0) begin
+            if (u_pipeline_core.regfile_inst.rs2_addr_i !== 5'd0) begin
                 $display("FAIL [%0t] rs2_addr_i: actual=%h expected=%h (must be 0 to verify x0 read)",
-                         $time, u_pipeline_core.register_file_inst.rs2_addr_i, 5'd0);
+                         $time, u_pipeline_core.regfile_inst.rs2_addr_i, 5'd0);
                 errors = errors + 1;
             end
-            if (u_pipeline_core.register_file_inst.rs2_data_o !== 32'h0) begin
+            if (u_pipeline_core.regfile_inst.rs2_data_o !== 32'h0) begin
                 $display("FAIL [%0t] rs2_data_o: actual=%h expected=%h (x0 read port)",
-                         $time, u_pipeline_core.register_file_inst.rs2_data_o, 32'h0);
+                         $time, u_pipeline_core.regfile_inst.rs2_data_o, 32'h0);
                 errors = errors + 1;
             end
         end
@@ -197,9 +197,9 @@ module tb_pipeline_core();
     //
     // 该 always 块在 active region 执行，而所有 <= 写入在 NBA region
     // 执行；所以此处读到的 wr_* 是 id_ex 上拍内容驱动的 execute_unit 组合输出，
-    // 也就是本沿真正要写入 register_file 的值。
+    // 也就是本沿真正要写入 regfile 的值。
     //
-    // 期望值（按 instruction_rom 内短程序与 id_ex 每拍延迟 1 拍推导）：
+    // 期望值（按 instr_rom 内短程序与 id_ex 每拍延迟 1 拍推导）：
     //   t=10 : rst=0                              — 不检查
     //   t=30 : id_ex 旧值 = 复位值                → (0,0,0)
     //   t=50 : id_ex 旧值 = t=30 采的 (全 0)      → (0,0,0)

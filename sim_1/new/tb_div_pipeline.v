@@ -598,7 +598,7 @@ module tb_div_pipeline;
         #1;
 
         for (m = 1; m < 32; m = m + 1) begin
-            if (dut.register_file_inst.reg_file[m] !== model_regs[m])
+            if (dut.regfile_inst.reg_file[m] !== model_regs[m])
                 fail("architectural register mismatch after rising edge");
         end
 

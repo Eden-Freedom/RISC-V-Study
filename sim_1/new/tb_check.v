@@ -40,10 +40,10 @@ task check_regfile;
 input [4:0]  idx;
 input [31:0] exp_val;
 begin
-    if (u_pipeline_core.register_file_inst.reg_file[idx] !== exp_val) begin
+    if (u_pipeline_core.regfile_inst.reg_file[idx] !== exp_val) begin
         $display("FAIL [%0t] x%0d: actual=%h expected=%h",
                  $time, idx,
-                 u_pipeline_core.register_file_inst.reg_file[idx], exp_val);
+                 u_pipeline_core.regfile_inst.reg_file[idx], exp_val);
         errors = errors + 1;
     end
 end
@@ -92,24 +92,24 @@ endtask
 
 task check_x0_read_ports;
 begin
-    if (u_pipeline_core.register_file_inst.rs1_addr_i !== 5'd0) begin
+    if (u_pipeline_core.regfile_inst.rs1_addr_i !== 5'd0) begin
         $display("FAIL [%0t] rs1_addr_i: actual=%h expected=%h (must be 0 to verify x0 read)",
-                 $time, u_pipeline_core.register_file_inst.rs1_addr_i, 5'd0);
+                 $time, u_pipeline_core.regfile_inst.rs1_addr_i, 5'd0);
         errors = errors + 1;
     end
-    if (u_pipeline_core.register_file_inst.rs1_data_o !== 32'h0) begin
+    if (u_pipeline_core.regfile_inst.rs1_data_o !== 32'h0) begin
         $display("FAIL [%0t] rs1_data_o: actual=%h expected=%h (x0 read port)",
-                 $time, u_pipeline_core.register_file_inst.rs1_data_o, 32'h0);
+                 $time, u_pipeline_core.regfile_inst.rs1_data_o, 32'h0);
         errors = errors + 1;
     end
-    if (u_pipeline_core.register_file_inst.rs2_addr_i !== 5'd0) begin
+    if (u_pipeline_core.regfile_inst.rs2_addr_i !== 5'd0) begin
         $display("FAIL [%0t] rs2_addr_i: actual=%h expected=%h (must be 0 to verify x0 read)",
-                 $time, u_pipeline_core.register_file_inst.rs2_addr_i, 5'd0);
+                 $time, u_pipeline_core.regfile_inst.rs2_addr_i, 5'd0);
         errors = errors + 1;
     end
-    if (u_pipeline_core.register_file_inst.rs2_data_o !== 32'h0) begin
+    if (u_pipeline_core.regfile_inst.rs2_data_o !== 32'h0) begin
         $display("FAIL [%0t] rs2_data_o: actual=%h expected=%h (x0 read port)",
-                 $time, u_pipeline_core.register_file_inst.rs2_data_o, 32'h0);
+                 $time, u_pipeline_core.regfile_inst.rs2_data_o, 32'h0);
         errors = errors + 1;
     end
 end

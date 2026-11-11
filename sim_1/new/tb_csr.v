@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
-// 程序来自 fetch_unit 内部的 instruction_rom，不由 TB 注入指令或 rs1 数据。
-// 更换 instruction_rom.v 中的程序时，同步调整下面的提交顺序和预期值。
+// 程序来自 fetch_unit 内部的 instr_rom，不由 TB 注入指令或 rs1 数据。
+// 更换 instr_rom.v 中的程序时，同步调整下面的提交顺序和预期值。
 module tb_csr();
 
 reg clk;
@@ -37,7 +37,7 @@ reg [8*64-1:0] item;
 begin
     // x0 不存放在数组中，必须通过读端口检查。
     $sformat(item, "x%0d", idx);
-    check(item, u_pipeline_core.register_file_inst.reg_file[idx], exp_val);
+    check(item, u_pipeline_core.regfile_inst.reg_file[idx], exp_val);
 end
 endtask
 
@@ -105,7 +105,7 @@ initial begin
     #15;
     // Fail immediately if Vivado reused a compiled ROM from another test.
     if (u_pipeline_core.instr_o !== 32'h03500093) begin
-        $fatal(1, "CSR ROM mismatch at PC=0: actual=%08h expected=03500093. Fully recompile instruction_rom.v; restarting the old snapshot is insufficient.",
+        $fatal(1, "CSR ROM mismatch at PC=0: actual=%08h expected=03500093. Fully recompile instr_rom.v; restarting the old snapshot is insufficient.",
                u_pipeline_core.instr_o);
     end
     check_valid(1'b0, 1'b0);
@@ -158,10 +158,10 @@ initial begin
     check_regfile(5'd4, 32'h0000_0035);
     check_regfile(5'd5, 32'h0000_003F);
     check_regfile(5'd6, 32'h0000_0035);
-    check("x0 rs1 address", {27'b0, u_pipeline_core.register_file_inst.rs1_addr_i}, 32'd0);
-    check("x0 rs1 read", u_pipeline_core.register_file_inst.rs1_data_o, 32'd0);
-    check("x0 rs2 address", {27'b0, u_pipeline_core.register_file_inst.rs2_addr_i}, 32'd0);
-    check("x0 rs2 read", u_pipeline_core.register_file_inst.rs2_data_o, 32'd0);
+    check("x0 rs1 address", {27'b0, u_pipeline_core.regfile_inst.rs1_addr_i}, 32'd0);
+    check("x0 rs1 read", u_pipeline_core.regfile_inst.rs1_data_o, 32'd0);
+    check("x0 rs2 address", {27'b0, u_pipeline_core.regfile_inst.rs2_addr_i}, 32'd0);
+    check("x0 rs2 read", u_pipeline_core.regfile_inst.rs2_data_o, 32'd0);
 
     if (errors == 0) begin
         $display("PASS: CSR pipeline checks passed");

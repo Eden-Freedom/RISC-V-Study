@@ -71,7 +71,7 @@ module tb_spi_system;
         rst_n = 1'b1;
     end
 
-    // TB 只驱动顶层 MISO。总线访问全部来自 CPU 执行 instruction_rom 中的程序。
+    // TB 只驱动顶层 MISO。总线访问全部来自 CPU 执行 instr_rom 中的程序。
     always @(negedge spi_cs_n_o) begin
         if (rst_n) begin
             case (frame_count)
@@ -230,12 +230,12 @@ module tb_spi_system;
             if (step !== PROGRAM_END || frame_count != 2 ||
                 {spi_cs_n_o, spi_sclk_o, spi_busy} !== 3'b100 ||
                 gpio_out_o !== 8'h5A ||
-                dut.pipeline_core_inst.register_file_inst.reg_file[4] !== 32'd1 ||
-                dut.pipeline_core_inst.register_file_inst.reg_file[7] !== 32'h5A) begin
+                dut.pipeline_core_inst.regfile_inst.reg_file[4] !== 32'd1 ||
+                dut.pipeline_core_inst.regfile_inst.reg_file[7] !== 32'h5A) begin
                 $fatal(1, "Unexpected final state: step=%0d frames=%0d GPIO=%h x4=%h x7=%h",
                        step, frame_count, gpio_out_o,
-                       dut.pipeline_core_inst.register_file_inst.reg_file[4],
-                       dut.pipeline_core_inst.register_file_inst.reg_file[7]);
+                       dut.pipeline_core_inst.regfile_inst.reg_file[4],
+                       dut.pipeline_core_inst.regfile_inst.reg_file[7]);
             end
             $display("PASS: SPI system checks passed");
             $finish;

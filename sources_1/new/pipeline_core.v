@@ -52,7 +52,7 @@ module pipeline_core#(
   wire [31:0] pc_ifid_o;  //if_id输出，id_ex输入   
   wire [31:0] instr_ifid_o;  //if_id输出，decode输入
 
-  //instruction_decoder
+  //decode
   wire [31:0] imm_typei_o;  //decode输出，id_ex输入
   wire [31:0] imm_typeb_o;  //decode输出，id_ex输入
   wire [31:0] imm_typej_o;  //decode输出，id_ex输入
@@ -60,8 +60,8 @@ module pipeline_core#(
   wire [31:0] imm_types_o;  //decode输出，id_ex输入
   wire [31:0] imm_csr_o;  //decode输出，id_ex输入
 
-  wire [ 4:0] rs1_addr_o;  //decode输出，id_ex，register_file输入
-  wire [ 4:0] rs2_addr_o;  //decode输出，id_ex，register_file输入
+  wire [ 4:0] rs1_addr_o;  //decode输出，id_ex，regfile输入
+  wire [ 4:0] rs2_addr_o;  //decode输出，id_ex，regfile输入
   wire [11:0] csr_addr_o;  //decode输出，id_ex输入
   wire [ 4:0] rd_addr_o;  //decode输出，id_ex输入
   wire        is_addi_o;  //decode输出，id_ex输入
@@ -214,9 +214,9 @@ module pipeline_core#(
   wire        is_illegal_idex_o;  //id_ex输出 execute_unit输入
 
   //execute_unit
-  wire        wr_en_ex_o;  //execute_unit输出，register_file输入
-  wire [ 4:0] wr_addr_ex_o;  //execute_unit输出，register_file输入
-  wire [31:0] wr_data_ex_o;  //execute_unit输出，register_file输入
+  wire        wr_en_ex_o;  //execute_unit输出，regfile输入
+  wire [ 4:0] wr_addr_ex_o;  //execute_unit输出，regfile输入
+  wire [31:0] wr_data_ex_o;  //execute_unit输出，regfile输入
   wire        pc_brench_flag_ex_o;  //execute_unit输出，fetch_unit输入
   wire [31:0] pc_brench_addr_ex_o;  //execute_unit输出，fetch_unit输入
   wire        clear_valid_ex_o;  //execute_unit输出，if_id输入,id_ex输入
@@ -235,9 +235,9 @@ module pipeline_core#(
   wire [31:0] data_addr;  //外部数据地址信号
 
 
-  //register_file
-  wire [31:0] rs1_data_o;  //register_file输出，id_ex输入
-  wire [31:0] rs2_data_o;  //register_file输出，id_ex输入
+  //regfile
+  wire [31:0] rs1_data_o;  //regfile输出，id_ex输入
+  wire [31:0] rs2_data_o;  //regfile输出，id_ex输入
 
   //data_bus
   wire        bus2ram_req_o;//data_bus输出，data_ram输入
@@ -302,7 +302,7 @@ assign fetch_addr_o = pc_o;
       .instr_ifid_o(instr_ifid_o)
   );
 
-  instruction_decoder instruction_decoder_inst (
+  decode decode_inst (
       .instr_i(instr_ifid_o),
       .imm_typei_o(imm_typei_o),
       .imm_typeu_o(imm_typeu_o),
@@ -656,7 +656,7 @@ assign fetch_addr_o = pc_o;
       .stall_ex_o(stall_ex_o)
   );
 
-  register_file register_file_inst (
+  regfile regfile_inst (
       .clk(clk),
       .rst_n(rst_n),
       .wr_en_i(wr_en_ex_o),

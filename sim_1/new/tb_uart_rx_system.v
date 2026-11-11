@@ -135,15 +135,15 @@ module tb_uart_rx_system;
                 dut.pipeline_core_inst.stall_ex_o === 1'b0) begin
                 #1;
                 if (step != 5 || gpio_out_o !== RX_BYTE ||
-                    dut.pipeline_core_inst.register_file_inst.reg_file[4] !== RX_WORD ||
-                    dut.pipeline_core_inst.register_file_inst.reg_file[5] !== 32'd0 ||
-                    dut.pipeline_core_inst.register_file_inst.reg_file[6] !== 32'd0 ||
+                    dut.pipeline_core_inst.regfile_inst.reg_file[4] !== RX_WORD ||
+                    dut.pipeline_core_inst.regfile_inst.reg_file[5] !== 32'd0 ||
+                    dut.pipeline_core_inst.regfile_inst.reg_file[6] !== 32'd0 ||
                     dut.uart_tx_target_inst.rx_pending !== 1'b0) begin
                     $fatal(1, "unexpected final state: step=%0d GPIO=%h x4=%h x5=%h x6=%h pending=%b",
                            step, gpio_out_o,
-                           dut.pipeline_core_inst.register_file_inst.reg_file[4],
-                           dut.pipeline_core_inst.register_file_inst.reg_file[5],
-                           dut.pipeline_core_inst.register_file_inst.reg_file[6],
+                           dut.pipeline_core_inst.regfile_inst.reg_file[4],
+                           dut.pipeline_core_inst.regfile_inst.reg_file[5],
+                           dut.pipeline_core_inst.regfile_inst.reg_file[6],
                            dut.uart_tx_target_inst.rx_pending);
                 end
                 $display("PASS: UART RX system checks passed");

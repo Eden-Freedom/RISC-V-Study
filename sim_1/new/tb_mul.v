@@ -2,7 +2,7 @@
 
 // Assistant-authored testbench, requested by the learner.
 // Style follows the current Vivado tb_check.v: tasks, errors, !== and #1.
-// Install the matching mul_imem_case.txt entries in instruction_rom before simulation.
+// Install the matching mul_imem_case.txt entries in instr_rom before simulation.
 // Checks include both JALs and their commits. No Python or run-time reference
 // multiplication is used by this testbench.
 module tb_mul();
@@ -52,10 +52,10 @@ task check_regfile;
     input [4:0] idx;
     input [31:0] exp_val;
     begin
-        if (u_pipeline_core.register_file_inst.reg_file[idx] !== exp_val) begin
+        if (u_pipeline_core.regfile_inst.reg_file[idx] !== exp_val) begin
             $display("FAIL [%0t] x%0d: actual=%h expected=%h",
                      $time, idx,
-                     u_pipeline_core.register_file_inst.reg_file[idx], exp_val);
+                     u_pipeline_core.regfile_inst.reg_file[idx], exp_val);
             errors = errors + 1;
         end
     end
@@ -110,13 +110,13 @@ endtask
 task check_x0_read_ports;
     begin
         check_value("x0 rs1 address",
-                    u_pipeline_core.register_file_inst.rs1_addr_i, 32'd0);
+                    u_pipeline_core.regfile_inst.rs1_addr_i, 32'd0);
         check_value("x0 rs2 address",
-                    u_pipeline_core.register_file_inst.rs2_addr_i, 32'd0);
+                    u_pipeline_core.regfile_inst.rs2_addr_i, 32'd0);
         check_value("x0 rs1 read",
-                    u_pipeline_core.register_file_inst.rs1_data_o, 32'd0);
+                    u_pipeline_core.regfile_inst.rs1_data_o, 32'd0);
         check_value("x0 rs2 read",
-                    u_pipeline_core.register_file_inst.rs2_data_o, 32'd0);
+                    u_pipeline_core.regfile_inst.rs2_data_o, 32'd0);
         check_value("x0 rs1 forwarding",
                     u_pipeline_core.rs1_data_forward_o, 32'd0);
         check_value("x0 rs2 forwarding",
@@ -167,7 +167,7 @@ task check_step;
         check_value("is_jal_idex_o", u_pipeline_core.is_jal_idex_o, exp_jump);
         check_no_memory;
 
-        // Either register_file or EX may suppress writes to x0.
+        // Either regfile or EX may suppress writes to x0.
         if (exp_rd != 5'd0)
             check_ex(1'b1, exp_rd, exp_data);
         else if (u_pipeline_core.wr_en_ex_o === 1'b1)

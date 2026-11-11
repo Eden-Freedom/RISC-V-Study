@@ -94,7 +94,7 @@ module addi_core(
         .instr_o(instr_o)
     );
 
-    instruction_decoder instruction_decoder_inst(
+    decode decode_inst(
         .instr_i(instr_o),
         .imm_typei_o(imm_typei_o),
         .imm_typeu_o(imm_typeu_o),
@@ -213,7 +213,7 @@ module addi_core(
       );
 
 
-    register_file register_file_inst(
+    regfile regfile_inst(
         .clk(clk),
         .rst_n(rst_n),
         .wr_en_i(wr_en),

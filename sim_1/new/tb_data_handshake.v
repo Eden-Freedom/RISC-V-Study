@@ -121,9 +121,9 @@ begin
                 u_pipeline_core.data_ram_target_inst.data_ram_inst.memory[n],expected_ram[n]);
             errors=errors+1;
         end
-        if(n!=0 && u_pipeline_core.register_file_inst.reg_file[n] !== expected_regs[n]) begin
+        if(n!=0 && u_pipeline_core.regfile_inst.reg_file[n] !== expected_regs[n]) begin
             $display("FAIL t=%0t step=%0d x%0d=%h expected=%h",$time,step,n,
-                u_pipeline_core.register_file_inst.reg_file[n],expected_regs[n]);
+                u_pipeline_core.regfile_inst.reg_file[n],expected_regs[n]);
             errors=errors+1;
         end
     end
@@ -133,8 +133,8 @@ begin
     check("mepc",u_pipeline_core.execute_unit_inst.csr_unit_inst.mepc_reg,mepc);
     check("mcause",u_pipeline_core.execute_unit_inst.csr_unit_inst.mcause_reg,mcause);
     check("mscratch unchanged",u_pipeline_core.execute_unit_inst.csr_unit_inst.mscratch_reg,0);
-    if(u_pipeline_core.register_file_inst.rs1_addr_i===5'd0)
-        check("architectural x0",u_pipeline_core.register_file_inst.rs1_data_o,0);
+    if(u_pipeline_core.regfile_inst.rs1_addr_i===5'd0)
+        check("architectural x0",u_pipeline_core.regfile_inst.rs1_data_o,0);
 end
 endtask
 
@@ -343,8 +343,8 @@ initial begin
             check("one IRQ only",irq_count,0);
             check("IRQ after LW completion",step,10);
             check("no in-flight memory at IRQ",{31'b0,memory_waiting},0);
-            check("LW already wrote x2",u_pipeline_core.register_file_inst.reg_file[2],32'h55);
-            check("consumer not executed",u_pipeline_core.register_file_inst.reg_file[3],0);
+            check("LW already wrote x2",u_pipeline_core.regfile_inst.reg_file[2],32'h55);
+            check("consumer not executed",u_pipeline_core.regfile_inst.reg_file[3],0);
             check_empty;
             check("IRQ request asserted",{31'b0,irq_external_i},1);
             check("entry",{31'b0,u_pipeline_core.execute_unit_inst.trap_enter_ex_o},1);

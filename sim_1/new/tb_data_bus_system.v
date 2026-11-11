@@ -77,13 +77,13 @@ module tb_data_bus_system;
             check(dev_reads == 1 && dev_writes == 1, "DEV read/write completed exactly once");
             check(ram_reads == 2 && ram_writes == 2, "RAM read/write completion counts");
             check(unmapped_reads == 1 && unmapped_writes == 1, "unmapped read/write completed");
-            check(dut.register_file_inst.reg_file[1] === 32'h35, "x1 = 35");
-            check(dut.register_file_inst.reg_file[2] === 32'h35, "x2 = RAM readback");
-            check(dut.register_file_inst.reg_file[3] === 32'h10000000, "x3 = DEV base address");
-            check(dut.register_file_inst.reg_file[4] === 32'h12345678, "x4 = DEV read response");
-            check(dut.register_file_inst.reg_file[5] === 32'h12345679, "x5 consumes DEV load");
-            check(dut.register_file_inst.reg_file[6] === 32'd0, "x6 = unmapped read zero");
-            check(dut.register_file_inst.reg_file[7] === 32'h12345679, "x7 = final RAM readback");
+            check(dut.regfile_inst.reg_file[1] === 32'h35, "x1 = 35");
+            check(dut.regfile_inst.reg_file[2] === 32'h35, "x2 = RAM readback");
+            check(dut.regfile_inst.reg_file[3] === 32'h10000000, "x3 = DEV base address");
+            check(dut.regfile_inst.reg_file[4] === 32'h12345678, "x4 = DEV read response");
+            check(dut.regfile_inst.reg_file[5] === 32'h12345679, "x5 consumes DEV load");
+            check(dut.regfile_inst.reg_file[6] === 32'd0, "x6 = unmapped read zero");
+            check(dut.regfile_inst.reg_file[7] === 32'h12345679, "x7 = final RAM readback");
             check(dut.data_ram_target_inst.data_ram_inst.memory[0] === 32'h35, "RAM address 0 unchanged");
             check(dut.data_ram_target_inst.data_ram_inst.memory[1] === 32'h12345679, "RAM address 4 result");
             for (i = 2; i < 32; i = i + 1)
@@ -229,7 +229,7 @@ module tb_data_bus_system;
             saved_ex_pc = dut.pc_idex_o;
             saved_ifid = {dut.valid_ifid_o, dut.pc_ifid_o, dut.instr_ifid_o};
             for (i = 1; i < 32; i = i + 1)
-                saved_regs[i] = dut.register_file_inst.reg_file[i];
+                saved_regs[i] = dut.regfile_inst.reg_file[i];
             was_waiting = dut.data_req && !dut.bus2cpu_ready_o;
 
             #1;
@@ -239,7 +239,7 @@ module tb_data_bus_system;
                 check({dut.valid_ifid_o, dut.pc_ifid_o, dut.instr_ifid_o} === saved_ifid,
                       "IF/ID holds across stalled edge");
                 for (i = 1; i < 32; i = i + 1)
-                    check(dut.register_file_inst.reg_file[i] === saved_regs[i], "registers unchanged during wait");
+                    check(dut.regfile_inst.reg_file[i] === saved_regs[i], "registers unchanged during wait");
             end
             if (finish_before) begin
                 finished = 1'b1;

@@ -5,7 +5,7 @@
 // 
 // Create Date: 2026/10/19 11:53:05
 // Design Name: 
-// Module Name: tb_register_file
+// Module Name: tb_regfile
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module tb_register_file();
+module tb_regfile();
 
 reg clk;
 reg rst_n;
@@ -66,7 +66,7 @@ initial begin
     $monitor("time =%dns,rst_n = %b,wr_en_i = %b,wr_addr_i = %d,wr_data_i = %d,rs1_addr_i = %d,rs2_addr_i = %d,rs1_data_o = %d,rs2_data_o = %d",$time,rst_n,wr_en_i,wr_addr_i,wr_data_i,rs1_addr_i,rs2_addr_i,rs1_data_o,rs2_data_o);
 end
 
-register_file u_register_file(
+regfile u_regfile(
     .clk(clk),
     .rst_n(rst_n),
     .wr_en_i(wr_en_i),

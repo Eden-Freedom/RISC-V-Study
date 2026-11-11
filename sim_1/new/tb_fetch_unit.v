@@ -60,7 +60,7 @@ fetch_unit u_fetch_unit(
     .instr_o(instr_o)
 );
 
-instruction_decoder u_instruction_decoder(
+decode u_decode(
     .instr_i(instr_o),
     .imm_o(imm_o),
     .rs1_addr_o(rs1_addr_o),
@@ -70,7 +70,7 @@ instruction_decoder u_instruction_decoder(
     .is_add_o(is_add_o)
 );
 
-// register_file u_register_file(
+// regfile u_regfile(
 //     .clk(clk),
 //     .rst_n(rst_n),
 //     .wr_en_i(is_addi_o),

@@ -82,10 +82,10 @@ module tb_timer_irq_system;
             check(dut.pipeline_core_inst.execute_unit_inst.csr_unit_inst.mcause_reg === expected_mcause,"mcause storage");
             check(dut.pipeline_core_inst.execute_unit_inst.csr_unit_inst.mscratch_reg === 32'd0,"mscratch unchanged");
             for(r=1;r<32;r=r+1)
-                if(dut.pipeline_core_inst.register_file_inst.reg_file[r] !== regs_expected[r]) begin
+                if(dut.pipeline_core_inst.regfile_inst.reg_file[r] !== regs_expected[r]) begin
                     errors=errors+1;
                     $display("FAIL: x%0d actual=%08h expected=%08h time=%0t step=%0d",r,
-                             dut.pipeline_core_inst.register_file_inst.reg_file[r],regs_expected[r],$time,step);
+                             dut.pipeline_core_inst.regfile_inst.reg_file[r],regs_expected[r],$time,step);
                 end
             check(dut.timer_target_inst.en_reg === timer_en_expected,"Timer count enable");
             check(dut.timer_target_inst.irq_en_reg === timer_irq_en_expected,"Timer device IRQ enable");
@@ -211,7 +211,7 @@ module tb_timer_irq_system;
             check(expected_mstatus==32'h1888 && expected_mtvec==32'h100 && expected_mie==32'h800 &&
                   expected_mepc==32'h3C && expected_mcause==32'h8000000B,"final architectural CSR expectations");
             for(r=1;r<32;r=r+1)
-                check(dut.pipeline_core_inst.register_file_inst.reg_file[r] === final_regs[r],"final register result");
+                check(dut.pipeline_core_inst.regfile_inst.reg_file[r] === final_regs[r],"final register result");
             for(r=1;r<32;r=r+1)
                 check(dut.pipeline_core_inst.data_ram_target_inst.data_ram_inst.memory[r] === 32'd0,
                       "other RAM words remain zero");
@@ -261,7 +261,7 @@ module tb_timer_irq_system;
             if(timer_irq_expected && !expected_mstatus[3])
                 check(irq_take === 1'b0,"CPU global mask blocks entry without clearing device request");
             if(return_count==0)
-                check(dut.pipeline_core_inst.register_file_inst.reg_file[9] === 32'd0,"x9 must wait until return");
+                check(dut.pipeline_core_inst.regfile_inst.reg_file[9] === 32'd0,"x9 must wait until return");
 
             // Observe actual handshakes, independently of stream progress.
             if(dut.timer_req && dut.timer_ready_o) begin

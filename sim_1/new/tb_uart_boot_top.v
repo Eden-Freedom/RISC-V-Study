@@ -45,7 +45,7 @@ module tb_uart_boot_top;
     wire ifid_valid = dut.pipeline_core_inst.valid_ifid_o;
     wire [31:0] ifid_pc = dut.pipeline_core_inst.pc_ifid_o;
     wire [31:0] ifid_instr = dut.pipeline_core_inst.instr_ifid_o;
-    wire [31:0] x1_value = dut.pipeline_core_inst.register_file_inst.reg_file[1];
+    wire [31:0] x1_value = dut.pipeline_core_inst.regfile_inst.reg_file[1];
 
     always #5 clk = ~clk;
 

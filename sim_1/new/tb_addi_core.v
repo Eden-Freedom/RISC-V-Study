@@ -56,10 +56,10 @@ initial begin
     $time,
     pc_o,
     instr_o,
-    u_addi_core.register_file_inst.reg_file[3],
-    u_addi_core.register_file_inst.reg_file[4],
-    u_addi_core.register_file_inst.reg_file[5],
-    u_addi_core.register_file_inst.reg_file[6],
+    u_addi_core.regfile_inst.reg_file[3],
+    u_addi_core.regfile_inst.reg_file[4],
+    u_addi_core.regfile_inst.reg_file[5],
+    u_addi_core.regfile_inst.reg_file[6],
     u_addi_core.data_ram_inst.memory[16],
     u_addi_core.ram_wr_sel_o,
     u_addi_core.ram_wr_addr_o,
@@ -76,38 +76,38 @@ initial begin
     repeat (20) @(negedge clk);
 
     // 第1项检查：这里的预期值按你的测试程序填写
-    if (u_addi_core.register_file_inst.reg_file[4] !== 32'h00000080) begin
+    if (u_addi_core.regfile_inst.reg_file[4] !== 32'h00000080) begin
         $display("FAIL x4: actual=%h expected=%h",
-                 u_addi_core.register_file_inst.reg_file[4],
+                 u_addi_core.regfile_inst.reg_file[4],
                  32'h00000080);
         errors = errors + 1;
     end
 
     // 在这里继续写第2～6项检查
-    if (u_addi_core.register_file_inst.reg_file[5] !== 32'hFFFFFF80) begin
+    if (u_addi_core.regfile_inst.reg_file[5] !== 32'hFFFFFF80) begin
         $display("FAIL x5: actual=%h expected=%h",
-                 u_addi_core.register_file_inst.reg_file[5],
+                 u_addi_core.regfile_inst.reg_file[5],
                  32'hFFFFFF80);
         errors = errors + 1;
     end
     
-    if (u_addi_core.register_file_inst.reg_file[6] !== 32'h00001280) begin
+    if (u_addi_core.regfile_inst.reg_file[6] !== 32'h00001280) begin
         $display("FAIL x6: actual=%h expected=%h",
-                 u_addi_core.register_file_inst.reg_file[6],
+                 u_addi_core.regfile_inst.reg_file[6],
                  32'h00001280);
         errors = errors + 1;
     end
 
-    if (u_addi_core.register_file_inst.reg_file[7] !== 32'hFFFFFF80) begin
+    if (u_addi_core.regfile_inst.reg_file[7] !== 32'hFFFFFF80) begin
         $display("FAIL x7: actual=%h expected=%h",
-                 u_addi_core.register_file_inst.reg_file[7],
+                 u_addi_core.regfile_inst.reg_file[7],
                  32'hFFFFFF80);
         errors = errors + 1;
     end
 
-    if (u_addi_core.register_file_inst.reg_file[8] !== 32'hFF805678) begin
+    if (u_addi_core.regfile_inst.reg_file[8] !== 32'hFF805678) begin
         $display("FAIL x8: actual=%h expected=%h",
-                 u_addi_core.register_file_inst.reg_file[8],
+                 u_addi_core.regfile_inst.reg_file[8],
                  32'hFF805678);
         errors = errors + 1;
     end

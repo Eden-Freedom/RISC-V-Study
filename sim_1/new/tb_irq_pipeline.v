@@ -46,15 +46,15 @@ begin
     check("mscratch", u_pipeline_core.execute_unit_inst.csr_unit_inst.mscratch_reg, mscratch);
     check("mepc", u_pipeline_core.execute_unit_inst.csr_unit_inst.mepc_reg, mepc);
     check("mcause", u_pipeline_core.execute_unit_inst.csr_unit_inst.mcause_reg, mcause);
-    // Storage for architectural x0 is intentionally not reset in this register_file.
+    // Storage for architectural x0 is intentionally not reset in this regfile.
     for (r=1; r<32; r=r+1)
-        if (u_pipeline_core.register_file_inst.reg_file[r] !== expected_regs[r]) begin
+        if (u_pipeline_core.regfile_inst.reg_file[r] !== expected_regs[r]) begin
             $display("FAIL t=%0t step=%0d x%0d actual=%h expected=%h", $time,
-                     step, r, u_pipeline_core.register_file_inst.reg_file[r], expected_regs[r]);
+                     step, r, u_pipeline_core.regfile_inst.reg_file[r], expected_regs[r]);
             errors = errors + 1;
         end
-    if (u_pipeline_core.register_file_inst.rs1_addr_i === 5'd0)
-        check("architectural x0 read",u_pipeline_core.register_file_inst.rs1_data_o,32'd0);
+    if (u_pipeline_core.regfile_inst.rs1_addr_i === 5'd0)
+        check("architectural x0 read",u_pipeline_core.regfile_inst.rs1_data_o,32'd0);
 end
 endtask
 
@@ -314,11 +314,11 @@ initial begin
     check("IRQ count",enter_count,5); check("MRET count",return_count,5);
     check("DIV start count",div_start_count,1); check("DIV write count",div_write_count,1);
     check("final PC",u_pipeline_core.pc_o,32'h0);
-    check("final x5",u_pipeline_core.register_file_inst.reg_file[5],7);
-    check("final x8",u_pipeline_core.register_file_inst.reg_file[8],33);
-    check("final x9",u_pipeline_core.register_file_inst.reg_file[9],34);
-    check("final x20",u_pipeline_core.register_file_inst.reg_file[20],5);
-    check("final x21",u_pipeline_core.register_file_inst.reg_file[21],0);
+    check("final x5",u_pipeline_core.regfile_inst.reg_file[5],7);
+    check("final x8",u_pipeline_core.regfile_inst.reg_file[8],33);
+    check("final x9",u_pipeline_core.regfile_inst.reg_file[9],34);
+    check("final x20",u_pipeline_core.regfile_inst.reg_file[20],5);
+    check("final x21",u_pipeline_core.regfile_inst.reg_file[21],0);
     check("final mscratch",u_pipeline_core.execute_unit_inst.csr_unit_inst.mscratch_reg,21);
     check("final mepc",u_pipeline_core.execute_unit_inst.csr_unit_inst.mepc_reg,0);
     check("final mcause",u_pipeline_core.execute_unit_inst.csr_unit_inst.mcause_reg,32'h8000000B);

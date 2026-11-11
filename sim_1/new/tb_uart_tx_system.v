@@ -185,10 +185,10 @@ module tb_uart_tx_system;
             check(dut.pipeline_core_inst.data_ram_target_inst.data_ram_inst.memory[0] === expected_ram_word,
                   "RAM word zero follows the program store");
             for (reg_index=1; reg_index<32; reg_index=reg_index+1) begin
-                if (dut.pipeline_core_inst.register_file_inst.reg_file[reg_index] !== expected_regs[reg_index]) begin
+                if (dut.pipeline_core_inst.regfile_inst.reg_file[reg_index] !== expected_regs[reg_index]) begin
                     errors = errors + 1;
                     $display("FAIL: x%0d=%08h expected=%08h t=%0t", reg_index,
-                             dut.pipeline_core_inst.register_file_inst.reg_file[reg_index],
+                             dut.pipeline_core_inst.regfile_inst.reg_file[reg_index],
                              expected_regs[reg_index], $time);
                 end
             end

@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-module instruction_rom(input wire [31:0] addr_i, output reg [31:0] instr_o);
+module instr_rom(input wire [31:0] addr_i, output reg [31:0] instr_o);
     // CPU program for tb_spi_system.
     always @(*) begin
         case (addr_i)

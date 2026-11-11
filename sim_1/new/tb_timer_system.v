@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 // TB drives only soc_top clock/reset/IRQ=0. Internal references observe the DUT.
-// CPU requests are generated exclusively by the instruction_rom program.
+// CPU requests are generated exclusively by the instr_rom program.
 module tb_timer_system;
     reg clk = 1'b0;
     reg rst_n = 1'b0;
@@ -100,10 +100,10 @@ module tb_timer_system;
                   "COUNT sample and Timer progress during RAM wait observed");
             check(checked_last_byte && checked_unmapped, "both window-boundary routes observed");
             for (i=1; i<=13; i=i+1)
-                check(dut.pipeline_core_inst.register_file_inst.reg_file[i] === expected_regs[i],
+                check(dut.pipeline_core_inst.regfile_inst.reg_file[i] === expected_regs[i],
                       "final program register value");
             for (i=14; i<32; i=i+1)
-                check(dut.pipeline_core_inst.register_file_inst.reg_file[i] === 32'd0,
+                check(dut.pipeline_core_inst.regfile_inst.reg_file[i] === 32'd0,
                       "unused registers remain zero");
             check(dut.pipeline_core_inst.data_ram_target_inst.data_ram_inst.memory[0] === 32'd3,
                   "RAM address zero stores three");
@@ -333,12 +333,12 @@ module tb_timer_system;
             saved_ifid={dut.pipeline_core_inst.valid_ifid_o,
                          dut.pipeline_core_inst.pc_ifid_o,dut.pipeline_core_inst.instr_ifid_o};
             for (i=1;i<32;i=i+1)
-                saved_regs[i]=dut.pipeline_core_inst.register_file_inst.reg_file[i];
+                saved_regs[i]=dut.pipeline_core_inst.regfile_inst.reg_file[i];
 
             #1;
             check_timer_state;
             if (wb_before)
-                check(dut.pipeline_core_inst.register_file_inst.reg_file[rd_before] === wb_data_before,
+                check(dut.pipeline_core_inst.regfile_inst.reg_file[rd_before] === wb_data_before,
                       "register storage after completion edge");
             if (stall_before) begin
                 check(ex_pc === saved_ex_pc && dut.pipeline_core_inst.pc_o === saved_fetch_pc,
@@ -346,7 +346,7 @@ module tb_timer_system;
                 check({dut.pipeline_core_inst.valid_ifid_o,dut.pipeline_core_inst.pc_ifid_o,
                        dut.pipeline_core_inst.instr_ifid_o} === saved_ifid,"IF/ID held during RAM wait");
                 for (i=1;i<32;i=i+1)
-                    check(dut.pipeline_core_inst.register_file_inst.reg_file[i] === saved_regs[i],
+                    check(dut.pipeline_core_inst.regfile_inst.reg_file[i] === saved_regs[i],
                           "register file held during RAM wait");
             end
             if (finish_before)

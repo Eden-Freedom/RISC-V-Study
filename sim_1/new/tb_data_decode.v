@@ -42,14 +42,14 @@ begin
             errors=errors+1;
         end
         // x0内部存储未复位，架构读口的零值另行检查。
-        if (n!=0 && u_pipeline_core.register_file_inst.reg_file[n] !== expected_regs[n]) begin
+        if (n!=0 && u_pipeline_core.regfile_inst.reg_file[n] !== expected_regs[n]) begin
             $display("FAIL t=%0t step=%0d x%0d=%h expected=%h",$time,step,n,
-                     u_pipeline_core.register_file_inst.reg_file[n],expected_regs[n]);
+                     u_pipeline_core.regfile_inst.reg_file[n],expected_regs[n]);
             errors=errors+1;
         end
     end
-    if (u_pipeline_core.register_file_inst.rs1_addr_i === 5'd0)
-        check("x0 read",u_pipeline_core.register_file_inst.rs1_data_o,32'd0);
+    if (u_pipeline_core.regfile_inst.rs1_addr_i === 5'd0)
+        check("x0 read",u_pipeline_core.regfile_inst.rs1_data_o,32'd0);
 end
 endtask
 

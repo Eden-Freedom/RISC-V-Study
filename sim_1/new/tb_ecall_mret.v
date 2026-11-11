@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-// 真实 instruction_rom -> IF -> ID/EX -> EX -> CSR/PC，不强制任何指令或事件信号。
+// 真实 instr_rom -> IF -> ID/EX -> EX -> CSR/PC，不强制任何指令或事件信号。
 module tb_ecall_mret();
 
 reg clk;
@@ -55,10 +55,10 @@ task check_regfile;
 input [4:0] idx;
 input [31:0] exp_val;
 begin
-    if (u_pipeline_core.register_file_inst.reg_file[idx] !== exp_val) begin
+    if (u_pipeline_core.regfile_inst.reg_file[idx] !== exp_val) begin
         $display("FAIL [%0t] x%0d: actual=%h expected=%h",
                  $time, idx,
-                 u_pipeline_core.register_file_inst.reg_file[idx], exp_val);
+                 u_pipeline_core.regfile_inst.reg_file[idx], exp_val);
         errors = errors + 1;
     end
 end
@@ -195,7 +195,7 @@ initial begin
     check_csr_state;
     check_bubble;
     if (u_pipeline_core.instr_o !== 32'h10000093)
-        $fatal(1, "ECALL ROM mismatch: recompile instruction_rom.v with this test program");
+        $fatal(1, "ECALL ROM mismatch: recompile instr_rom.v with this test program");
 
     #10; // t=25，在上升沿之间释放复位
     rst_n = 1'b1;
@@ -276,10 +276,10 @@ initial begin
     check("wrong-path CSR writes cancelled",
           u_pipeline_core.execute_unit_inst.csr_unit_inst.mscratch_reg, 32'b0);
     // 冲刷后的读地址为零，通过实际读口检查架构 x0。
-    check("x0 rs1 address", {27'b0,u_pipeline_core.register_file_inst.rs1_addr_i}, 32'd0);
-    check("x0 rs1 data", u_pipeline_core.register_file_inst.rs1_data_o, 32'd0);
-    check("x0 rs2 address", {27'b0,u_pipeline_core.register_file_inst.rs2_addr_i}, 32'd0);
-    check("x0 rs2 data", u_pipeline_core.register_file_inst.rs2_data_o, 32'd0);
+    check("x0 rs1 address", {27'b0,u_pipeline_core.regfile_inst.rs1_addr_i}, 32'd0);
+    check("x0 rs1 data", u_pipeline_core.regfile_inst.rs1_data_o, 32'd0);
+    check("x0 rs2 address", {27'b0,u_pipeline_core.regfile_inst.rs2_addr_i}, 32'd0);
+    check("x0 rs2 data", u_pipeline_core.regfile_inst.rs2_data_o, 32'd0);
 
     if (errors == 0) begin
         $display("PASS: ECALL/MRET pipeline checks passed");
