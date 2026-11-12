@@ -61,7 +61,7 @@ module decode (
   assign imm_csr_o      =  {27'b0, instr_i[19:15]};
   assign csr_addr_o      = instr_i[31:20];
   assign rs1_addr_o = instr_i[19:15];
-  assign rs2_addr_o = (opcode == 7'b0110011 || opcode == 7'b1100011 || opcode == 7'b0100011) ? instr_i[24:20] : 5'b00000;
+  assign rs2_addr_o = (opcode == `INSTR_R_CODE || opcode == `INSTR_B_CODE || opcode == `INSTR_S_CODE) ? instr_i[24:20] : 5'b00000;
   assign rd_addr_o  = instr_i[11:7];
 
 
@@ -82,6 +82,7 @@ module decode (
             `F3_R_SR: op_dc_o = `CPU_OP_SRL;
             `F3_R_OR: op_dc_o = `CPU_OP_OR;
             `F3_R_AND: op_dc_o = `CPU_OP_AND;
+            default: op_dc_o = `CPU_OP_NONE;
             endcase
           end
 
@@ -90,6 +91,7 @@ module decode (
             case (funct3)
             `F3_R_ADD_SUB: op_dc_o = `CPU_OP_SUB;
             `F3_R_SR: op_dc_o = `CPU_OP_SRA;
+            default: op_dc_o = `CPU_OP_NONE;
             endcase
           end
           
@@ -104,132 +106,119 @@ module decode (
             `F3_M_DIVU: op_dc_o = `CPU_OP_DIVU;
             `F3_M_REM: op_dc_o = `CPU_OP_REM;
             `F3_M_REMU: op_dc_o = `CPU_OP_REMU;
+            default: op_dc_o = `CPU_OP_NONE;
             endcase
           end
-
+          default: op_dc_o = `CPU_OP_NONE;
           endcase
       end
-      7'b0010011: begin//I型指令
-        if (funct3 == 3'b000) begin
-          op_dc_o = `CPU_OP_ADDI;
-        end
-        else if (funct3 == 3'b100) begin
-          op_dc_o = `CPU_OP_XORI;
-        end
-        else if (funct3 == 3'b110) begin
-          op_dc_o = `CPU_OP_ORI;
-        end
-        else if (funct3 == 3'b111) begin
-          op_dc_o = `CPU_OP_ANDI;
-        end
-        else if (funct3 == 3'b001 && funct7 == 7'b0000000) begin
-          op_dc_o = `CPU_OP_SLLI;
-        end
-        else if (funct3 == 3'b101 && funct7 == 7'b0000000) begin
-          op_dc_o = `CPU_OP_SRLI;
-        end
-        else if (funct3 == 3'b101 && funct7 == 7'b0100000) begin
-          op_dc_o = `CPU_OP_SRAI;
-        end
-        else if (funct3 == 3'b010) begin
-          op_dc_o = `CPU_OP_SLTI;
-        end
-        else if (funct3 == 3'b011) begin
-          op_dc_o = `CPU_OP_SLTIU;
+      `INSTR_I_CODE: begin
+      case (funct3)
+        `F3_I_ADDI:  op_dc_o = `CPU_OP_ADDI;
+        `F3_I_SLTI:  op_dc_o = `CPU_OP_SLTI;
+        `F3_I_SLTIU: op_dc_o = `CPU_OP_SLTIU;
+        `F3_I_XORI:  op_dc_o = `CPU_OP_XORI;
+        `F3_I_ORI:   op_dc_o = `CPU_OP_ORI;
+        `F3_I_ANDI:  op_dc_o = `CPU_OP_ANDI;
+
+        // SLLI：移位量在 instr[24:20]，高7位必须为零
+        `F3_I_SLLI: begin
+          case (funct7)
+            `F7_I_SHIFT_LOGIC: op_dc_o = `CPU_OP_SLLI;
+            default:          op_dc_o = `CPU_OP_NONE;
+          endcase
         end
 
-      end
-      7'b0110111: begin//U型指令
-        op_dc_o = `CPU_OP_LUI;
-      end
-      7'b0010111: begin//U型指令
-        op_dc_o = `CPU_OP_AUIPC;
-      end
-      7'b1100011:begin//B型指令
-        if (funct3 == 3'b000) begin
-          op_dc_o = `CPU_OP_BEQ;
+        // 右移指令由高7位区分逻辑右移和算术右移
+        `F3_I_SR: begin
+          case (funct7)
+            `F7_I_SHIFT_LOGIC: op_dc_o = `CPU_OP_SRLI;
+            `F7_I_SHIFT_ARITH: op_dc_o = `CPU_OP_SRAI;
+            default:          op_dc_o = `CPU_OP_NONE;
+          endcase
         end
-        else if (funct3 == 3'b001) begin
-          op_dc_o = `CPU_OP_BNE;
+
+        default: op_dc_o = `CPU_OP_NONE;
+      endcase
+    end
+
+    `INSTR_LUI_CODE: begin
+      op_dc_o = `CPU_OP_LUI;
+    end
+
+    `INSTR_AUIPC_CODE: begin
+      op_dc_o = `CPU_OP_AUIPC;
+    end
+
+    `INSTR_B_CODE: begin
+      case (funct3)
+        `F3_B_BEQ:  op_dc_o = `CPU_OP_BEQ;
+        `F3_B_BNE:  op_dc_o = `CPU_OP_BNE;
+        `F3_B_BLT:  op_dc_o = `CPU_OP_BLT;
+        `F3_B_BGE:  op_dc_o = `CPU_OP_BGE;
+        `F3_B_BLTU: op_dc_o = `CPU_OP_BLTU;
+        `F3_B_BGEU: op_dc_o = `CPU_OP_BGEU;
+        default:   op_dc_o = `CPU_OP_NONE;
+      endcase
+    end
+
+    `INSTR_JAL_CODE: begin
+      op_dc_o = `CPU_OP_JAL;
+    end
+
+    `INSTR_JALR_CODE: begin
+      case (funct3)
+        `F3_JALR: op_dc_o = `CPU_OP_JALR;
+        default:  op_dc_o = `CPU_OP_NONE;
+      endcase
+    end
+
+    `INSTR_S_CODE: begin
+      case (funct3)
+        `F3_S_SB: op_dc_o = `CPU_OP_SB;
+        `F3_S_SH: op_dc_o = `CPU_OP_SH;
+        `F3_S_SW: op_dc_o = `CPU_OP_SW;
+        default:  op_dc_o = `CPU_OP_NONE;
+      endcase
+    end
+
+    `INSTR_LOAD_CODE: begin
+      case (funct3)
+        `F3_L_LB:  op_dc_o = `CPU_OP_LB;
+        `F3_L_LH:  op_dc_o = `CPU_OP_LH;
+        `F3_L_LW:  op_dc_o = `CPU_OP_LW;
+        `F3_L_LBU: op_dc_o = `CPU_OP_LBU;
+        `F3_L_LHU: op_dc_o = `CPU_OP_LHU;
+        default:   op_dc_o = `CPU_OP_NONE;
+      endcase
+    end
+
+    `INSTR_CSR_CODE: begin
+      case (funct3)
+
+        // 这一组按完整32位指令识别，不能只检查 funct3
+        `F3_SYS_ENV: begin
+          case (instr_i)
+            `INSTR_ECALL_WORD: op_dc_o = `CPU_OP_ECALL;
+            `INSTR_MRET_WORD:  op_dc_o = `CPU_OP_MRET;
+            default:          op_dc_o = `CPU_OP_NONE;
+          endcase
         end
-        else if(funct3 == 3'b100) begin
-          op_dc_o = `CPU_OP_BLT;
-        end
-        else if(funct3 == 3'b101) begin
-          op_dc_o = `CPU_OP_BGE;
-        end
-        else if(funct3 == 3'b110) begin
-          op_dc_o = `CPU_OP_BLTU;
-        end
-        else if(funct3 == 3'b111) begin
-          op_dc_o = `CPU_OP_BGEU;
-        end
-      end
-      7'b1101111: begin//J型指令
-        op_dc_o = `CPU_OP_JAL;
-      end
-      7'b1100111: begin//I型指令
-        if(funct3 == 3'b000) begin
-        op_dc_o = `CPU_OP_JALR;
-        end
-      end
-      7'b0100011:begin//S型指令
-        if(funct3 == 3'b010)begin
-          op_dc_o = `CPU_OP_SW;
-        end
-        else if(funct3 == 3'b000)begin
-          op_dc_o = `CPU_OP_SB;
-        end
-        else if(funct3 == 3'b001)begin
-          op_dc_o = `CPU_OP_SH;
-        end
-      end
-      7'b0000011:begin//I型指令数据加载
-        if(funct3 == 3'b010)begin
-          op_dc_o = `CPU_OP_LW;
-        end
-        else if(funct3 == 3'b000)begin
-          op_dc_o = `CPU_OP_LB;
-        end
-        else if(funct3 == 3'b100)begin
-          op_dc_o = `CPU_OP_LBU;
-        end
-        else if(funct3 == 3'b001)begin
-          op_dc_o = `CPU_OP_LH;
-        end
-        else if(funct3 == 3'b101)begin
-          op_dc_o = `CPU_OP_LHU;
-        end
-      end
-      7'b1110011:begin//CSR型指令
-        if(instr_i == 32'h00000073)begin
-          op_dc_o = `CPU_OP_ECALL;
-        end
-        else if(instr_i == 32'h30200073)begin
-          op_dc_o = `CPU_OP_MRET;
-        end
-        else if(funct3 == 3'b001)begin
-          op_dc_o = `CPU_OP_CSRRW;
-        end
-        else if(funct3 == 3'b010)begin
-          op_dc_o = `CPU_OP_CSRRS;
-        end
-        else if(funct3 == 3'b011)begin
-          op_dc_o = `CPU_OP_CSRRC;
-        end
-        else if(funct3 == 3'b101)begin
-          op_dc_o = `CPU_OP_CSRRWI;
-          end
-        else if(funct3 == 3'b110)begin
-          op_dc_o = `CPU_OP_CSRRSI;
-        end
-        else if(funct3 == 3'b111)begin
-          op_dc_o = `CPU_OP_CSRRCI;
-        end
-      end
-      default: begin
-        op_dc_o = `CPU_OP_NONE;
-      end
-    endcase
-  end
+
+        `F3_CSRRW:  op_dc_o = `CPU_OP_CSRRW;
+        `F3_CSRRS:  op_dc_o = `CPU_OP_CSRRS;
+        `F3_CSRRC:  op_dc_o = `CPU_OP_CSRRC;
+        `F3_CSRRWI: op_dc_o = `CPU_OP_CSRRWI;
+        `F3_CSRRSI: op_dc_o = `CPU_OP_CSRRSI;
+        `F3_CSRRCI: op_dc_o = `CPU_OP_CSRRCI;
+
+        default: op_dc_o = `CPU_OP_NONE;
+      endcase
+    end
+
+    default: begin
+      op_dc_o = `CPU_OP_NONE;
+    end
+  endcase
+end
 endmodule

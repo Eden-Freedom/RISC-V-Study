@@ -53,6 +53,57 @@
 `define F3_M_REMU   3'b111
 
 
+// I 型运算的 funct3
+`define F3_I_ADDI  3'b000
+`define F3_I_SLLI  3'b001
+`define F3_I_SLTI  3'b010
+`define F3_I_SLTIU 3'b011
+`define F3_I_XORI  3'b100
+`define F3_I_SR    3'b101 // SRLI、SRAI
+`define F3_I_ORI   3'b110
+`define F3_I_ANDI  3'b111
+
+// 仅用于 I 型移位指令的高7位
+`define F7_I_SHIFT_LOGIC 7'b0000000 // SLLI、SRLI
+`define F7_I_SHIFT_ARITH 7'b0100000 // SRAI
+
+// 条件分支的 funct3
+`define F3_B_BEQ  3'b000
+`define F3_B_BNE  3'b001
+`define F3_B_BLT  3'b100
+`define F3_B_BGE  3'b101
+`define F3_B_BLTU 3'b110
+`define F3_B_BGEU 3'b111
+
+// load 的 funct3
+`define F3_L_LB  3'b000
+`define F3_L_LH  3'b001
+`define F3_L_LW  3'b010
+`define F3_L_LBU 3'b100
+`define F3_L_LHU 3'b101
+
+// store 的 funct3
+`define F3_S_SB 3'b000
+`define F3_S_SH 3'b001
+`define F3_S_SW 3'b010
+
+// JALR 的 funct3
+`define F3_JALR 3'b000
+
+// SYSTEM 指令的 funct3
+`define F3_SYS_ENV 3'b000 // 本工程在此组识别 ECALL、MRET
+`define F3_CSRRW   3'b001
+`define F3_CSRRS   3'b010
+`define F3_CSRRC   3'b011
+`define F3_CSRRWI  3'b101
+`define F3_CSRRSI  3'b110
+`define F3_CSRRCI  3'b111
+
+// 需要完整匹配的机器指令编码
+`define INSTR_ECALL_WORD 32'h00000073
+`define INSTR_MRET_WORD  32'h30200073
+
+
 
 
 
