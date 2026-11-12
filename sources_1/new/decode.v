@@ -18,8 +18,8 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
-
+`include "cpu_defs.vh"
+`include "cpu_op_defs.vh"
 module decode (
     input  wire [31:0] instr_i,
     output wire [31:0] imm_typei_o,
@@ -32,63 +32,9 @@ module decode (
     output wire [ 4:0] rs1_addr_o,
     output wire [ 4:0] rs2_addr_o,
     output wire [ 4:0] rd_addr_o,
-    output reg         is_addi_o,
-    output reg         is_xori_o,
-    output reg         is_ori_o,
-    output reg         is_andi_o,
-    output reg         is_add_o,
-    output reg         is_sub_o,
-    output reg         is_xor_o,
-    output reg         is_or_o,
-    output reg         is_and_o,
-    output reg         is_sll_o,
-    output reg         is_srl_o,
-    output reg         is_sra_o,
-    output reg         is_slli_o,
-    output reg         is_srli_o,
-    output reg         is_srai_o,
-    output reg         is_slt_o,
-    output reg         is_sltu_o,
-    output reg         is_slti_o,
-    output reg         is_sltiu_o,
-    output reg         is_lui_o,
-    output reg         is_auipc_o,
-    output reg         is_beq_o,
-    output reg         is_bne_o,
-    output reg         is_blt_o,
-    output reg         is_bge_o,
-    output reg         is_bltu_o,
-    output reg         is_bgeu_o,
-    output reg         is_jal_o,
-    output reg         is_jalr_o,
-    output reg         is_sw_o,
-    output reg         is_lw_o,
-    output reg         is_lb_o,
-    output reg         is_lbu_o,
-    output reg         is_lh_o,
-    output reg         is_lhu_o,
-    output reg         is_sb_o,
-    output reg         is_sh_o,
 
-    output reg         is_mul_o,
-    output reg         is_mulh_o,
-    output reg         is_mulhsu_o,
-    output reg         is_mulhu_o,
 
-    output reg         is_div_o,
-    output reg         is_divu_o,
-    output reg         is_rem_o,
-    output reg         is_remu_o,
-
-    output reg         is_csrrw_o,
-    output reg         is_csrrs_o,
-    output reg         is_csrrc_o,
-    output reg         is_csrrwi_o,
-    output reg         is_csrrsi_o,
-    output reg         is_csrrci_o,
-
-    output reg         is_ecall_o,
-    output reg         is_mret_o,
+    output reg         [5:0] op_dc_o,
 
     output wire        is_illegal_o
 );
@@ -99,17 +45,7 @@ module decode (
 
   wire instr_recognized;
 
-  assign instr_recognized = (is_addi_o | is_xori_o | is_ori_o | is_andi_o | is_slli_o | is_srli_o | is_srai_o | is_slti_o | is_sltiu_o |
-                             is_add_o | is_sub_o | is_xor_o | is_or_o | is_and_o | is_sll_o | is_srl_o | is_sra_o | is_slt_o | is_sltu_o |
-                             is_beq_o |  is_bne_o | is_blt_o | is_bge_o | is_bltu_o | is_bgeu_o |
-                             is_jal_o | is_jalr_o | 
-                             is_lui_o | is_auipc_o |
-                             is_sw_o | is_sb_o | is_sh_o |
-                             is_lw_o | is_lb_o | is_lbu_o | is_lh_o | is_lhu_o |
-                             is_mul_o | is_mulh_o | is_mulhsu_o | is_mulhu_o |
-                             is_div_o | is_divu_o | is_rem_o | is_remu_o |
-                             is_csrrw_o | is_csrrs_o | is_csrrc_o | is_csrrwi_o | is_csrrsi_o | is_csrrci_o |
-                             is_ecall_o | is_mret_o);
+  assign instr_recognized = (op_dc_o != `CPU_OP_NONE);
 
   assign is_illegal_o = ~instr_recognized;
 
@@ -130,288 +66,169 @@ module decode (
 
 
   always @(*) begin
-    is_addi_o = 1'b0;
-    is_xori_o = 1'b0;
-    is_ori_o = 1'b0;
-    is_andi_o = 1'b0;
-    is_add_o  = 1'b0;
-    is_sub_o  = 1'b0;
-    is_xor_o  = 1'b0;
-    is_or_o   = 1'b0;
-    is_and_o  = 1'b0;
-    is_sll_o  = 1'b0;
-    is_srl_o  = 1'b0;
-    is_sra_o  = 1'b0;
-    is_slli_o = 1'b0;
-    is_srli_o = 1'b0;
-    is_srai_o = 1'b0;
-    is_slt_o  = 1'b0;
-    is_sltu_o = 1'b0;
-    is_slti_o = 1'b0;
-    is_sltiu_o = 1'b0;
-    is_lui_o = 1'b0;
-    is_auipc_o = 1'b0;
-    is_beq_o = 1'b0;
-    is_bne_o = 1'b0;
-    is_blt_o = 1'b0;
-    is_bge_o = 1'b0;
-    is_bltu_o = 1'b0;
-    is_bgeu_o = 1'b0;
-    is_jal_o = 1'b0;
-    is_jalr_o = 1'b0;
-    is_sw_o = 1'b0;
-    is_lw_o = 1'b0;
-    is_lb_o = 1'b0;
-    is_lbu_o = 1'b0;
-    is_lh_o = 1'b0;
-    is_lhu_o = 1'b0;
-    is_sb_o = 1'b0;
-    is_sh_o = 1'b0;
-    is_mul_o = 1'b0;
-    is_mulh_o = 1'b0;
-    is_mulhsu_o = 1'b0;
-    is_mulhu_o = 1'b0;
-    is_div_o = 1'b0;
-    is_divu_o = 1'b0;
-    is_rem_o = 1'b0;
-    is_remu_o = 1'b0;
-    is_csrrw_o = 1'b0;
-    is_csrrs_o = 1'b0;
-    is_csrrc_o = 1'b0;
-    is_csrrwi_o = 1'b0;
-    is_csrrsi_o = 1'b0;
-    is_csrrci_o = 1'b0;
-    is_ecall_o = 1'b0;
-    is_mret_o = 1'b0;
+    op_dc_o = `CPU_OP_NONE;
     case (opcode)
-      7'b0110011: begin//R型指令
-        if (funct3 == 3'b000 && funct7 == 7'b0000000) begin
-          is_add_o = 1'b1;
-        end
-        else if (funct3 == 3'b000 && funct7 == 7'b0100000) begin
-          is_sub_o = 1'b1;
-        end
-        else if (funct3 == 3'b100 && funct7 == 7'b0000000) begin
-          is_xor_o = 1'b1;
-        end
-        else if (funct3 == 3'b110 && funct7 == 7'b0000000) begin
-          is_or_o = 1'b1;
-        end
-        else if (funct3 == 3'b111 && funct7 == 7'b0000000) begin
-          is_and_o = 1'b1;
-        end
-        else if (funct3 == 3'b001 && funct7 == 7'b0000000) begin
-          is_sll_o = 1'b1;
-        end
-        else if (funct3 == 3'b101 && funct7 == 7'b0000000) begin
-          is_srl_o = 1'b1;
-        end
-        else if (funct3 == 3'b101 && funct7 == 7'b0100000) begin
-          is_sra_o = 1'b1;
-        end
-        else if (funct3 == 3'b010 && funct7 == 7'b0000000) begin
-          is_slt_o = 1'b1;
-        end
-        else if (funct3 == 3'b011 && funct7 == 7'b0000000) begin
-          is_sltu_o = 1'b1;
-        end
-        else if (funct3 == 3'b000 && funct7 == 7'b0000001) begin
-          is_mul_o = 1'b1;
-        end
-        else if (funct3 == 3'b001 && funct7 == 7'b0000001) begin
-          is_mulh_o = 1'b1;
-        end
-        else if (funct3 == 3'b010 && funct7 == 7'b0000001) begin
-          is_mulhsu_o = 1'b1;
-        end
-        else if (funct3 == 3'b011 && funct7 == 7'b0000001) begin
-          is_mulhu_o = 1'b1;
-        end
-        else if (funct3 == 3'b100 && funct7 == 7'b0000001) begin
-          is_div_o = 1'b1;
-        end
-        else if (funct3 == 3'b101 && funct7 == 7'b0000001) begin
-          is_divu_o = 1'b1;
-        end
-        else if (funct3 == 3'b110 && funct7 == 7'b0000001) begin
-          is_rem_o = 1'b1;
-        end
-        else if (funct3 == 3'b111 && funct7 == 7'b0000001) begin
-          is_remu_o = 1'b1;
-        end
+      `INSTR_R_CODE: begin//R型指令
+          case (funct7)
+
+          //普通寄存器组
+          `F7_R_BASE: begin
+            case (funct3)
+            `F3_R_ADD_SUB: op_dc_o = `CPU_OP_ADD;
+            `F3_R_SLL: op_dc_o = `CPU_OP_SLL;
+            `F3_R_SLT: op_dc_o = `CPU_OP_SLT;
+            `F3_R_SLTU: op_dc_o = `CPU_OP_SLTU;
+            `F3_R_XOR: op_dc_o = `CPU_OP_XOR;
+            `F3_R_SR: op_dc_o = `CPU_OP_SRL;
+            `F3_R_OR: op_dc_o = `CPU_OP_OR;
+            `F3_R_AND: op_dc_o = `CPU_OP_AND;
+            endcase
+          end
+
+          //SUB、SRA组
+          `F7_R_SUB_SRA: begin
+            case (funct3)
+            `F3_R_ADD_SUB: op_dc_o = `CPU_OP_SUB;
+            `F3_R_SR: op_dc_o = `CPU_OP_SRA;
+            endcase
+          end
+          
+          //乘除法组
+          `F7_R_M: begin
+            case (funct3)
+            `F3_M_MUL: op_dc_o = `CPU_OP_MUL;
+            `F3_M_MULH: op_dc_o = `CPU_OP_MULH;
+            `F3_M_MULHSU: op_dc_o = `CPU_OP_MULHSU;
+            `F3_M_MULHU: op_dc_o = `CPU_OP_MULHU;
+            `F3_M_DIV: op_dc_o = `CPU_OP_DIV;
+            `F3_M_DIVU: op_dc_o = `CPU_OP_DIVU;
+            `F3_M_REM: op_dc_o = `CPU_OP_REM;
+            `F3_M_REMU: op_dc_o = `CPU_OP_REMU;
+            endcase
+          end
+
+          endcase
       end
       7'b0010011: begin//I型指令
         if (funct3 == 3'b000) begin
-          is_addi_o = 1'b1;
+          op_dc_o = `CPU_OP_ADDI;
         end
         else if (funct3 == 3'b100) begin
-          is_xori_o = 1'b1;
+          op_dc_o = `CPU_OP_XORI;
         end
         else if (funct3 == 3'b110) begin
-          is_ori_o = 1'b1;
+          op_dc_o = `CPU_OP_ORI;
         end
         else if (funct3 == 3'b111) begin
-          is_andi_o = 1'b1;
+          op_dc_o = `CPU_OP_ANDI;
         end
         else if (funct3 == 3'b001 && funct7 == 7'b0000000) begin
-          is_slli_o = 1'b1;
+          op_dc_o = `CPU_OP_SLLI;
         end
         else if (funct3 == 3'b101 && funct7 == 7'b0000000) begin
-          is_srli_o = 1'b1;
+          op_dc_o = `CPU_OP_SRLI;
         end
         else if (funct3 == 3'b101 && funct7 == 7'b0100000) begin
-          is_srai_o = 1'b1;
+          op_dc_o = `CPU_OP_SRAI;
         end
         else if (funct3 == 3'b010) begin
-          is_slti_o = 1'b1;
+          op_dc_o = `CPU_OP_SLTI;
         end
         else if (funct3 == 3'b011) begin
-          is_sltiu_o = 1'b1;
+          op_dc_o = `CPU_OP_SLTIU;
         end
 
       end
       7'b0110111: begin//U型指令
-        is_lui_o = 1'b1;
+        op_dc_o = `CPU_OP_LUI;
       end
       7'b0010111: begin//U型指令
-        is_auipc_o = 1'b1;
+        op_dc_o = `CPU_OP_AUIPC;
       end
       7'b1100011:begin//B型指令
         if (funct3 == 3'b000) begin
-          is_beq_o = 1'b1;
+          op_dc_o = `CPU_OP_BEQ;
         end
         else if (funct3 == 3'b001) begin
-          is_bne_o = 1'b1;
+          op_dc_o = `CPU_OP_BNE;
         end
         else if(funct3 == 3'b100) begin
-          is_blt_o = 1'b1;
+          op_dc_o = `CPU_OP_BLT;
         end
         else if(funct3 == 3'b101) begin
-          is_bge_o = 1'b1;
+          op_dc_o = `CPU_OP_BGE;
         end
         else if(funct3 == 3'b110) begin
-          is_bltu_o = 1'b1;
+          op_dc_o = `CPU_OP_BLTU;
         end
         else if(funct3 == 3'b111) begin
-          is_bgeu_o = 1'b1;
+          op_dc_o = `CPU_OP_BGEU;
         end
       end
       7'b1101111: begin//J型指令
-        is_jal_o = 1'b1;
+        op_dc_o = `CPU_OP_JAL;
       end
       7'b1100111: begin//I型指令
         if(funct3 == 3'b000) begin
-        is_jalr_o = 1'b1;
+        op_dc_o = `CPU_OP_JALR;
         end
       end
       7'b0100011:begin//S型指令
         if(funct3 == 3'b010)begin
-          is_sw_o = 1'b1;
+          op_dc_o = `CPU_OP_SW;
         end
         else if(funct3 == 3'b000)begin
-          is_sb_o = 1'b1;
+          op_dc_o = `CPU_OP_SB;
         end
         else if(funct3 == 3'b001)begin
-          is_sh_o = 1'b1;
+          op_dc_o = `CPU_OP_SH;
         end
       end
       7'b0000011:begin//I型指令数据加载
         if(funct3 == 3'b010)begin
-          is_lw_o = 1'b1;
+          op_dc_o = `CPU_OP_LW;
         end
         else if(funct3 == 3'b000)begin
-          is_lb_o = 1'b1;
+          op_dc_o = `CPU_OP_LB;
         end
         else if(funct3 == 3'b100)begin
-          is_lbu_o = 1'b1;
+          op_dc_o = `CPU_OP_LBU;
         end
         else if(funct3 == 3'b001)begin
-          is_lh_o = 1'b1;
+          op_dc_o = `CPU_OP_LH;
         end
         else if(funct3 == 3'b101)begin
-          is_lhu_o = 1'b1;
+          op_dc_o = `CPU_OP_LHU;
         end
       end
       7'b1110011:begin//CSR型指令
         if(instr_i == 32'h00000073)begin
-          is_ecall_o = 1'b1;
+          op_dc_o = `CPU_OP_ECALL;
         end
         else if(instr_i == 32'h30200073)begin
-          is_mret_o = 1'b1;
+          op_dc_o = `CPU_OP_MRET;
         end
         else if(funct3 == 3'b001)begin
-          is_csrrw_o = 1'b1;
+          op_dc_o = `CPU_OP_CSRRW;
         end
         else if(funct3 == 3'b010)begin
-          is_csrrs_o = 1'b1;
+          op_dc_o = `CPU_OP_CSRRS;
         end
         else if(funct3 == 3'b011)begin
-          is_csrrc_o = 1'b1;
+          op_dc_o = `CPU_OP_CSRRC;
         end
         else if(funct3 == 3'b101)begin
-          is_csrrwi_o = 1'b1;
+          op_dc_o = `CPU_OP_CSRRWI;
           end
         else if(funct3 == 3'b110)begin
-          is_csrrsi_o = 1'b1;
+          op_dc_o = `CPU_OP_CSRRSI;
         end
         else if(funct3 == 3'b111)begin
-          is_csrrci_o = 1'b1;
+          op_dc_o = `CPU_OP_CSRRCI;
         end
       end
       default: begin
-        is_addi_o = 1'b0;
-        is_xori_o = 1'b0;
-        is_ori_o = 1'b0;
-        is_andi_o = 1'b0;
-        is_add_o  = 1'b0;
-        is_sub_o  = 1'b0;
-        is_xor_o  = 1'b0;
-        is_or_o   = 1'b0;
-        is_and_o  = 1'b0;
-        is_sll_o  = 1'b0;
-        is_srl_o  = 1'b0;
-        is_sra_o  = 1'b0;
-        is_slli_o = 1'b0;
-        is_srli_o = 1'b0;
-        is_srai_o = 1'b0;
-        is_slt_o  = 1'b0;
-        is_sltu_o = 1'b0;
-        is_slti_o = 1'b0;
-        is_sltiu_o = 1'b0;
-        is_lui_o = 1'b0;
-        is_auipc_o = 1'b0;
-        is_beq_o = 1'b0;
-        is_bne_o = 1'b0;
-        is_blt_o = 1'b0;
-        is_bge_o = 1'b0;
-        is_bltu_o = 1'b0;
-        is_bgeu_o = 1'b0;
-        is_jal_o = 1'b0;
-        is_jalr_o = 1'b0;
-        is_sw_o = 1'b0;
-        is_lw_o = 1'b0;
-        is_lb_o = 1'b0;
-        is_lbu_o = 1'b0;
-        is_lh_o = 1'b0;
-        is_lhu_o = 1'b0;
-        is_sb_o = 1'b0;
-        is_sh_o = 1'b0;
-        is_mul_o = 1'b0;
-        is_mulh_o = 1'b0;
-        is_mulhsu_o = 1'b0;
-        is_mulhu_o = 1'b0;
-        is_div_o = 1'b0;
-        is_divu_o = 1'b0;
-        is_rem_o = 1'b0;
-        is_remu_o = 1'b0;
-        is_csrrw_o = 1'b0;
-        is_csrrs_o = 1'b0;
-        is_csrrc_o = 1'b0;
-        is_csrrwi_o = 1'b0;
-        is_csrrsi_o = 1'b0;
-        is_csrrci_o = 1'b0;
-        is_ecall_o = 1'b0;
-        is_mret_o = 1'b0;
+        op_dc_o = `CPU_OP_NONE;
       end
     endcase
   end

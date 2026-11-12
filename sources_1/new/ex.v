@@ -19,77 +19,14 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-
+`include "cpu_op_defs.vh"
 module ex (
 
     input wire clk,
     input wire rst_n,
     input wire valid_ex_i,
 
-    input wire is_addi_ex_i,
-    input wire is_xori_ex_i,
-    input wire is_ori_ex_i,
-    input wire is_andi_ex_i,
-    input wire is_slli_ex_i,
-    input wire is_srli_ex_i,
-    input wire is_srai_ex_i,
-    input wire is_slti_ex_i,
-    input wire is_sltiu_ex_i,
-
-    input wire is_add_ex_i,
-    input wire is_sub_ex_i,
-    input wire is_xor_ex_i,
-    input wire is_or_ex_i,
-    input wire is_and_ex_i,
-    input wire is_sll_ex_i,
-    input wire is_srl_ex_i,
-    input wire is_sra_ex_i,
-    input wire is_slt_ex_i,
-    input wire is_sltu_ex_i,
-
-    input wire is_beq_ex_i,
-    input wire is_bne_ex_i,
-    input wire is_blt_ex_i,
-    input wire is_bge_ex_i,
-    input wire is_bltu_ex_i,
-    input wire is_bgeu_ex_i,
-
-    input wire is_jal_ex_i,
-    input wire is_jalr_ex_i,
-
-    input wire is_lui_ex_i,
-    input wire is_auipc_ex_i,
-
-    input wire is_sw_ex_i,
-    input wire is_sb_ex_i,
-    input wire is_sh_ex_i,
-
-    input wire is_lw_ex_i,
-    input wire is_lb_ex_i,
-    input wire is_lbu_ex_i,
-    input wire is_lh_ex_i,
-    input wire is_lhu_ex_i,
-
-    input wire is_mul_ex_i,
-    input wire is_mulh_ex_i,
-    input wire is_mulhsu_ex_i,
-    input wire is_mulhu_ex_i,
-
-    input wire is_div_ex_i,
-    input wire is_divu_ex_i,
-    input wire is_rem_ex_i,
-    input wire is_remu_ex_i,
-
-    input wire is_csrrw_ex_i,
-    input wire is_csrrs_ex_i,
-    input wire is_csrrc_ex_i,
-    input wire is_csrrwi_ex_i,
-    input wire is_csrrsi_ex_i,
-    input wire is_csrrci_ex_i,
-
-    input wire is_ecall_ex_i,
-    input wire is_mret_ex_i,
-
+    input wire [5:0] op_ex_i,
     input wire is_illegal_ex_i,
 
     input wire irq_external_ex_i,
@@ -168,8 +105,8 @@ module ex (
 
 
   //有符号乘法或者无符号乘法
-  assign mul_a = (is_mulh_ex_i | is_mulhsu_ex_i)?{rs1_data_ex_i[31], rs1_data_ex_i} : {1'b0, rs1_data_ex_i};
-  assign mul_b = (is_mulh_ex_i) ? {rs2_data_ex_i[31], rs2_data_ex_i} : {1'b0, rs2_data_ex_i};
+  assign mul_a = (op_ex_i == `CPU_OP_MULH || op_ex_i == `CPU_OP_MULHSU)?{rs1_data_ex_i[31], rs1_data_ex_i} : {1'b0, rs1_data_ex_i};
+  assign mul_b = (op_ex_i == `CPU_OP_MULH) ? {rs2_data_ex_i[31], rs2_data_ex_i} : {1'b0, rs2_data_ex_i};
   assign mul_result = mul_a * mul_b;
 
   always @(*) begin
@@ -218,48 +155,49 @@ module ex (
       clear_valid_ex_o    = 1'b1;
     end
     else if (valid_ex_i) begin
-      if (is_addi_ex_i) begin
-        wr_en_ex_o   = 1'b1;
-        wr_addr_ex_o = rd_addr_ex_i;
-        wr_data_ex_o = rs1_data_ex_i + immi_data_ex_i;
-      end
-      else if (is_xori_ex_i) begin
-        wr_en_ex_o   = 1'b1;
-        wr_addr_ex_o = rd_addr_ex_i;
-        wr_data_ex_o = rs1_data_ex_i ^ immi_data_ex_i;
-      end
-      else if (is_ori_ex_i) begin
+      case (op_ex_i)
+        `CPU_OP_ADDI: begin
+          wr_en_ex_o   = 1'b1;
+          wr_addr_ex_o = rd_addr_ex_i;
+          wr_data_ex_o = rs1_data_ex_i + immi_data_ex_i;
+        end
+        `CPU_OP_XORI: begin
+          wr_en_ex_o   = 1'b1;
+          wr_addr_ex_o = rd_addr_ex_i;
+          wr_data_ex_o = rs1_data_ex_i ^ immi_data_ex_i;
+        end
+      `CPU_OP_ORI: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = rs1_data_ex_i | immi_data_ex_i;
       end
-      else if (is_andi_ex_i) begin
+      `CPU_OP_ANDI: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = rs1_data_ex_i & immi_data_ex_i;
       end
-      else if (is_slli_ex_i) begin
+      `CPU_OP_SLLI: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = rs1_data_ex_i << immi_data_ex_i[4:0];
       end
-      else if (is_srli_ex_i) begin
+      `CPU_OP_SRLI: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = rs1_data_ex_i >> immi_data_ex_i[4:0];
       end
-      else if (is_srai_ex_i) begin
+      `CPU_OP_SRAI: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = $signed(rs1_data_ex_i) >>> immi_data_ex_i[4:0];
       end
-      else if (is_slti_ex_i) begin
+      `CPU_OP_SLTI: begin
         wr_en_ex_o = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = $signed(rs1_data_ex_i) < $signed(immi_data_ex_i) ? 32'h0000_0001 :
             32'h0000_0000;
       end
-      else if (is_sltiu_ex_i) begin
+      `CPU_OP_SLTIU: begin
         wr_en_ex_o = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = $unsigned(rs1_data_ex_i) < $unsigned(immi_data_ex_i) ? 32'h0000_0001 :
@@ -267,53 +205,53 @@ module ex (
       end
 
 
-      else if (is_add_ex_i) begin
+      `CPU_OP_ADD: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = rs1_data_ex_i + rs2_data_ex_i;
       end
-      else if (is_sub_ex_i) begin
+      `CPU_OP_SUB: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = rs1_data_ex_i - rs2_data_ex_i;
       end
-      else if (is_xor_ex_i) begin
+      `CPU_OP_XOR: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = rs1_data_ex_i ^ rs2_data_ex_i;
       end
-      else if (is_or_ex_i) begin
+      `CPU_OP_OR: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = rs1_data_ex_i | rs2_data_ex_i;
       end
-      else if (is_and_ex_i) begin
+      `CPU_OP_AND: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = rs1_data_ex_i & rs2_data_ex_i;
       end
-      else if (is_sll_ex_i) begin
+      `CPU_OP_SLL: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = rs1_data_ex_i << rs2_data_ex_i[4:0];
       end
-      else if (is_srl_ex_i) begin
+      `CPU_OP_SRL: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = rs1_data_ex_i >> rs2_data_ex_i[4:0];
       end
-      else if (is_sra_ex_i) begin
+      `CPU_OP_SRA: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = $signed(rs1_data_ex_i) >>> rs2_data_ex_i[4:0];
       end
-      else if (is_slt_ex_i) begin
+      `CPU_OP_SLT: begin
         wr_en_ex_o = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = $signed(rs1_data_ex_i) < $signed(rs2_data_ex_i) ? 32'h0000_0001 :
             32'h0000_0000;
       end
-      else if (is_sltu_ex_i) begin
+      `CPU_OP_SLTU: begin
         wr_en_ex_o = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = $unsigned(rs1_data_ex_i) < $unsigned(rs2_data_ex_i) ? 32'h0000_0001 :
@@ -321,7 +259,7 @@ module ex (
       end
 
 
-      else if (is_beq_ex_i) begin
+      `CPU_OP_BEQ: begin
         if (rs1_data_ex_i == rs2_data_ex_i) begin
           pc_brench_flag_ex_o = 1'b1;
           pc_brench_addr_ex_o = pc_ex_i + immb_data_ex_i;
@@ -333,7 +271,7 @@ module ex (
           clear_valid_ex_o    = 1'b0;
         end
       end
-      else if (is_bne_ex_i) begin
+      `CPU_OP_BNE: begin
         if (rs1_data_ex_i != rs2_data_ex_i) begin
           pc_brench_flag_ex_o = 1'b1;
           pc_brench_addr_ex_o = pc_ex_i + immb_data_ex_i;
@@ -345,7 +283,7 @@ module ex (
           clear_valid_ex_o    = 1'b0;
         end
       end
-      else if (is_blt_ex_i) begin
+      `CPU_OP_BLT: begin
         if ($signed(rs1_data_ex_i) < $signed(rs2_data_ex_i)) begin
           pc_brench_flag_ex_o = 1'b1;
           pc_brench_addr_ex_o = pc_ex_i + immb_data_ex_i;
@@ -357,7 +295,7 @@ module ex (
           clear_valid_ex_o    = 1'b0;
         end
       end
-      else if (is_bge_ex_i) begin
+      `CPU_OP_BGE: begin
         if ($signed(rs1_data_ex_i) >= $signed(rs2_data_ex_i)) begin
           pc_brench_flag_ex_o = 1'b1;
           pc_brench_addr_ex_o = pc_ex_i + immb_data_ex_i;
@@ -369,7 +307,7 @@ module ex (
           clear_valid_ex_o    = 1'b0;
         end
       end
-      else if (is_bltu_ex_i) begin
+      `CPU_OP_BLTU: begin
         if ($unsigned(rs1_data_ex_i) < $unsigned(rs2_data_ex_i)) begin
           pc_brench_flag_ex_o = 1'b1;
           pc_brench_addr_ex_o = pc_ex_i + immb_data_ex_i;
@@ -381,7 +319,7 @@ module ex (
           clear_valid_ex_o    = 1'b0;
         end
       end
-      else if (is_bgeu_ex_i) begin
+      `CPU_OP_BGEU: begin
         if ($unsigned(rs1_data_ex_i) >= $unsigned(rs2_data_ex_i)) begin
           pc_brench_flag_ex_o = 1'b1;
           pc_brench_addr_ex_o = pc_ex_i + immb_data_ex_i;
@@ -395,7 +333,7 @@ module ex (
       end
 
 
-      else if (is_jal_ex_i) begin
+      `CPU_OP_JAL: begin
         wr_en_ex_o          = 1'b1;
         wr_addr_ex_o        = rd_addr_ex_i;
         wr_data_ex_o        = pc_ex_i + 32'h00000004;
@@ -403,7 +341,7 @@ module ex (
         pc_brench_addr_ex_o = pc_ex_i + immj_data_ex_i;
         clear_valid_ex_o    = 1'b1;
       end
-      else if (is_jalr_ex_i) begin
+      `CPU_OP_JALR: begin
         wr_en_ex_o          = 1'b1;
         wr_addr_ex_o        = rd_addr_ex_i;
         wr_data_ex_o        = pc_ex_i + 32'h00000004;
@@ -412,19 +350,19 @@ module ex (
         clear_valid_ex_o    = 1'b1;
       end
 
-      else if (is_lui_ex_i) begin
+      `CPU_OP_LUI: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = immu_data_ex_i;
       end
-      else if (is_auipc_ex_i) begin
+      `CPU_OP_AUIPC: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = pc_ex_i + immu_data_ex_i;
       end
 
 
-      else if (is_sw_ex_i) begin
+      `CPU_OP_SW: begin
         ram_wr_en_ex_o   = 1'b1;
         ram_wr_addr_ex_o = rs1_data_ex_i + imms_data_ex_i;
         ram_wr_data_ex_o = rs2_data_ex_i;
@@ -437,7 +375,7 @@ module ex (
           end
         end
       end
-      else if (is_sb_ex_i) begin
+      `CPU_OP_SB: begin
         ram_wr_en_ex_o   = 1'b1;
         ram_wr_addr_ex_o = rs1_data_ex_i + imms_data_ex_i;
         case (ram_wr_addr_ex_o[1:0])
@@ -466,7 +404,7 @@ module ex (
           end
         end
       end
-      else if (is_sh_ex_i) begin
+      `CPU_OP_SH: begin
         ram_wr_en_ex_o   = 1'b1;
         ram_wr_addr_ex_o = rs1_data_ex_i + imms_data_ex_i;
         case (ram_wr_addr_ex_o[1:0])
@@ -491,7 +429,7 @@ module ex (
           end
         end
       end
-      else if (is_lw_ex_i) begin
+      `CPU_OP_LW: begin
         ram_rd_en_ex_o   = 1'b1;
         ram_rd_addr_ex_o = rs1_data_ex_i + immi_data_ex_i;
         wr_en_ex_o       = 1'b1;
@@ -505,7 +443,7 @@ module ex (
           end
         end
       end
-      else if (is_lb_ex_i) begin
+      `CPU_OP_LB: begin
         ram_rd_en_ex_o   = 1'b1;
         ram_rd_addr_ex_o = rs1_data_ex_i + immi_data_ex_i;
         wr_en_ex_o       = 1'b1;
@@ -532,7 +470,7 @@ module ex (
           end
         end
       end
-      else if (is_lbu_ex_i) begin
+      `CPU_OP_LBU: begin
         ram_rd_en_ex_o   = 1'b1;
         ram_rd_addr_ex_o = rs1_data_ex_i + immi_data_ex_i;
         wr_en_ex_o       = 1'b1;
@@ -559,7 +497,7 @@ module ex (
           end
         end
       end
-      else if (is_lh_ex_i) begin
+      `CPU_OP_LH: begin
         ram_rd_en_ex_o   = 1'b1;
         ram_rd_addr_ex_o = rs1_data_ex_i + immi_data_ex_i;
         wr_en_ex_o       = 1'b1;
@@ -583,7 +521,7 @@ module ex (
           end
         end
       end
-      else if (is_lhu_ex_i) begin
+      `CPU_OP_LHU: begin
         ram_rd_en_ex_o   = 1'b1;
         ram_rd_addr_ex_o = rs1_data_ex_i + immi_data_ex_i;
         wr_en_ex_o       = 1'b1;
@@ -608,31 +546,31 @@ module ex (
         end
       end
 
-      else if (is_mul_ex_i) begin
+      `CPU_OP_MUL: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = mul_result[31:0];
       end
-      else if (is_mulh_ex_i) begin
+      `CPU_OP_MULH: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = mul_result[63:32];
       end
-      else if (is_mulhsu_ex_i) begin
+      `CPU_OP_MULHSU: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = mul_result[63:32];
       end
-      else if (is_mulhu_ex_i) begin
+      `CPU_OP_MULHU: begin
         wr_en_ex_o   = 1'b1;
         wr_addr_ex_o = rd_addr_ex_i;
         wr_data_ex_o = mul_result[63:32];
       end
 
 
-      else if (is_div_ex_i) begin
+      `CPU_OP_DIV: begin
 
-        signed_ex_o   = is_div_ex_i;
+        signed_ex_o   = 1'b1;
         dividend_ex_o = rs1_data_ex_i;
         divisor_ex_o  = rs2_data_ex_i;
 
@@ -662,7 +600,7 @@ module ex (
           wr_data_ex_o = 32'h0;
         end
       end
-      else if (is_divu_ex_i) begin
+      `CPU_OP_DIVU: begin
         signed_ex_o   = 1'b0;
         dividend_ex_o = rs1_data_ex_i;
         divisor_ex_o  = rs2_data_ex_i;
@@ -689,7 +627,7 @@ module ex (
           wr_data_ex_o = 32'h0;
         end
       end
-      else if (is_rem_ex_i) begin
+      `CPU_OP_REM: begin
         signed_ex_o   = 1'b1;
         dividend_ex_o = rs1_data_ex_i;
         divisor_ex_o  = rs2_data_ex_i;
@@ -716,7 +654,7 @@ module ex (
           wr_data_ex_o = 32'h0;
         end
       end
-      else if (is_remu_ex_i) begin
+      `CPU_OP_REMU: begin
         signed_ex_o   = 1'b0;
         dividend_ex_o = rs1_data_ex_i;
         divisor_ex_o  = rs2_data_ex_i;
@@ -744,7 +682,7 @@ module ex (
         end
       end
 
-      else if (is_csrrw_ex_i) begin
+      `CPU_OP_CSRRW: begin
         csr_type_ex_o    = 3'b001;
         csr_wr_en_ex_o   = 1'b1;
         csr_wr_addr_ex_o = csr_addr_ex_i;
@@ -764,7 +702,7 @@ module ex (
           wr_data_ex_o     = 32'h0;
         end
       end
-      else if (is_csrrs_ex_i) begin
+      `CPU_OP_CSRRS: begin
         csr_type_ex_o = 3'b010;
         if (imm_csr_ex_i != 32'h0) begin
           csr_wr_en_ex_o   = 1'b1;
@@ -782,7 +720,7 @@ module ex (
         wr_addr_ex_o     = rd_addr_ex_i;
         wr_data_ex_o     = csr_rdata_csr_o;
       end
-      else if (is_csrrc_ex_i) begin
+      `CPU_OP_CSRRC: begin
         csr_type_ex_o = 3'b011;
         if (imm_csr_ex_i != 32'h0) begin
           csr_wr_en_ex_o   = 1'b1;
@@ -800,7 +738,7 @@ module ex (
         wr_addr_ex_o     = rd_addr_ex_i;
         wr_data_ex_o     = csr_rdata_csr_o;
       end
-      else if (is_csrrwi_ex_i) begin
+      `CPU_OP_CSRRWI: begin
         csr_type_ex_o    = 3'b101;
         csr_wr_en_ex_o   = 1'b1;
         csr_wr_addr_ex_o = csr_addr_ex_i;
@@ -820,7 +758,7 @@ module ex (
           wr_data_ex_o     = 32'h0;
         end
       end
-      else if (is_csrrsi_ex_i) begin
+      `CPU_OP_CSRRSI: begin
         csr_type_ex_o = 3'b110;
         if (imm_csr_ex_i != 32'h0) begin
           csr_wr_en_ex_o   = 1'b1;
@@ -838,7 +776,7 @@ module ex (
         wr_addr_ex_o     = rd_addr_ex_i;
         wr_data_ex_o     = csr_rdata_csr_o;
       end
-      else if (is_csrrci_ex_i) begin
+      `CPU_OP_CSRRCI: begin
         csr_type_ex_o = 3'b111;
         if (imm_csr_ex_i != 32'h0) begin
           csr_wr_en_ex_o   = 1'b1;
@@ -856,7 +794,7 @@ module ex (
         wr_addr_ex_o     = rd_addr_ex_i;
         wr_data_ex_o     = csr_rdata_csr_o;
       end
-      else if (is_ecall_ex_i) begin
+      `CPU_OP_ECALL: begin
         trap_enter_ex_o     = 1'b1;
         trap_cause_ex_o     = 32'd11;
         trap_pc_ex_o        = pc_ex_i;
@@ -865,25 +803,14 @@ module ex (
         pc_brench_addr_ex_o = csr_mtvec_o;
         clear_valid_ex_o    = 1'b1;
       end
-      else if (is_mret_ex_i) begin
+      `CPU_OP_MRET: begin
         trap_return_ex_o    = 1'b1;
 
         pc_brench_flag_ex_o = 1'b1;
         pc_brench_addr_ex_o = csr_mepc_o;
         clear_valid_ex_o    = 1'b1;
       end
-
-      else if (is_illegal_ex_i) begin
-        trap_enter_ex_o     = 1'b1;
-        trap_cause_ex_o     = 32'd2;
-        trap_pc_ex_o        = pc_ex_i;
-
-        pc_brench_flag_ex_o = 1'b1;
-        pc_brench_addr_ex_o = csr_mtvec_o;
-        clear_valid_ex_o    = 1'b1;
-      end
-    end
-    else begin
+    default: begin
       wr_en_ex_o          = 1'b0;
       wr_addr_ex_o        = 5'h0;
       wr_data_ex_o        = 32'h0;
@@ -918,7 +845,20 @@ module ex (
       trap_pc_ex_o        = 32'h0;
       trap_return_ex_o    = 1'b0;
     end
+  endcase
+
+  if (is_illegal_ex_i) begin
+    trap_enter_ex_o     = 1'b1;
+    trap_cause_ex_o     = 32'd2;
+    trap_pc_ex_o        = pc_ex_i;
+
+    pc_brench_flag_ex_o = 1'b1;
+    pc_brench_addr_ex_o = csr_mtvec_o;
+    clear_valid_ex_o    = 1'b1;
   end
+end
+  end
+
 
   //真实指令完成，就记录新的继续位置；
   //真实指令还没完成，就暂时禁用边界；
